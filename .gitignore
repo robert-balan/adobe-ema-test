@@ -7,7 +7,9 @@ helix-importer-ui
 .DS_Store
 *.bak
 .idea
+.claude/settings.local.json
 
 # Ensure these files are tracked
 !CLAUDE.md
 !AGENTS.md
+.claude/qa/plans/*.jira-actions.json

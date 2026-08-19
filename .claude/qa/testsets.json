@@ -1,0 +1,17 @@
+{
+  "Sanity testing": {
+    "issueId": "301670",
+    "key": "EC-104",
+    "suite": "sanity"
+  },
+  "Regression testing": {
+    "issueId": "301671",
+    "key": "EC-105",
+    "suite": "regression"
+  },
+  "E2E testing": {
+    "issueId": "301672",
+    "key": "EC-106",
+    "suite": "e2e"
+  }
+}
