@@ -12,4 +12,6 @@ helix-importer-ui
 # Ensure these files are tracked
 !CLAUDE.md
 !AGENTS.md
+
+# Ensure these files are not tracked — they carry Jira ticket content
 .claude/qa/plans/*.jira-actions.json
