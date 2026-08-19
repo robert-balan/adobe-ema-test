@@ -1,0 +1,226 @@
+{
+  "project": "EC",
+  "source": {
+    "key": "EC-18",
+    "summary": "Block: [Megamenu]: Products Brand Carousel Desktop",
+    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-18"
+  },
+  "folder": "/Header/Megamenu/Brands Carousel",
+  "tests": [
+    {
+      "id": "EC-18-TC-01",
+      "summary": "[EC-18] AC-1, AC-2 — Carousel renders at the bottom of the Products panel on desktop",
+      "ac": [
+        "AC-1",
+        "AC-2"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "desktop"
+      ],
+      "precondition": "Brand data source publishes 12 valid brands. Test page with an authored Products megamenu is previewed.",
+      "steps": [
+        {
+          "action": "Open the test page at a desktop viewport and open the Products megamenu.",
+          "data": "Viewport 1440x900",
+          "result": "The megamenu panel opens and a brand carousel strip is rendered below all product category columns, spanning the full panel width."
+        },
+        {
+          "action": "Count the circular brand logo items visible in the strip without scrolling.",
+          "result": "Between 5 and 7 logo items are visible simultaneously."
+        }
+      ]
+    },
+    {
+      "id": "EC-18-TC-02",
+      "summary": "[EC-18] AC-11, AC-22 — Previous-brands arrow is disabled at the start of the track",
+      "ac": [
+        "AC-11",
+        "AC-22"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "desktop",
+        "a11y"
+      ],
+      "precondition": "Products megamenu open at 1440x900 with 12 brands authored; carousel track at its leftmost position.",
+      "steps": [
+        {
+          "action": "Inspect the previous-brands arrow button.",
+          "result": "The button carries aria-disabled=\"true\", is styled as disabled, and remains present in the tab order."
+        },
+        {
+          "action": "Move focus to the previous-brands arrow and activate it.",
+          "data": "Tab to the button, then press Enter, then press Space",
+          "result": "The carousel track does not scroll and its scroll offset is unchanged."
+        }
+      ]
+    },
+    {
+      "id": "EC-18-TC-03",
+      "summary": "[EC-18] AC-10 — Next-brands arrow advances the track by one item width",
+      "ac": [
+        "AC-10"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "desktop"
+      ],
+      "precondition": "Products megamenu open at 1440x900 with 12 brands authored; track at its leftmost position.",
+      "steps": [
+        {
+          "action": "Note the first fully visible brand, then click the next-brands arrow once.",
+          "result": "The track scrolls forward by one logo width and the previously second brand is now first in the visible window."
+        },
+        {
+          "action": "Click the previous-brands arrow once.",
+          "result": "The track scrolls back by the same amount and returns to its original position."
+        }
+      ]
+    },
+    {
+      "id": "EC-18-TC-04",
+      "summary": "[EC-18] AC-6 — Carousel zone is absent from the DOM when the brand list is empty",
+      "ac": [
+        "AC-6"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "authoring",
+        "fallback"
+      ],
+      "precondition": "Brand data source publishes zero rows.",
+      "steps": [
+        {
+          "action": "Open the Products megamenu at 1440x900 and inspect the panel markup.",
+          "result": "No carousel container, strip, heading, or arrow button exists in the DOM — not merely hidden with CSS."
+        },
+        {
+          "action": "Inspect the panel layout and the browser console.",
+          "result": "Product category columns fill the panel with no empty gap where the carousel would sit, and no uncaught error is logged."
+        }
+      ]
+    },
+    {
+      "id": "EC-18-TC-05",
+      "summary": "[EC-18] AC-6 — Carousel is suppressed when the brand data source fetch fails",
+      "ac": [
+        "AC-6"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "fallback",
+        "resilience"
+      ],
+      "precondition": "Brand data source request is forced to fail (block the request or return HTTP 500).",
+      "steps": [
+        {
+          "action": "Open the Products megamenu at 1440x900 with the data request failing.",
+          "result": "The carousel zone is absent from the DOM and the megamenu remains fully usable."
+        },
+        {
+          "action": "Inspect the browser console.",
+          "result": "A warning is logged for the failed fetch and no uncaught exception is thrown."
+        }
+      ]
+    },
+    {
+      "id": "EC-18-TC-06",
+      "summary": "[EC-18] AC-5, AC-16 — Mobile renders a touch-scrollable strip with no arrow buttons",
+      "ac": [
+        "AC-5",
+        "AC-16"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "mobile"
+      ],
+      "precondition": "12 brands authored. Mobile drawer navigation available.",
+      "steps": [
+        {
+          "action": "Load the test page at a mobile viewport, open the navigation drawer, and enter the Products section.",
+          "data": "Viewport 390x844",
+          "result": "A horizontal strip of circular brand logos is rendered inline in the Products drawer section."
+        },
+        {
+          "action": "Inspect the strip for arrow controls.",
+          "result": "No previous or next arrow button exists anywhere in the strip markup."
+        },
+        {
+          "action": "Swipe the strip horizontally, then scroll the drawer vertically.",
+          "result": "The strip scrolls horizontally with momentum and the drawer still scrolls vertically without interference."
+        }
+      ]
+    },
+    {
+      "id": "EC-18-TC-07",
+      "summary": "[EC-18] AC-21 — Each brand logo link exposes the authored brand name as its accessible name",
+      "ac": [
+        "AC-21"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "a11y"
+      ],
+      "precondition": "12 brands authored, each with a brand name, logo and destination URL.",
+      "steps": [
+        {
+          "action": "Open the Products megamenu at 1440x900 and inspect the accessibility tree for the carousel region.",
+          "result": "Every logo is exposed as a link whose accessible name equals its authored brand name; none is empty or generic."
+        }
+      ]
+    },
+    {
+      "id": "EC-18-TC-08",
+      "summary": "[EC-18] AC-12 — Tapping a brand logo on mobile closes the drawer and navigates to the brand page",
+      "ac": [
+        "AC-12"
+      ],
+      "suites": [
+        "e2e",
+        "regression"
+      ],
+      "labels": [
+        "brands-carousel",
+        "mobile",
+        "navigation"
+      ],
+      "precondition": "12 brands authored with valid destination URLs. Mobile drawer open on the Products section.",
+      "steps": [
+        {
+          "action": "Tap the first brand logo in the strip.",
+          "data": "Viewport 390x844",
+          "result": "The navigation drawer closes and the browser navigates to that brand's authored destination URL."
+        },
+        {
+          "action": "Confirm the destination page has loaded.",
+          "result": "The brand page renders and no drawer overlay remains on screen."
+        }
+      ]
+    }
+  ]
+}
