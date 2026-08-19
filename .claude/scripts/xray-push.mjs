@@ -4,7 +4,7 @@
  *
  *   node .claude/scripts/xray-push.mjs <plan.json> [options]
  *
- *     --dry-run            show what would change; write nothing
+ *     --dry-run            show what would change, including suite drift; write nothing
  *     --only ID,ID         restrict to these plan test ids
  *     --force              rewrite matching tests even when nothing differs
  *     --deprecate ID,ID    retire tests: drop from every suite, flag for a `deprecated` label
@@ -12,6 +12,11 @@
  * The plan is the master copy and Jira is the published copy; this brings the published copy
  * into line. Tests are matched on their plan id, recorded in <plan>.result.json, so a revised
  * plan edits the existing tickets rather than creating duplicates. Nothing is ever deleted.
+ *
+ * Suite membership is checked in both directions before anything is written: tests the plan claims
+ * but the Test Set has lost (a stray removal in the Xray UI leaves no trace, since membership is
+ * not a Jira link) and tests sitting in a set the plan no longer claims. Missing ones are restored
+ * by the run itself; unclaimed ones are only reported, never removed.
  *
  * Xray owns test steps, test type and suite membership — this script writes those directly.
  * Jira owns summary, description, labels and issue links, which the Xray API cannot touch, so
@@ -131,6 +136,9 @@ const Q = {
     addTestsToTestSet(issueId: $issueId, testIssueIds: $testIssueIds) { addedTests warning } }`,
   removeFromSet: `mutation RemoveTests($issueId: String!, $testIssueIds: [String]!) {
     removeTestsFromTestSet(issueId: $issueId, testIssueIds: $testIssueIds) }`,
+  getTestSet: `query GetTestSet($issueId: String!, $start: Int, $limit: Int!) {
+    getTestSet(issueId: $issueId) {
+      issueId tests(start: $start, limit: $limit) { total results { issueId } } } }`,
 };
 
 /* ------------------------------------------------------------------ payloads */
@@ -181,6 +189,67 @@ const ORPHANS = Object.entries(prior.tests)
   .filter(([id]) => !plan.tests.some((t) => t.id === id))
   .map(([id, rec]) => ({ id, rec }));
 
+/* -------------------------------------------------------------- suite drift */
+
+// Suite membership lives in Xray, not in a Jira link, so a stray removal in the Xray UI leaves no
+// trace. Compare each set's real membership against the plan before touching anything, in both
+// directions. Suites are project-wide and accumulate across tickets, so a set legitimately holds
+// tests from other plans — drift is only meaningful for the tests THIS plan owns:
+//   missing   — the plan claims the suite, the set doesn't have the test (a re-run restores it)
+//   unclaimed — the set has a test this plan owns, but the plan no longer claims that suite
+// Anything the plan has never heard of belongs to another ticket and is counted, never touched.
+
+async function setMembers(issueId) {
+  const members = new Set();
+  let start = 0;
+  let total = Infinity;
+  while (members.size < total) {
+    const d = await gql(Q.getTestSet, { issueId, start, limit: 100 });
+    const page = d?.getTestSet?.tests;
+    const results = page?.results || [];
+    if (!page || !results.length) break;
+    total = page.total ?? 0;
+    for (const r of results) members.add(r.issueId);
+    start += results.length;
+  }
+  return members;
+}
+
+const ownedByPlan = new Map();  // issueId -> plan test id, for everything this plan has created
+for (const [id, rec] of Object.entries(prior.tests)) if (rec.issueId) ownedByPlan.set(rec.issueId, id);
+const creating = new Set(CREATE.map((t) => t.id));
+
+const DRIFT = {};
+for (const suite of SUITES) {
+  const desired = plan.tests.filter((t) => (t.suites || []).includes(suite));
+  if (!desired.length) continue;
+  const name = setNameFor(suite);
+  const set = registry[name];
+  const d = {
+    name, key: set?.key, desired: desired.length, missing: [], unclaimed: [], foreign: 0,
+    // Tests being created this run have no membership yet by definition — not drift.
+    pending: desired.filter((t) => creating.has(t.id)).map((t) => t.id),
+  };
+  if (set?.issueId) {
+    const members = await setMembers(set.issueId);
+    const want = new Set();
+    for (const t of desired) {
+      if (creating.has(t.id)) continue;
+      const rec = prior.tests[t.id];
+      if (!rec?.issueId) continue;
+      want.add(rec.issueId);
+      if (!members.has(rec.issueId)) d.missing.push(`${rec.key} (${t.id})`);
+    }
+    for (const issueId of members) {
+      if (want.has(issueId)) continue;
+      const id = ownedByPlan.get(issueId);
+      if (id) d.unclaimed.push(`${prior.tests[id].key} (${id})`);
+      else d.foreign += 1;
+    }
+  }
+  DRIFT[suite] = d;
+}
+
 /* ------------------------------------------------------------------- report */
 
 function report() {
@@ -220,11 +289,26 @@ function report() {
   console.log('');
   console.log('  Test Sets:');
   for (const s of SUITES) {
-    const n = plan.tests.filter((t) => (t.suites || []).includes(s)).length;
-    if (!n) continue;
-    const name = setNameFor(s);
-    const ex = registry[name]?.key;
-    console.log(`      ${s}: ${n} test(s) → ${ex ? `add to existing ${ex} "${name}"` : `create "${name}"`}`);
+    const d = DRIFT[s];
+    if (!d) continue;
+    if (!d.key) {
+      console.log(`      ${s}: ${d.desired} test(s) → create "${d.name}"`);
+      continue;
+    }
+    const state = [];
+    if (d.pending.length) state.push(`${d.pending.length} new`);
+    if (d.missing.length) state.push(`${d.missing.length} missing`);
+    if (d.unclaimed.length) state.push(`${d.unclaimed.length} unclaimed`);
+    if (!state.length) state.push('in sync');
+    console.log(`      ${s}: ${d.desired} test(s) → ${d.key} "${d.name}" — ${state.join(', ')}`);
+    if (d.missing.length) {
+      console.log(`          DRIFT  missing from the set, will be re-added: ${d.missing.join(', ')}`);
+    }
+    if (d.unclaimed.length) {
+      console.log(`          DRIFT  in the set but the plan no longer claims this suite — review, never auto-removed:`);
+      console.log(`                 ${d.unclaimed.join(', ')}`);
+    }
+    if (d.foreign) console.log(`          ${d.foreign} test(s) from other plans — left alone`);
   }
 }
 
