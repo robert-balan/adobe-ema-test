@@ -40,6 +40,19 @@ Fetch the ticket with `getJiraIssue` (`responseContentFormat: "markdown"`). Read
 description — these tickets carry long block specs with variants, content slots, state modes,
 and a numbered AC list. Also fetch linked/parent issues when the spec references them.
 
+### 1b. Ground the tests in the actual implementation
+
+Before designing anything, read the code the ticket is about — do not write tests from the spec
+alone. A spec describes intent; the code describes what an author can actually produce.
+
+- Block ticket → read `blocks/{block}/{block}.js` and `.css` for the real content model, the
+  variant class names, and what the decoration actually emits.
+- Page or section ticket → inspect the markup and the relevant decoration logic in `scripts/`.
+- `curl http://localhost:3000/path.plain.html` shows the authored markup a block receives.
+
+If the block does not exist yet, say so — the tests are then written against the spec alone and
+must be re-checked once it lands.
+
 ### 2. Extract the AC inventory
 Build an explicit list of every testable assertion, keyed by its AC id (`AC-1`, `AC-2`, …).
 Note which are functional, which are accessibility, which are authoring/content rules. Mark any
@@ -53,6 +66,8 @@ AC that is not objectively verifiable (e.g. "must feel smooth") as needing clari
 - Cover EDS-specific risk that these specs consistently care about:
   - authored content variations (author omits an optional field, adds an extra column)
   - the three-phase load (eager/lazy/delayed) and no layout shift on async data
+  - images: author-uploaded ones are auto-optimised, so test alt text, lazy loading and the
+    rendered `picture` sources rather than file size
   - responsive breakpoints at 600 / 900 / 1200px plus any breakpoint the spec names
   - RTL, keyboard-only operation, screen reader announcement, `aria-disabled` boundaries
   - graceful DOM suppression — no orphan containers when a block has nothing to render
