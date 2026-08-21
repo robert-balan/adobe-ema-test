@@ -13,5 +13,6 @@ helix-importer-ui
 !CLAUDE.md
 !AGENTS.md
 
-# Ensure these files are not tracked — they carry Jira ticket content
-.claude/qa/plans/*.jira-actions.json
+# Ensure these files are not tracked — they carry Jira ticket and design detail,
+# and this repo is public
+.claude/qa/plans/*.json
