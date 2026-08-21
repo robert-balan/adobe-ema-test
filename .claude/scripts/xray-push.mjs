@@ -201,18 +201,27 @@ const ORPHANS = Object.entries(prior.tests)
 
 async function setMembers(issueId) {
   const members = new Set();
+  let dangling = 0;
   let start = 0;
+  let seen = 0;
   let total = Infinity;
-  while (members.size < total) {
+  while (seen < total) {
     const d = await gql(Q.getTestSet, { issueId, start, limit: 100 });
     const page = d?.getTestSet?.tests;
     const results = page?.results || [];
     if (!page || !results.length) break;
     total = page.total ?? 0;
-    for (const r of results) members.add(r.issueId);
+    // A membership row whose Test issue has been deleted comes back as null.
+    // Count it rather than dereferencing it, and page on `seen` not on
+    // `members.size` — otherwise a dangling row stalls the loop.
+    for (const r of results) {
+      if (r?.issueId) members.add(r.issueId);
+      else dangling += 1;
+    }
+    seen += results.length;
     start += results.length;
   }
-  return members;
+  return { members, dangling };
 }
 
 const ownedByPlan = new Map();  // issueId -> plan test id, for everything this plan has created
@@ -231,7 +240,8 @@ for (const suite of SUITES) {
     pending: desired.filter((t) => creating.has(t.id)).map((t) => t.id),
   };
   if (set?.issueId) {
-    const members = await setMembers(set.issueId);
+    const { members, dangling } = await setMembers(set.issueId);
+    d.dangling = dangling;
     const want = new Set();
     for (const t of desired) {
       if (creating.has(t.id)) continue;
@@ -309,6 +319,7 @@ function report() {
       console.log(`                 ${d.unclaimed.join(', ')}`);
     }
     if (d.foreign) console.log(`          ${d.foreign} test(s) from other plans — left alone`);
+    if (d.dangling) console.log(`          ⚠ ${d.dangling} membership row(s) point at a deleted Test — clean up in the Xray UI`);
   }
 }
 
