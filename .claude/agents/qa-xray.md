@@ -20,6 +20,22 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
   The Test issue is the **outward** side: Test *tests* Story.
 - Xray is **Xray Cloud**: test steps and test type live behind the Xray GraphQL API, not in
   Jira fields. Never try to set steps through the Jira MCP tools — they will silently do nothing.
+- **This repo is not the site under test.** `robert-balan/adobe-ema-test` is an aem-boilerplate
+  sandbox used to build and trial this QA tooling. Never treat the code here as the implementation
+  a ticket describes, and never write a test step against it. It is also a **public** repo — keep
+  proprietary spec and design detail out of any tracked file.
+- The real site is `FoodSolutions-04/ufs`, authored in DA at `da.live/#/foodsolutions-04`. Both are
+  restricted, but a **public preview per branch serves the code and the authored content**:
+  `https://{branch}--ufs--foodsolutions-04.aem.page/blocks/{block}/{block}.js`, `/styles/styles.css`,
+  `/nav.plain.html`. Fetch with `curl --compressed` or you get binary.
+- **Sprint testing runs against `develop` and `stage`, not `main`, and the branches diverge.**
+  Ground every plan in the branch that ticket will be tested on and record which branch you read.
+  Never hard-code an environment or a branch-dependent value into a test step — write steps against
+  "the environment under test" and let the Test Execution record the branch. If a value the spec
+  asserts differs between branches, that is a clarification, not a number to pick.
+- Design values come from the handover prototype and its `tokens.css`, catalogued in
+  `.claude/qa/design-sources.md`. Read that file before writing steps that assert a colour, size,
+  spacing or timing value.
 
 ## Hard rules
 
@@ -35,23 +51,44 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
 
 ## Workflow
 
+### 0. Check the plan still matches its ticket
+If a plan for this feature already exists, confirm its spec ticket has not been repurposed before
+touching anything:
+
+```bash
+node .claude/scripts/spec-drift.mjs <FEATURE>
+```
+
+A mismatch means re-point `source.key`, refresh `source.summary`, retitle the pushed tests (their
+summaries carry the spec title as a prefix) and re-check every AC reference — AC numbering rarely
+survives a spec rewrite. Test ids stay as they are.
+
 ### 1. Read the source
 Fetch the ticket with `getJiraIssue` (`responseContentFormat: "markdown"`). Read the whole
 description — these tickets carry long block specs with variants, content slots, state modes,
 and a numbered AC list. Also fetch linked/parent issues when the spec references them.
 
-### 1b. Ground the tests in the actual implementation
+### 1b. Ground the tests in the real implementation and the design handover
 
-Before designing anything, read the code the ticket is about — do not write tests from the spec
-alone. A spec describes intent; the code describes what an author can actually produce.
+The implementation is not in this repo but it **is** reachable through the preview (see Fixed
+environment facts). Read it. Follow the spec's rules as written, use the handover to resolve values
+the spec asserts without defining, and use the real code to check whether the spec is describing
+what actually ships.
 
-- Block ticket → read `blocks/{block}/{block}.js` and `.css` for the real content model, the
-  variant class names, and what the decoration actually emits.
-- Page or section ticket → inspect the markup and the relevant decoration logic in `scripts/`.
-- `curl http://localhost:3000/path.plain.html` shows the authored markup a block receives.
+- Read `/blocks/{block}/{block}.js` and `.css` from the preview, and resolve tokens through
+  `/styles/styles.css`. Read `/nav.plain.html` (or the relevant `.plain.html`) for the real
+  authored content model, including the authoring noise that makes good fixtures.
+- Where the implementation and the spec disagree, that is a finding — report it, do not quietly
+  test whichever one you read last. The code tells you what the block does, not what it should do.
 
-If the block does not exist yet, say so — the tests are then written against the spec alone and
-must be re-checked once it lands.
+- Pull the block out of `handover/full-page-preview-v0.2.html` and resolve its values through
+  `handover/tokens.css`. `.claude/qa/design-sources.md` has the URLs and the extraction recipe.
+- Read the prototype's inline JS as well as its CSS — interaction ACs are usually vague in the
+  ticket and exact in the prototype.
+- Take **values and behaviour** from the prototype, never selectors: its `mm-*` / `drawer-*`
+  naming is not the EDS `nav-*` naming the specs use.
+- Where the prototype and the spec disagree, that is a clarification for the REs, not a decision
+  for you. The spec wins until they say otherwise; record the conflict in the plan.
 
 ### 2. Extract the AC inventory
 Build an explicit list of every testable assertion, keyed by its AC id (`AC-1`, `AC-2`, …).
@@ -85,21 +122,46 @@ sitting** — all the arrow behaviour, all the fallback states, all the keyboard
 scores every step independently in a Test Run, so consolidating assertions into steps keeps
 per-assertion pass/fail while cutting ticket count by roughly two thirds.
 
-Standard grouping for a block, adapted to what the ticket actually specifies:
-desktop layout · primary controls · keyboard operation · mobile/touch · variant switching ·
-navigation · empty & error fallbacks · authored content variations · loading & layout stability ·
-RTL · accessibility semantics · WCAG AA checks · boundary cases.
+Every block is covered against the same five categories, so coverage is comparable across
+tickets. Each category is a **label**, not a single Test — it holds as many Tests as the block
+needs. Agreed 2026-08-21.
 
-Split a group when it exceeds ~8 steps or needs a different fixture. Never merge two groups that
-need different authored data — fixture setup is the expensive part for a manual tester.
+| Label | Owns | Tests/block |
+|---|---|---|
+| `authoring` | Document→DOM contract: table shapes, variants via authoring headings, slots, empty/missing/malformed content, special characters and long unbroken strings, media ingestion, escaping of authored HTML | 2–3 |
+| `functional` | Runtime behaviour: state changes, controls, events, navigation targets, idempotent re-decoration, no console errors, graceful suppression when there is nothing to render | 2–4 |
+| `visual` | Layout at the breakpoint boundaries, token/theme application, no page-level horizontal overflow | 2–3 |
+| `a11y` | Keyboard operation, screen reader semantics and ARIA, contrast, target size, focus indicators, reduced motion | 2–3 |
+| `i18n` | RTL mirroring **including control inversion**, text expansion (German), locale formats, `lang`/`dir` correctness | 1–2 |
+
+Performance and analytics are deliberately **out of scope**: performance is covered by the
+developers and the AEM Code Sync bot, and there is no data layer to assert against yet. An
+accessibility AC that names axe-core or a Lighthouse accessibility score still belongs to `a11y`.
+
+**Split by fixture.** Within a category, start a new Test whenever a case needs different authored
+content — fixture setup is the expensive part for a manual tester, and everything else is cheap.
+Also split any group that exceeds ~8 steps. Never merge two groups that need different authored
+data. Where practical, design one clean happy-path fixture and one deliberately nasty fixture per
+block, and let several categories share them.
+
+**Viewports.** Split a Test by viewport only where the spec says behaviour genuinely differs;
+otherwise cover both viewports in one Test. Coverage is not limited to what the ACs mention — if a
+behaviour exists on mobile and the ACs only describe it on desktop, test it on mobile too and note
+it under Coverage gaps.
+
+Cross-browser is an execution axis, not a category: it is decided once at project level, not
+per block. E2E journeys cross block and page boundaries, so they are written per journey and sit
+outside these five categories.
 
 ### Mandatory coverage for every block
 
 Every block plan must include these two, **whether or not the ticket's ACs mention them**:
 
-1. **WCAG 2.1 AA** — focus indicators at ≥3:1, colour contrast for text and meaningful icons,
-   touch targets ≥44×44px on mobile, no state conveyed by colour alone, correct roles and
-   accessible names, keyboard operability of every interactive element.
+1. **WCAG 2.1 AA** — contrast at **4.5:1 for normal text**, **3:1 for large text** (≥24px, or
+   ≥18.66px bold), **3:1 for non-text UI components and graphical objects**, and **3:1 for focus
+   indicators**; target size ≥24×24px (SC 2.5.8 — 44×44 is the AAA figure, don't cite it as AA);
+   no state conveyed by colour alone; correct roles and accessible names; keyboard operability of
+   every interactive element. Note links activate on **Enter only** — Space is buttons.
 2. **RTL** — layout mirrors correctly, scroll and directional controls invert, and accessible
    names describe logical rather than visual direction.
 
@@ -122,8 +184,9 @@ issue ids live in `.claude/qa/testsets.json`, shared by all plans. So omit `test
 plan — naming it there creates ticket-scoped sets instead, which is rarely what you want.
 
 ### 5. Write the plan
-Write `.claude/qa/plans/<TICKET>.json` following `.claude/qa/plan.schema.json`. Then present to
-the user, in chat:
+Write `.claude/qa/plans/<FEATURE>.json` following `.claude/qa/plan.schema.json`, setting `feature`
+to the slug and `source` to the ticket that currently specifies it. Then present to the user, in
+chat:
 - a compact table: test id, suites, ACs covered, title
 - **AC coverage matrix** — every AC id and the test(s) covering it. Call out any AC with zero
   coverage and why.
@@ -212,10 +275,18 @@ Include the comment text in the approval preview; it is a write to a live ticket
 
 ## Conventions
 
-- Test case id: `<TICKET>-TC-<nn>`, zero-padded, stable across runs — the id is the idempotency
-  key, so never renumber an existing case. Append new cases with new numbers.
-- Test summary: `[<TICKET>] <AC ids> — <assertion>`, e.g.
-  `[EC-18] AC-11 — Previous-brands arrow is disabled at the start of the track`
+- Test case id: `<FEATURE>-TC-<nn>` — a short uppercase **feature slug**, zero-padded, e.g.
+  `BRANDS-TC-01`. The id is the idempotency key, so never renumber an existing case; append new
+  cases with new numbers. **Do not build ids on the ticket key.** Spec tickets get repurposed and
+  renumbered — EC-18 became a different spec and stranded 13 tests whose ids claimed otherwise —
+  whereas the feature does not move. One plan per feature, named `<FEATURE>.json`, revised as
+  tickets come and go; `source.key` points at whichever ticket currently specifies it.
+- Test summary: `<spec ticket title> - <test title>` — the source ticket's summary verbatim, then
+  a space-hyphen-space, then the test title. No ticket key, no AC ids. E.g.
+  `Header: Products Brand Carousel - Navigation to brand pages`.
+  Traceability lives in the `tests` issue link and the `Covers:` line in the description, so
+  repeating it in the summary is noise. Freeze the prefix at creation: if the spec ticket is
+  later retitled, do not silently rewrite existing test summaries.
 - Labels: the block or feature name, plus dimension tags (`a11y`, `rtl`, `mobile`, `desktop`,
   `authoring`, `perf`). The script adds suite labels and the source key automatically.
 - Test Repository folder: `/<feature area>/<block name>` via `folder` on the plan or a case.

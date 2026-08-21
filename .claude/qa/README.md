@@ -3,6 +3,15 @@
 The `qa-xray` agent (`.claude/agents/qa-xray.md`) reads a Jira ticket, derives test cases from
 its acceptance criteria, and creates real Xray Tests and Test Sets in project **EC**.
 
+## Design sources
+
+The Jira spec is the contract; the handover prototype is where its values come from. URLs and the
+extraction recipe live in [`design-sources.md`](design-sources.md) — read it before writing any
+test step that asserts a colour, size, spacing or timing.
+
+Note this repo is an aem-boilerplate **sandbox** for building the QA tooling, not the site under
+test, and it is public. Keep proprietary spec and design detail out of tracked files.
+
 ## Prerequisites
 
 ### 1. Xray API key
@@ -100,6 +109,21 @@ node .claude/scripts/xray-push.mjs .claude/qa/plans/EC-18.json             # app
 Created keys are recorded in `.claude/qa/plans/EC-18.result.json`. Re-running skips tests that
 already exist, so the push is safe to repeat after a partial failure.
 
+### Before each sprint — check for spec drift
+
+```sh
+node .claude/scripts/spec-drift.mjs
+```
+
+Each plan records the summary its spec ticket had when it was written. This compares that against
+the live summary and exits non-zero on a mismatch — meaning the ticket was repurposed and its
+tests may no longer describe it. Set `JIRA_EMAIL` and `JIRA_API_TOKEN` (store them like the Xray
+key above) to check automatically; without them the script prints the JQL and expected summaries
+for an agent to resolve over MCP.
+
+Plans and test ids are keyed on a **feature slug**, not a ticket key — `BRANDS-TC-01` in
+`plans/BRANDS.json` — precisely so a renumbered ticket costs nothing but re-pointing `source.key`.
+
 ### Revising tests when a spec changes
 
 The plan file is the master copy; Jira is the published copy. Re-run the same plan after editing
@@ -140,7 +164,9 @@ keyed by summary, so a different name simply means a different set.
 | Path | Purpose |
 |---|---|
 | `.claude/agents/qa-xray.md` | The QA agent: role, test-design heuristics, suite rules, conventions |
+| `.claude/qa/design-sources.md` | Handover + token URLs and how to extract exact design values |
 | `.claude/qa/plan.schema.json` | Schema for a test plan |
+| `.claude/scripts/spec-drift.mjs` | Flags plans whose spec ticket was repurposed — run before each sprint |
 | `.claude/qa/plans/` | Generated plans and their push results |
 | `.claude/qa/testsets.json` | Shared registry of the three project-wide Test Sets (created on first push) |
 | `.claude/scripts/xray-api.sh` | Auth + raw GraphQL against Xray Cloud |
