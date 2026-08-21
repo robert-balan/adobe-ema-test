@@ -37,7 +37,7 @@
     },
     "testSets": {
       "type": "object",
-      "description": "Optional override of the Test Set summary per suite. Omit it — the default is three project-wide sets (\"Sanity testing\", \"Regression testing\", \"E2E testing\") that accumulate tests across every ticket. Naming them here creates ticket-scoped sets instead, since the registry is keyed by summary.",
+      "description": "Optional override of the Test Set summary per suite. Omit it \u2014 the default is three project-wide sets (\"Sanity testing\", \"Regression testing\", \"E2E testing\") that accumulate tests across every ticket. Naming them here creates ticket-scoped sets instead, since the registry is keyed by summary.",
       "properties": {
         "sanity": {
           "type": "string"
@@ -67,12 +67,12 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[A-Z]+-[0-9]+-TC-[0-9]{2,}$",
-            "description": "Stable idempotency key, e.g. EC-18-TC-01. Never renumber."
+            "pattern": "^[A-Z][A-Z0-9]*(-[0-9]+)?-TC-[0-9]{2,}$",
+            "description": "Stable identity, and the idempotency key for pushes \u2014 NEVER renumber one. Prefer a feature slug (BRANDS-TC-01) over a ticket key (EC-14-TC-01): spec tickets get repurposed and renumbered, features do not."
           },
           "summary": {
             "type": "string",
-            "description": "Jira summary: \"[TICKET] AC-n — assertion\"."
+            "description": "Jira summary: \"[TICKET] AC-n \u2014 assertion\"."
           },
           "ac": {
             "type": "array",
@@ -144,6 +144,11 @@
     "assignee": {
       "type": "string",
       "description": "Atlassian accountId to assign every created Test to. Omit to leave unassigned."
+    },
+    "feature": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*$",
+      "description": "Feature slug these tests belong to; matches the prefix of every test id."
     }
   }
 }
