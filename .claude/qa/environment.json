@@ -1,0 +1,26 @@
+{
+  "_comment": "Machine-checkable facts about this Jira/Xray instance. Verify with .claude/scripts/verify-environment.mjs — never hand-edit a value here to make the check pass without finding out who changed it and why.",
+  "site": "https://unileverfoodsolutions.atlassian.net",
+  "cloudId": "6eda9019-0dad-4d38-8274-5f258c2c7556",
+  "project": {
+    "key": "EC",
+    "name": "EDS Migration",
+    "id": "11590"
+  },
+  "coverage": {
+    "coverableIssueTypeIds": ["11809"],
+    "issueLinkTypeId": "10500",
+    "issueLinkTypeName": "Test",
+    "issueLinkTypeDirection": "INWARD"
+  },
+  "testEnvironments": ["develop-eds-ufs", "stage-eds-ufs", "main-eds-ufs"],
+  "issueTypes": {
+    "Story": "11809",
+    "Test": "12531",
+    "Test Set": "12669",
+    "Test Plan": "12597",
+    "Test execution": "12598",
+    "XRay Precondition": "12668"
+  },
+  "verifiedOn": "2026-08-24"
+}
