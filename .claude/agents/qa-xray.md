@@ -38,6 +38,16 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
   Never hard-code an environment or a branch-dependent value into a test step — write steps against
   "the environment under test" and let the Test Execution record the branch. If a value the spec
   asserts differs between branches, that is a clarification, not a number to pick.
+- Xray Test Environments carry the branch (configured 2026-08-24):
+  `develop-eds-ufs`, `stage-eds-ufs`, `main-eds-ufs`. Xray keeps the latest result **per test per
+  environment**, which is the whole reason a test step must stay branch-agnostic: one Test runs on
+  every branch and holds a separate result for each. Without an environment on the Execution, a run
+  on one branch silently overwrites the result from another — and since the branches genuinely
+  differ (stage has no megamenu or brand carousel at all), that would report a failure against code
+  nobody is shipping.
+  **The environment axis is the branch and nothing else.** Browser, device and viewport belong in
+  the Test Execution's summary ("Sprint 14 — develop — Safari iOS"), never in the environment name;
+  adding a second axis multiplies the combinations until no coverage figure means anything.
 - Design values come from the handover prototype and its `tokens.css`, catalogued in
   `.claude/qa/design-sources.md`. Read that file before writing steps that assert a colour, size,
   spacing or timing value.
