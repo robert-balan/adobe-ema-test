@@ -3,6 +3,13 @@
 The `qa-xray` agent (`.claude/agents/qa-xray.md`) reads a Jira ticket, derives test cases from
 its acceptance criteria, and creates real Xray Tests and Test Sets in project **EC**.
 
+## Two different things are called a "plan"
+
+Say **plan file** for `plans/<FEATURE>.json` — the master copy of the test content, which lives in
+git. Say **Xray Test Plan** for the Jira issue type (12597), which holds a sprint's execution scope
+and tracks results across Test Executions. They are unrelated, and bare "test plan" is ambiguous,
+so avoid it.
+
 ## Design sources
 
 The Jira spec is the contract; the handover prototype is where its values come from. URLs and the
@@ -198,15 +205,49 @@ them.
 To get ticket-scoped sets instead, name them in the plan's `testSets` block — the registry is
 keyed by summary, so a different name simply means a different set.
 
+### Xray Test Plans — sprint scope
+
+Test Sets and Xray Test Plans answer opposite questions, and conflating them is the usual way this
+gets messy:
+
+| | Answers | Lifetime |
+|---|---|---|
+| **Test Set** | what kind of run is this — sanity, regression, e2e | permanent, cumulative |
+| **Xray Test Plan** | is this slice of work tested yet | finite; opens, fills, closes |
+
+So never create a Test Plan called "Regression" — that duplicates the Test Set and never closes.
+A Test Plan carries the axis a Test Set cannot: **time and scope**. One per sprint, named to match
+the Jira sprint so they cross-reference, holding the tests for that sprint's stories plus the
+sanity suite plus regression for whatever it touched. Test Executions then sit inside it, one per
+branch per cycle, each tagged with a test environment:
+
+```
+EC Sprint 14                                  ← Xray Test Plan
+ ├─ Sprint 14 — develop — round 1    env: develop-eds-ufs
+ ├─ Sprint 14 — develop — round 2    env: develop-eds-ufs
+ └─ Sprint 14 — stage — sign-off     env: stage-eds-ufs
+```
+
+A push can add its tests to an existing Test Plan:
+
+```sh
+node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --test-plan EC-59
+```
+
+Opt-in rather than automatic, deliberately. What a sprint intends to run includes regression for
+blocks the ticket never touched, which a plan file has no way of knowing — pushing tests and
+scoping a sprint are separate decisions. Adding is idempotent, so re-running to pick up new cases
+is safe, and a key that is not a Test Plan is rejected before anything is written.
+
 ## Files
 
 | Path | Purpose |
 |---|---|
 | `.claude/agents/qa-xray.md` | The QA agent: role, test-design heuristics, suite rules, conventions |
 | `.claude/qa/design-sources.md` | Handover + token URLs and how to extract exact design values |
-| `.claude/qa/plan.schema.json` | Schema for a test plan |
+| `.claude/qa/plan.schema.json` | Schema for a plan file |
 | `.claude/scripts/spec-drift.mjs` | Flags plans whose spec ticket was repurposed — run before each sprint |
-| `.claude/qa/plans/` | Plans and their result ledgers — tracked; `*.jira-actions.json` is not |
+| `.claude/qa/plans/` | Plan files and their result ledgers — tracked; `*.jira-actions.json` is not |
 | `.claude/qa/testsets.json` | Shared registry of the three project-wide Test Sets (created on first push) |
 | `.claude/scripts/xray-api.sh` | Auth + raw GraphQL against Xray Cloud |
 | `.claude/scripts/xray-push.mjs` | Validates a plan, creates Tests and Test Sets, idempotently |

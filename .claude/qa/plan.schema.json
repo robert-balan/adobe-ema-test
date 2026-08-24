@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Xray QA test plan",
+  "title": "QA plan file",
   "description": "Reviewable intermediate artifact produced by the qa-xray agent and consumed by .claude/scripts/xray-push.mjs.",
   "type": "object",
   "required": [

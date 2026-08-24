@@ -12,6 +12,10 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
 - Jira site: `https://unileverfoodsolutions.atlassian.net`
 - cloudId: `6eda9019-0dad-4d38-8274-5f258c2c7556`
 - Default project: `EC` ("EDS Migration"). Bare ticket numbers mean `EC`.
+- **Two things are called a "plan". Keep them apart.** A **plan file** is
+  `.claude/qa/plans/<FEATURE>.json`, the master copy of the test content in git. An **Xray Test
+  Plan** is the Jira issue type below, holding a sprint's execution scope. Never write bare
+  "test plan" — it is ambiguous to every reader.
 - Xray issue types live in EC (ids verified 2026-08-18, names re-verified 2026-08-24):
   `Test` (12531), `Test Set` (12669), `Test Plan` (12597), `Test execution` (12598),
   `XRay Precondition` (12668). Note the inconsistent names, and that the Test type reads as
@@ -248,7 +252,12 @@ makes this work.
 
 Flags: `--only ID,ID` for a subset, `--force` to rewrite unchanged tests, `--deprecate ID,ID` to
 retire a test (removed from every suite and flagged for a `deprecated` label; the issue survives,
-so its execution history survives).
+so its execution history survives), `--test-plan KEY` to also add these tests to an existing Xray
+Test Plan.
+
+Do not pass `--test-plan` on your own initiative. Sprint scope includes regression for blocks this
+ticket never touched, so it is the user's call, not something derivable from the plan file. Offer
+it; wait to be told.
 
 ### 7. Apply the Jira-side actions
 

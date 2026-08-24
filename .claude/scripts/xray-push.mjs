@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Reconcile a QA test plan with Xray Cloud.
+ * Reconcile a QA plan file with Xray Cloud.
  *
  *   node .claude/scripts/xray-push.mjs <plan.json> [options]
  *
@@ -10,6 +10,11 @@
  *     --deprecate ID,ID    retire tests: drop from every suite, flag for a `deprecated` label
  *     --adopt              rebuild <plan>.result.json from the Jira labels and exit; writes
  *                          nothing to Xray. Use on a fresh clone, or to repair a lost cache.
+ *     --test-plan KEY      also add this plan's tests to an existing Xray Test Plan (e.g. EC-59)
+ *
+ * Suites (Test Sets) and sprint scope (Xray Test Plans) are separate axes, so adding to a Test
+ * Plan is opt-in rather than automatic: which tests a sprint intends to run includes regression
+ * for blocks this ticket never touched, which a plan file cannot know.
  *
  * The plan is the master copy and Jira is the published copy; this brings the published copy
  * into line. Tests are matched on their plan id, which is written to Jira as a label and cached
@@ -53,9 +58,12 @@ const force = flag('--force');
 const only = listArg('--only');
 const deprecate = listArg('--deprecate') || [];
 const adopt = flag('--adopt');
+const oneArg = (name) => listArg(name)?.[0] || null;
+const testPlanKey = oneArg('--test-plan');
 
 const fail = (msg) => { console.error(`xray-push: ${msg}`); process.exit(1); };
-if (!planPath) fail('usage: xray-push.mjs <plan.json> [--dry-run] [--only IDs] [--force] [--deprecate IDs] [--adopt]');
+if (!planPath) fail('usage: xray-push.mjs <plan.json> [--dry-run] [--only IDs] [--force] [--deprecate IDs] [--adopt] [--test-plan KEY]');
+if (testPlanKey && !/^[A-Z][A-Z0-9]*-\d+$/.test(testPlanKey)) fail(`--test-plan expects an issue key like EC-59, got "${testPlanKey}"`);
 if (!existsSync(planPath)) fail(`no such plan: ${planPath}`);
 
 const plan = JSON.parse(readFileSync(planPath, 'utf8'));
@@ -148,6 +156,11 @@ const Q = {
   getTestSet: `query GetTestSet($issueId: String!, $start: Int, $limit: Int!) {
     getTestSet(issueId: $issueId) {
       issueId tests(start: $start, limit: $limit) { total results { issueId } } } }`,
+  findTestPlan: `query FindTestPlan($jql: String!) {
+    getTestPlans(jql: $jql, limit: 1) {
+      results { issueId jira(fields: ["key","summary"]) } } }`,
+  addToPlan: `mutation AddToPlan($issueId: String!, $testIssueIds: [String]!) {
+    addTestsToTestPlan(issueId: $issueId, testIssueIds: $testIssueIds) { addedTests warning } }`,
 };
 
 /* ------------------------------------------------------------------ payloads */
@@ -364,6 +377,18 @@ for (const suite of SUITES) {
   DRIFT[suite] = d;
 }
 
+/* ----------------------------------------------------------- xray test plan */
+
+// Resolved during reconcile rather than at apply time: a mistyped key should stop the run
+// before it writes, not after it has created 16 issues.
+let testPlan = null;
+if (testPlanKey) {
+  const d = await gql(Q.findTestPlan, { jql: `key = ${testPlanKey}` });
+  const hit = d?.getTestPlans?.results?.[0];
+  if (!hit) fail(`--test-plan ${testPlanKey} is not an Xray Test Plan in this instance`);
+  testPlan = { issueId: hit.issueId, key: hit.jira.key, summary: hit.jira.summary };
+}
+
 /* ------------------------------------------------------------------- report */
 
 function report() {
@@ -376,6 +401,10 @@ function report() {
   if (ORPHANS.length) console.log(`  ${w(ORPHANS.length)} no longer in the plan — review manually, never auto-deleted`);
   if (deprecate.length) console.log(`  ${w(deprecate.length)} to deprecate`);
   if (conflicted.size) console.log(`  ${w(conflicted.size)} with a contested identity — nothing will be written`);
+  if (testPlan) {
+    const n = scoped.filter((t) => !conflicted.has(t.id)).length;
+    console.log(`  ${w(n)} to add to Xray Test Plan ${testPlan.key} "${testPlan.summary}"`);
+  }
   console.log('');
   for (const { id, key } of ADOPTED) console.log(`  ADOPT     ${key}  ${id} — already in Jira, reusing it instead of creating a duplicate`);
   reportIdentityProblems();
@@ -509,6 +538,22 @@ for (const suite of SUITES) {
   }
   testSets[suite] = registry[summary];
   writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2) + '\n');
+}
+
+/* ----------------------------------------------------------- xray test plan */
+
+// Membership is additive and idempotent — Xray ignores tests the plan already holds — so a
+// re-run to pick up newly added cases is safe.
+if (testPlan) {
+  const ids = scoped
+    .filter((t) => !conflicted.has(t.id) && created[t.id]?.issueId)
+    .map((t) => created[t.id].issueId);
+  if (ids.length) {
+    const d = await gql(Q.addToPlan, { issueId: testPlan.issueId, testIssueIds: ids });
+    const { addedTests, warning } = d.addTestsToTestPlan;
+    const n = Array.isArray(addedTests) ? addedTests.length : addedTests;
+    console.log(`testplan +${n} → ${testPlan.key} "${testPlan.summary}"${warning ? `  ⚠ ${warning}` : ''}`);
+  }
 }
 
 /* ------------------------------------------------------------- deprecation */
