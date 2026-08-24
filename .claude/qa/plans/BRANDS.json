@@ -6,7 +6,9 @@
   "source": {
     "key": "EC-14",
     "summary": "Header: Products Brand Carousel",
-    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-14"
+    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-14",
+    "acDigest": "sha256:2bef38e89e95f5a4",
+    "acCheckedOn": "2026-08-24"
   },
   "folder": "/Header/Megamenu/Brands Carousel",
   "tests": [
@@ -44,7 +46,7 @@
         {
           "action": "Check the strip for empty tiles.",
           "data": "The live nav document contains an empty paragraph between two brand links.",
-          "result": "The empty paragraph produces no tile and no gap \u2014 tiles are evenly spaced across the row."
+          "result": "The empty paragraph produces no tile and no gap — tiles are evenly spaced across the row."
         },
         {
           "action": "Change the authored label text, republish, and reopen the megamenu.",
@@ -86,7 +88,7 @@
         },
         {
           "action": "Author the strip with 3 image links plus 1 text-only link and reopen.",
-          "result": "The strip is not classified as a brand carousel \u2014 no round tiles and no scroller arrows are built."
+          "result": "The strip is not classified as a brand carousel — no round tiles and no scroller arrows are built."
         },
         {
           "action": "Author the strip with image links that carry captions and reopen.",
@@ -113,7 +115,7 @@
         "authoring"
       ],
       "precondition": "A deliberately degraded brand strip: label omitted, one link pointing at a missing image, one wide non-square logo, one image with empty alt text.",
-      "notes": "The ticket says broken images must 'degrade gracefully' without defining what that means \u2014 see clarifications.",
+      "notes": "The ticket says broken images must 'degrade gracefully' without defining what that means — see clarifications.",
       "steps": [
         {
           "action": "Omit the label paragraph, publish, and open the Products megamenu.",
@@ -121,11 +123,11 @@
         },
         {
           "action": "Inspect the tile whose image URL is missing.",
-          "result": "The tile degrades gracefully \u2014 nothing overflows the circular tile, the row keeps its alignment, and the neighbouring tiles are unaffected."
+          "result": "The tile degrades gracefully — nothing overflows the circular tile, the row keeps its alignment, and the neighbouring tiles are unaffected."
         },
         {
           "action": "Inspect the wide non-square logo.",
-          "result": "The logo is cropped to fill the circular tile without stretching or squashing \u2014 the aspect ratio is preserved."
+          "result": "The logo is cropped to fill the circular tile without stretching or squashing — the aspect ratio is preserved."
         },
         {
           "action": "Tab to the link whose image has empty alt text.",
@@ -305,7 +307,7 @@
         },
         {
           "action": "Alternate rapidly between the previous and next arrows.",
-          "result": "No stuck state \u2014 the row keeps responding and arrow visibility stays correct for the current position."
+          "result": "No stuck state — the row keeps responding and arrow visibility stays correct for the current position."
         },
         {
           "action": "Click a brand tile.",
@@ -448,7 +450,7 @@
         },
         {
           "action": "Inspect the background behind the strip.",
-          "result": "The background is transparent \u2014 no tinted band."
+          "result": "The background is transparent — no tinted band."
         },
         {
           "action": "Inspect the strip for arrow buttons.",
@@ -526,7 +528,7 @@
         "brand-carousel",
         "a11y"
       ],
-      "precondition": "Desktop viewport with 12 brand logos, enough to overflow. Keyboard only \u2014 no mouse.",
+      "precondition": "Desktop viewport with 12 brand logos, enough to overflow. Keyboard only — no mouse.",
       "notes": "Step 2 targets the tile focus indicator and step 6 the behaviour of an arrow that hides while focused; both are known risk areas in the current implementation.",
       "steps": [
         {
@@ -573,7 +575,7 @@
         "a11y"
       ],
       "precondition": "A screen reader is available. Products megamenu authored with 12 brand logos, each with meaningful alt text.",
-      "notes": "The implementation puts an aria-label on the link, which overrides the image alt text. AC-16 states the accessible name comes from alt \u2014 see clarifications.",
+      "notes": "The implementation puts an aria-label on the link, which overrides the image alt text. AC-16 states the accessible name comes from alt — see clarifications.",
       "steps": [
         {
           "action": "With the screen reader running, open the Products megamenu and navigate to the carousel.",
@@ -593,7 +595,7 @@
         },
         {
           "action": "Move through a logo link again and listen for a repeated announcement of its image.",
-          "result": "The brand is announced once \u2014 the image is not announced separately from its link."
+          "result": "The brand is announced once — the image is not announced separately from its link."
         },
         {
           "action": "Close the Products megamenu and navigate the header with the screen reader.",
@@ -620,11 +622,11 @@
         "a11y"
       ],
       "precondition": "Contrast tooling and axe-core available. The Products megamenu must be OPEN while every scan runs, otherwise the carousel is not in the scanned DOM.",
-      "notes": "The label is #d14900 on the #f5f3f4 band at 12px weight 600, which measures 4.08:1 against a 4.5:1 requirement. Step 1 is expected to fail on current code \u2014 see clarifications.",
+      "notes": "The label is #d14900 on the #f5f3f4 band at 12px weight 600, which measures 4.08:1 against a 4.5:1 requirement. Step 1 is expected to fail on current code — see clarifications.",
       "steps": [
         {
           "action": "At a desktop viewport with the megamenu open, measure the contrast of the label text against the tinted band behind it.",
-          "data": "Label #d14900 on band #f5f3f4, rendered at 12px weight 600 \u2014 normal text, so the 4.5:1 threshold applies.",
+          "data": "Label #d14900 on band #f5f3f4, rendered at 12px weight 600 — normal text, so the 4.5:1 threshold applies.",
           "result": "The ratio is at least 4.5:1."
         },
         {
@@ -672,7 +674,7 @@
         },
         {
           "action": "Locate the previous and next arrows.",
-          "result": "The previous arrow is at the right edge and the next arrow at the left \u2014 mirrored from the LTR layout."
+          "result": "The previous arrow is at the right edge and the next arrow at the left — mirrored from the LTR layout."
         },
         {
           "action": "Inspect the chevrons inside the arrows.",
@@ -684,7 +686,7 @@
         },
         {
           "action": "Scroll to the logical end, then back to the logical start.",
-          "result": "The next arrow is hidden at the end and the previous arrow is hidden at the start \u2014 the same edge rules as LTR, applied to the mirrored direction."
+          "result": "The next arrow is hidden at the end and the previous arrow is hidden at the start — the same edge rules as LTR, applied to the mirrored direction."
         },
         {
           "action": "Repeat the swipe and layout checks at a mobile viewport in the RTL locale.",
