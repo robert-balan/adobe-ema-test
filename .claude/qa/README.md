@@ -123,17 +123,72 @@ Created keys are recorded in `.claude/qa/plans/EC-18.result.json`, and each Test
 with its plan id in Jira. Re-running reconciles against both, so the push is safe to repeat after
 a partial failure — and safe to run from a clone that has never seen the result file.
 
-### Before each sprint — check for spec drift
+### Before each sprint — check for drift
 
 ```sh
-node .claude/scripts/spec-drift.mjs
+node .claude/scripts/verify-environment.mjs    # has the Jira/Xray instance moved?
+node .claude/scripts/spec-drift.mjs            # have the specs?
 ```
 
-Each plan records the summary its spec ticket had when it was written. This compares that against
-the live summary and exits non-zero on a mismatch — meaning the ticket was repurposed and its
-tests may no longer describe it. Set `JIRA_EMAIL` and `JIRA_API_TOKEN` (store them like the Xray
-key above) to check automatically; without them the script prints the JQL and expected summaries
-for an agent to resolve over MCP.
+**The instance.** Issue-type ids, the coverage settings, the link type and the test environments
+are recorded in `environment.json` and re-read from the live API. The coverage settings are the
+ones that matter: change them and every link the tooling makes stays correct and counts for
+nothing. Re-record with `--update` once you know who changed what and why — recording a change is
+not the same as agreeing with it.
+
+**The specs.** Each plan records both the summary its ticket had and a digest of its acceptance
+criteria. Two different failures:
+
+- the **summary** changed — the ticket was repurposed, and every pushed test now carries a stale
+  title prefix
+- the **digest** changed — the title held still while the criteria were rewritten underneath the
+  tests. This is the common one, and a summary comparison cannot see it
+
+Set `JIRA_EMAIL` and `JIRA_API_TOKEN` (store them like the Xray key above) to check automatically.
+Without them the script prints what to resolve over MCP; pipe a description through
+`spec-drift.mjs --digest` to compare a digest by hand, and record one with
+`spec-drift.mjs <FEATURE> --record`.
+
+### After each push — check the coverage registered
+
+```sh
+node .claude/scripts/qa-coverage.mjs --plan .claude/qa/plans/BRANDS.json
+```
+
+Xray computes requirement coverage from Test → Story links, in one direction only. A link made the
+other way round renders identically in the Jira UI and contributes nothing, which is how this
+project once ended up with a full suite of tests covering nothing at all. This asks Xray what it
+counts, names any pushed test that is not counted, and exits non-zero — so it can gate.
+
+The push emits missing links on every run now, not only when a test changes, and reports a
+backwards link separately: those have to be deleted in the Jira UI, since the MCP tools cannot
+remove a link and adding a second one does not help.
+
+### Nothing reaches Jira unapproved
+
+`.claude/settings.json` registers a `PreToolUse` hook that blocks `xray-push.mjs` unless the run is
+read-only (`--dry-run`, `--adopt`) or carries an explicit approval:
+
+```sh
+XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json
+```
+
+The agent's first hard rule always said this; until the hook existed it was prose, and the
+command that writes to production differed from the safe one by an absent flag. Prefixing the
+variable rather than exporting it keeps the approval scoped to one invocation and visible in the
+transcript. Review `/hooks` if you want to see or disable it.
+
+### Changing the tooling
+
+```sh
+node --test .claude/scripts/test/*.test.mjs
+```
+
+Every reconcile outcome the tables in this file promise — created, adopted, mismatch, duplicate,
+gone, orphan, unchanged — is pinned by a test, along with link direction, suite drift, schema
+validation and the client's retry behaviour. The decision-making code has no I/O in it
+(`scripts/lib/reconcile.mjs`), so none of that needs a Jira instance to exercise. Run the tests
+before pushing a change to the tooling; they take under a second.
 
 Plans and test ids are keyed on a **feature slug**, not a ticket key — `BRANDS-TC-01` in
 `plans/BRANDS.json` — precisely so a renumbered ticket costs nothing but re-pointing `source.key`.
@@ -184,11 +239,13 @@ Tests dropped from a plan are reported for review, never deleted — deleting a 
 execution history. To retire one properly:
 
 ```sh
-node .claude/scripts/xray-push.mjs .claude/qa/plans/EC-18.json --deprecate EC-18-TC-09
+node .claude/scripts/xray-push.mjs .claude/qa/plans/EC-18.json --deprecate BRANDS-TC-09
 ```
 
-That removes it from every suite so it stops being run, and flags it for a `deprecated` label.
-The ticket and its history survive.
+That removes it from every Test Set **and every Xray Test Plan**, and flags it for a `deprecated`
+label. The ticket and its history survive. Both have to be cleared: a test dropped only from the
+suites still sits in each open sprint's Test Plan, unexecuted, dragging that sprint's completion
+figure down.
 
 Because the Xray API cannot write Jira fields or links, each run also emits
 `<plan>.jira-actions.json` listing the links, field edits and labels for the agent to apply over
@@ -245,11 +302,17 @@ is safe, and a key that is not a Test Plan is rejected before anything is writte
 |---|---|
 | `.claude/agents/qa-xray.md` | The QA agent: role, test-design heuristics, suite rules, conventions |
 | `.claude/qa/design-sources.md` | Handover + token URLs and how to extract exact design values |
-| `.claude/qa/plan.schema.json` | Schema for a plan file |
-| `.claude/scripts/spec-drift.mjs` | Flags plans whose spec ticket was repurposed — run before each sprint |
+| `.claude/qa/plan.schema.json` | Schema for a plan file — enforced on every push, not just documented |
+| `.claude/qa/environment.json` | Instance facts (issue types, coverage settings, environments), machine-checked |
 | `.claude/qa/plans/` | Plan files and their result ledgers — tracked; `*.jira-actions.json` is not |
 | `.claude/qa/testsets.json` | Shared registry of the three project-wide Test Sets (created on first push) |
-| `.claude/scripts/xray-api.sh` | Auth + raw GraphQL against Xray Cloud |
 | `.claude/scripts/xray-push.mjs` | Validates a plan, creates Tests and Test Sets, idempotently |
+| `.claude/scripts/qa-coverage.mjs` | Asks Xray what it actually counts as covered — run after every push |
+| `.claude/scripts/spec-drift.mjs` | Flags a repurposed ticket or rewritten criteria — run before each sprint |
+| `.claude/scripts/verify-environment.mjs` | Re-checks `environment.json` against the live instance |
+| `.claude/scripts/guard-xray-push.sh` | PreToolUse hook: blocks an unapproved push before it runs |
+| `.claude/scripts/xray-api.sh` | Auth + raw GraphQL against Xray Cloud |
+| `.claude/scripts/lib/` | The parts with no I/O in them: reconcile logic, schema validation, the API client |
+| `.claude/scripts/test/` | Tests for all of the above — `node --test .claude/scripts/test/*.test.mjs` |
 
 Everything lives under `.claude/`, which `.hlxignore` excludes from the published site.

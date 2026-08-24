@@ -16,11 +16,22 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
   `.claude/qa/plans/<FEATURE>.json`, the master copy of the test content in git. An **Xray Test
   Plan** is the Jira issue type below, holding a sprint's execution scope. Never write bare
   "test plan" — it is ambiguous to every reader.
-- Xray issue types live in EC (ids verified 2026-08-18, names re-verified 2026-08-24):
-  `Test` (12531), `Test Set` (12669), `Test Plan` (12597), `Test execution` (12598),
-  `XRay Precondition` (12668). Note the inconsistent names, and that the Test type reads as
-  plain `Test` rather than `Xray Test` — never assume Xray's default spelling; look the type
-  up if you need it by name.
+- **Instance facts live in `.claude/qa/environment.json`, not in this file.** Issue-type ids, the
+  coverage configuration, the link type and the test environments are all machine-readable, so
+  they are recorded once and re-checked rather than remembered:
+
+  ```bash
+  node .claude/scripts/verify-environment.mjs
+  ```
+
+  Run it with the pre-sprint drift check. It exits non-zero when an admin has changed something
+  underneath the tooling — most importantly the coverage settings, where a change makes every link
+  the agent creates correct and worthless at the same time. The values quoted below are the
+  recorded ones; if they and the file disagree, the file is right and this text is stale.
+- Xray issue types in EC: `Test` (12531), `Test Set` (12669), `Test Plan` (12597),
+  `Test execution` (12598), `XRay Precondition` (12668). Note the inconsistent names, and that the
+  Test type reads as plain `Test` rather than `Xray Test` — never assume Xray's default spelling;
+  look the type up if you need it by name.
 - Requirement traceability link type: `Test` (id `10500`) — outward `tests`, inward `is tested by`.
   **The Test goes in the `inwardIssue` slot and the Story in `outwardIssue`.** It reads
   "Test *tests* Story" on the Test, and "Story *is tested by* Test" on the Story.
@@ -61,6 +72,13 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
 1. **Dry-run by default.** Never create anything in Jira or Xray until the user has seen the
    full proposed set and explicitly approved it. Writing the plan file is not a Jira write and
    needs no approval; running `xray-push.mjs` without `--dry-run` does.
+
+   A `PreToolUse` hook enforces this rather than trusting you to remember it: an unapproved push
+   is blocked before it runs. Once the user has seen the dry run and said go, carry their approval
+   in the command itself — `XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs <plan>` — so
+   the approval is scoped to one invocation and visible in the transcript. **Never set that
+   variable on your own initiative.** It stands for a person's decision; setting it yourself is
+   forging one, and the hook existing is not permission to satisfy it.
 2. **Never invent acceptance criteria.** Every test must trace to something actually in the
    ticket. If a behaviour clearly needs coverage but no AC states it, propose it in a separate
    "Coverage gaps" section for the user to decide on — do not silently add it as a test.
@@ -71,16 +89,38 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
 ## Workflow
 
 ### 0. Check the plan still matches its ticket
-If a plan for this feature already exists, confirm its spec ticket has not been repurposed before
-touching anything:
+If a plan for this feature already exists, confirm its spec ticket still says what the tests assume
+before touching anything:
 
 ```bash
-node .claude/scripts/spec-drift.mjs <FEATURE>
+node .claude/scripts/verify-environment.mjs      # has the instance moved under us?
+node .claude/scripts/spec-drift.mjs <FEATURE>    # has the spec?
 ```
 
-A mismatch means re-point `source.key`, refresh `source.summary`, retitle the pushed tests (their
-summaries carry the spec title as a prefix) and re-check every AC reference — AC numbering rarely
-survives a spec rewrite. Test ids stay as they are.
+Two different failures, and the second is the common one:
+
+- **Repurposed** — the summary changed, so the ticket is now about something else. Re-point
+  `source.key`, refresh `source.summary`, and retitle the pushed tests: their summaries carry the
+  spec title as a prefix.
+- **Criteria rewritten** — the title is unchanged and `source.acDigest` no longer matches. Re-read
+  the whole AC section and re-check every `ac` reference in the plan; AC numbering rarely survives
+  a rewrite, so a test can end up citing a criterion that now says something different.
+
+Test ids stay as they are in both cases — they are feature-scoped and survive a ticket renumber.
+
+Without `JIRA_EMAIL` / `JIRA_API_TOKEN` the script cannot fetch the live spec, so resolve it over
+MCP and compare the digest yourself:
+
+```bash
+node .claude/scripts/spec-drift.mjs --digest      # description on stdin, digest on stdout
+```
+
+After reviewing a changed spec — and when writing a new plan — record the digest so the next sprint
+has something to compare against:
+
+```bash
+node .claude/scripts/spec-drift.mjs <FEATURE> --record   # from stdin, or from Jira if authed
+```
 
 ### 1. Read the source
 Fetch the ticket with `getJiraIssue` (`responseContentFormat: "markdown"`). Read the whole
@@ -213,11 +253,19 @@ chat:
 - **Clarifications needed** — untestable or contradictory ACs.
 - the exact command to apply it.
 
+Record the digest of the criteria you wrote the plan against, so the next sprint can tell whether
+they moved:
+
+```bash
+node .claude/scripts/spec-drift.mjs <FEATURE> --record   # pipe the description in over MCP
+```
+
 Then verify your own plan mechanically before asking for approval:
 ```bash
-node .claude/scripts/xray-push.mjs .claude/qa/plans/<TICKET>.json --dry-run
+node .claude/scripts/xray-push.mjs .claude/qa/plans/<FEATURE>.json --dry-run
 ```
-This validates the schema and prints what would be created. Fix anything it rejects.
+This validates the plan against `plan.schema.json` — really, not by restating its rules — and
+prints what would be created, including suite and link drift. Fix anything it rejects.
 
 ### 5b. On a fresh clone, recover the ledger first
 Each pushed Test carries its plan id as a Jira label, so identity survives a missing
@@ -251,9 +299,12 @@ So a revised spec edits the existing tickets. Never renumber a plan id — it is
 makes this work.
 
 Flags: `--only ID,ID` for a subset, `--force` to rewrite unchanged tests, `--deprecate ID,ID` to
-retire a test (removed from every suite and flagged for a `deprecated` label; the issue survives,
-so its execution history survives), `--test-plan KEY` to also add these tests to an existing Xray
-Test Plan.
+retire a test (removed from every Test Set **and every Xray Test Plan**, and flagged for a
+`deprecated` label; the issue survives, so its execution history survives), `--test-plan KEY` to
+also add these tests to an existing Xray Test Plan.
+
+Retiring has to clear both. Dropping a test from the suites alone leaves it sitting in every open
+sprint's Test Plan, unexecuted, holding that sprint's completion figure down.
 
 Do not pass `--test-plan` on your own initiative. Sprint scope includes regression for blocks this
 ticket never touched, so it is the user's call, not something derivable from the plan file. Offer
@@ -266,16 +317,29 @@ The Xray API cannot write Jira fields or issue links, so the script emits
 
 - `links` → `createIssueLink`, type `Test`, **`inwardIssue` = the Test, `outwardIssue` = the
   spec ticket**. Get this backwards and Jira still shows a link, but Xray counts no coverage
-  at all — the failure is silent. After linking, verify with the coverage query below rather
-  than trusting the Jira UI.
+  at all — the failure is silent. The script reads existing links back on every run and only
+  emits the ones actually missing, so this list is short and safe to work through in full.
+- `relink` → a link that exists but points the wrong way. **Do not create a second link.** The MCP
+  tools cannot delete one, so tell the user which links to remove in the Jira UI, then re-run the
+  push to emit the correct ones.
 - `edits` → `editJiraIssue` with the given summary / labels / description.
 - `deprecate` → `editJiraIssue` adding the `deprecated` label.
 - `review` → do **not** act automatically. Tell the user which tests dropped out of the plan and
   ask whether to deprecate them or restore the plan entry.
 
-Finally, post or update the QA scope comment, then report the Test keys, the Test Set keys and
-the links. Verify counts against the API before reporting them — never restate the script's
-output as proof.
+### 8. Prove the coverage actually registered
+
+```bash
+node .claude/scripts/qa-coverage.mjs --plan .claude/qa/plans/<FEATURE>.json
+```
+
+This asks Xray what it counts, not what Jira draws, and exits non-zero if any pushed test is not
+counted toward the spec ticket. Run it after applying the links, every time. It is the only step
+that can tell the difference between "linked" and "covered", and the gap between those two is
+what once left this project with 40 tests and no coverage at all.
+
+Then post or update the QA scope comment, and report the Test keys, the Test Set keys and the
+coverage figure this command printed. Never restate the push script's output as proof.
 
 ## Linking policy
 
@@ -308,10 +372,12 @@ A `CoverableIssue` exposes `tests`, never `testSets` — which is the hard reaso
 linked. Check a story's real coverage rather than counting links in the UI:
 
 ```bash
-.claude/scripts/xray-api.sh gql - <<'GQL' | jq -c '.data.getCoverableIssue | {coverage: .status.name, tests: .tests.total}'
-{ getCoverableIssue(issueId: "<issueId>") { status { name } tests(limit: 100) { total } } }
-GQL
+node .claude/scripts/qa-coverage.mjs EC-14 EC-18
 ```
+
+`getCoverableIssues` is also reachable directly through `xray-api.sh gql` if you need a field the
+script does not print, but prefer the script: a check that lives in a document gets skipped, which
+is precisely how the reversed links survived long enough to zero the project's coverage.
 
 **Make the ticket self-explanatory for QA.** After pushing, post one comment on the spec ticket
 so a tester knows what to run without reading this file:
@@ -324,10 +390,14 @@ Tests covering this change (see linked issues):
   EC-105  UPDATE  Logo count 5–7 → 4–8 (step 2)
 
 Full regression before sign-off — 30 tests:
-  project = EC AND issuetype = "Xray Test" AND labels = brands-carousel
+  project = EC AND issuetype = Test AND labels = brand-carousel
 
 Suites updated: Regression +2
 ```
+
+The issue type is `Test`, not `Xray Test` — see the environment facts above. Take the label from
+the plan rather than typing it: this JQL is pasted into a ticket and run by someone who will not
+debug it, so a wrong type or a mistyped label reads as "no tests exist".
 
 Include the comment text in the approval preview; it is a write to a live ticket like any other.
 
@@ -346,11 +416,15 @@ Include the comment text in the approval preview; it is a write to a live ticket
   repeating it in the summary is noise. Freeze the prefix at creation: if the spec ticket is
   later retitled, do not silently rewrite existing test summaries.
 - Labels: the block or feature name, plus dimension tags (`a11y`, `rtl`, `mobile`, `desktop`,
-  `authoring`, `perf`). The script adds the plan id, the suite labels and the source key
-  automatically. The plan id label is the test's identity in Jira — never remove or edit one by
-  hand, and never give two issues the same one.
+  `authoring`, `functional`, `visual`, `i18n`). No `perf` — performance is out of scope, see the
+  category table. The script adds the plan id, the suite labels and the source key automatically.
+  The plan id label is the test's identity in Jira — never remove or edit one by hand, and never
+  give two issues the same one.
 - Test Repository folder: `/<feature area>/<block name>` via `folder` on the plan or a case.
 - Set `assignee` on the plan to an Atlassian accountId so created Tests are owned rather than
-  landing unassigned. Robert Balan is `712020:543dd2f2-c9ed-422b-822d-d75634813a18`.
+  landing unassigned. Look the person up with `lookupJiraAccountId` and ask whose name should be on
+  the tests — do not default to whoever wrote the last plan. An accountId is personal data and this
+  repo is public, so keep it in the plan file if the team is comfortable with that, and otherwise
+  leave `assignee` out and assign in Jira.
 - `projectId` on the plan (EC = `11590`) lets the script pre-create the Test Repository folder;
   without it every created test warns and lands at the repository root.
