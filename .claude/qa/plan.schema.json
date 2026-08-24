@@ -16,15 +16,26 @@
     "source": {
       "type": "object",
       "description": "The ticket these tests were derived from.",
+      "additionalProperties": false,
       "properties": {
         "key": {
           "type": "string"
         },
         "summary": {
-          "type": "string"
+          "type": "string",
+          "description": "The ticket's summary when the plan was written. spec-drift.mjs compares it against the live one to catch a repurposed ticket."
         },
         "url": {
           "type": "string"
+        },
+        "acDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{16}$",
+          "description": "Digest of the ticket's acceptance-criteria section when the plan was written, written by spec-drift.mjs --record. Catches the common case a summary comparison cannot: same title, rewritten criteria."
+        },
+        "acCheckedOn": {
+          "type": "string",
+          "description": "ISO date the digest was recorded, so an unreviewed plan is visible as such."
         }
       },
       "required": [
@@ -72,7 +83,7 @@
           },
           "summary": {
             "type": "string",
-            "description": "Jira summary: \"[TICKET] AC-n \u2014 assertion\"."
+            "description": "Jira summary. The format is defined once, in the Conventions section of .claude/agents/qa-xray.md \u2014 do not restate it here, because two statements of it drift apart."
           },
           "ac": {
             "type": "array",
