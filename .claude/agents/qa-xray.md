@@ -18,7 +18,10 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
   plain `Test` rather than `Xray Test` — never assume Xray's default spelling; look the type
   up if you need it by name.
 - Requirement traceability link type: `Test` (id `10500`) — outward `tests`, inward `is tested by`.
-  The Test issue is the **outward** side: Test *tests* Story.
+  **The Test goes in the `inwardIssue` slot and the Story in `outwardIssue`.** It reads
+  "Test *tests* Story" on the Test, and "Story *is tested by* Test" on the Story.
+  This was backwards here until 2026-08-24 and produced zero Xray coverage across the whole
+  project while looking correct in the Jira UI — see the coverage note below.
 - Xray is **Xray Cloud**: test steps and test type live behind the Xray GraphQL API, not in
   Jira fields. Never try to set steps through the Jira MCP tools — they will silently do nothing.
 - **This repo is not the site under test.** `robert-balan/adobe-ema-test` is an aem-boilerplate
@@ -242,8 +245,10 @@ so its execution history survives).
 The Xray API cannot write Jira fields or issue links, so the script emits
 `<TICKET>.jira-actions.json`. Work through it with the MCP tools:
 
-- `links` → `createIssueLink`, type `Test`, `inwardIssue` = the spec ticket,
-  `outwardIssue` = the Test. Verified direction: the spec then reads *is tested by*.
+- `links` → `createIssueLink`, type `Test`, **`inwardIssue` = the Test, `outwardIssue` = the
+  spec ticket**. Get this backwards and Jira still shows a link, but Xray counts no coverage
+  at all — the failure is silent. After linking, verify with the coverage query below rather
+  than trusting the Jira UI.
 - `edits` → `editJiraIssue` with the given summary / labels / description.
 - `deprecate` → `editJiraIssue` adding the `deprecated` label.
 - `review` → do **not** act automatically. Tell the user which tests dropped out of the plan and
@@ -258,7 +263,7 @@ output as proof.
 Links answer "which tests verify this ticket's requirements?". Suites and labels answer "what
 should QA run?". Keep the two separate — conflating them makes coverage reports meaningless.
 
-**Link to the spec ticket** (link type `Test`, outwardIssue = the Test, inwardIssue = the spec):
+**Link to the spec ticket** (link type `Test`, `inwardIssue` = the Test, `outwardIssue` = the spec):
 - every **new** Test created for that ticket
 - every **existing** Test whose steps this ticket changed — link the whole Test issue even if
   only one step changed; a step is not a linkable entity. Keep its links to earlier tickets, so
@@ -269,6 +274,25 @@ should QA run?". Keep the two separate — conflating them makes coverage report
   ticket that introduced them.
 - **Test Sets. Never link a Test Set to a spec ticket.** Suites are execution scope, not
   requirement coverage.
+
+**Coverage depends on a project setting, not just the link.** Xray computes requirement coverage
+from Test→Story links only, and only when EC's Test Coverage settings name the link type. Verified
+2026-08-24:
+
+| Setting | Value |
+|---|---|
+| Coverable issue types | `Story` (11809) only |
+| Issue link type | `Test` (10500) |
+| Direction | `INWARD` |
+
+A `CoverableIssue` exposes `tests`, never `testSets` — which is the hard reason Test Sets are not
+linked. Check a story's real coverage rather than counting links in the UI:
+
+```bash
+.claude/scripts/xray-api.sh gql - <<'GQL' | jq -c '.data.getCoverableIssue | {coverage: .status.name, tests: .tests.total}'
+{ getCoverableIssue(issueId: "<issueId>") { status { name } tests(limit: 100) { total } } }
+GQL
+```
 
 **Make the ticket self-explanatory for QA.** After pushing, post one comment on the spec ticket
 so a tester knows what to run without reading this file:
