@@ -4,10 +4,10 @@
  *
  *   node .claude/scripts/xray-push.mjs <plan.json> [options]
  *
- *     --dry-run            show what would change, including suite drift; write nothing
+ *     --dry-run            show what would change, including suite and link drift; write nothing
  *     --only ID,ID         restrict to these plan test ids
  *     --force              rewrite matching tests even when nothing differs
- *     --deprecate ID,ID    retire tests: drop from every suite, flag for a `deprecated` label
+ *     --deprecate ID,ID    retire tests: drop from every suite and Test Plan, flag for a label
  *     --adopt              rebuild <plan>.result.json from the Jira labels and exit; writes
  *                          nothing to Xray. Use on a fresh clone, or to repair a lost cache.
  *     --test-plan KEY      also add this plan's tests to an existing Xray Test Plan (e.g. EC-59)
@@ -23,27 +23,38 @@
  * than obeyed: the run adopts the labelled issue instead of creating a second one, and refuses
  * to act on a contradiction. Nothing is ever deleted.
  *
- * Suite membership is checked in both directions before anything is written: tests the plan claims
- * but the Test Set has lost (a stray removal in the Xray UI leaves no trace, since membership is
- * not a Jira link) and tests sitting in a set the plan no longer claims. Missing ones are restored
- * by the run itself; unclaimed ones are only reported, never removed.
+ * Three kinds of state are checked in both directions before anything is written, because each
+ * can drift without leaving a trace anywhere a person would look:
+ *
+ *   steps, summary, labels, description   compared against the live Test
+ *   suite membership                      lives in Xray, so a removal in its UI is invisible
+ *   the requirement link                  correct and backwards render identically in Jira, and
+ *                                         backwards yields no coverage at all
  *
  * Xray owns test steps, test type and suite membership — this script writes those directly.
- * Jira owns summary, description, labels and issue links, which the Xray API cannot touch, so
- * those are emitted to <plan>.jira-actions.json for the qa-xray agent to apply over MCP.
+ * Jira owns summary, description, labels and issue links, which the Xray API cannot write (it
+ * can read them, which is why they can be reconciled), so those are emitted to
+ * <plan>.jira-actions.json for the qa-xray agent to apply over MCP.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { createClient } from './lib/gql.mjs';
+import { validate } from './lib/schema.mjs';
+import {
+  SUITES, LINK_TYPE, stepsOf, labelsFor, describeTest,
+  resolveIdentity, diffTest, linkState, driftFor,
+} from './lib/reconcile.mjs';
 
+const HERE = dirname(fileURLToPath(import.meta.url));
 const BASE = process.env.XRAY_BASE_URL || 'https://xray.cloud.getxray.app';
-const SUITES = ['sanity', 'regression', 'e2e'];
 
 // Suites are project-wide and accumulate across tickets, so Test Set ids live in one shared
 // registry rather than per-plan. A plan that names its own Test Sets gets ticket-scoped ones
 // instead — the registry is keyed by summary, so a new name simply means a new set.
 const DEFAULT_SET_NAMES = { sanity: 'Sanity testing', regression: 'Regression testing', e2e: 'E2E testing' };
-const REGISTRY_PATH = join(dirname(fileURLToPath(import.meta.url)), '..', 'qa', 'testsets.json');
+const REGISTRY_PATH = join(HERE, '..', 'qa', 'testsets.json');
+const SCHEMA_PATH = join(HERE, '..', 'qa', 'plan.schema.json');
 
 const args = process.argv.slice(2);
 const planPath = args.find((a) => !a.startsWith('--') && a.endsWith('.json'));
@@ -67,8 +78,8 @@ if (testPlanKey && !/^[A-Z][A-Z0-9]*-\d+$/.test(testPlanKey)) fail(`--test-plan 
 if (!existsSync(planPath)) fail(`no such plan: ${planPath}`);
 
 const plan = JSON.parse(readFileSync(planPath, 'utf8'));
-const resultPath = planPath.replace(/\.json$/, '') + '.result.json';
-const actionsPath = planPath.replace(/\.json$/, '') + '.jira-actions.json';
+const resultPath = `${planPath.replace(/\.json$/, '')}.result.json`;
+const actionsPath = `${planPath.replace(/\.json$/, '')}.jira-actions.json`;
 const prior = existsSync(resultPath)
   ? JSON.parse(readFileSync(resultPath, 'utf8')) : { tests: {}, testSets: {} };
 const registry = existsSync(REGISTRY_PATH) ? JSON.parse(readFileSync(REGISTRY_PATH, 'utf8')) : {};
@@ -76,68 +87,55 @@ const setNameFor = (suite) => plan.testSets?.[suite] || DEFAULT_SET_NAMES[suite]
 
 /* ---------------------------------------------------------------- validation */
 
-const problems = [];
-if (!plan.project) problems.push('plan.project is required');
-if (!Array.isArray(plan.tests) || plan.tests.length === 0) problems.push('plan.tests must be a non-empty array');
+// The schema is the contract, so it is enforced rather than described. Semantic rules the schema
+// cannot express are checked after it.
+const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'));
+const problems = validate(plan, schema);
+
 const seen = new Set();
-(plan.tests || []).forEach((t, i) => {
-  const at = `tests[${i}]${t.id ? ` (${t.id})` : ''}`;
-  if (!t.id) problems.push(`${at}: id is required`);
-  if (t.id && seen.has(t.id)) problems.push(`${at}: duplicate id`);
-  if (t.id) seen.add(t.id);
-  if (!t.summary) problems.push(`${at}: summary is required`);
-  if (!Array.isArray(t.steps) || t.steps.length === 0) problems.push(`${at}: at least one step is required`);
-  (t.steps || []).forEach((s, j) => {
-    if (!s.action) problems.push(`${at}: steps[${j}].action is required`);
-    if (!s.result) problems.push(`${at}: steps[${j}].result is required`);
-  });
-  const bad = (t.suites || []).filter((s) => !SUITES.includes(s));
-  if (bad.length) problems.push(`${at}: unknown suite(s) ${bad.join(', ')} — expected ${SUITES.join(' | ')}`);
-  if (!(t.suites || []).length) problems.push(`${at}: must belong to at least one suite`);
-  if (!(t.ac || []).length) problems.push(`${at}: must cite at least one acceptance criterion in "ac"`);
-});
-if (problems.length) fail(`plan is invalid:\n  - ${problems.join('\n  - ')}`);
+for (const t of plan.tests || []) {
+  if (!t.id) continue;
+  if (seen.has(t.id)) problems.push(`tests: duplicate id "${t.id}" — ids are the idempotency key and must be unique`);
+  seen.add(t.id);
+  if (plan.feature && !t.id.startsWith(`${plan.feature}-TC-`)) {
+    problems.push(`tests (${t.id}): does not start with the plan's feature slug "${plan.feature}-TC-"`);
+  }
+}
+if (problems.length) fail(`plan is invalid (checked against ${SCHEMA_PATH}):\n  - ${problems.join('\n  - ')}`);
 
 /* ------------------------------------------------------------------ graphql */
 
-let token;
-async function auth() {
-  if (token) return token;
-  const { XRAY_CLIENT_ID: client_id, XRAY_CLIENT_SECRET: client_secret } = process.env;
-  if (!client_id || !client_secret) fail('XRAY_CLIENT_ID / XRAY_CLIENT_SECRET are not set (see .claude/qa/README.md)');
-  const res = await fetch(`${BASE}/api/v2/authenticate`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ client_id, client_secret }),
-  });
-  const body = await res.text();
-  if (!res.ok) fail(`authenticate failed (HTTP ${res.status}): ${body}`);
-  token = JSON.parse(body); // a bare JSON string holding the JWT
-  return token;
-}
-
-// tolerant: return null on a GraphQL error instead of aborting. Used where failure is benign
-// (e.g. the Test Repository folder already exists from an earlier push).
-async function gql(query, variables, { tolerant = false } = {}) {
-  const res = await fetch(`${BASE}/api/v2/graphql`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${await auth()}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables }),
-  });
-  const body = await res.text();
-  if (!res.ok) { if (tolerant) return null; fail(`graphql HTTP ${res.status}: ${body}`); }
-  const json = JSON.parse(body);
-  if (json.errors?.length) { if (tolerant) return null; fail(`graphql errors: ${JSON.stringify(json.errors)}`); }
-  return json.data;
-}
+const client = createClient({
+  baseUrl: BASE,
+  clientId: process.env.XRAY_CLIENT_ID,
+  clientSecret: process.env.XRAY_CLIENT_SECRET,
+  onRetry: ({ label, attempt, of, delay, reason }) => {
+    console.error(`retry    ${label} (${attempt}/${of}) in ${delay}ms — ${reason.slice(0, 120)}`);
+  },
+});
+const gql = async (...a) => {
+  try {
+    return await client.gql(...a);
+  } catch (err) {
+    return fail(err.message);
+  }
+};
+// Used where a throw must be caught rather than exit the process (the step rewrite).
+const gqlOrThrow = client.gql;
 
 const Q = {
   getTests: `query GetTests($issueIds: [String]) {
     getTests(issueIds: $issueIds, limit: 100) {
-      results { issueId testType { name } steps { id action data result } jira(fields: ["key","summary","labels","description"]) }
+      total
+      results { issueId testType { name } steps { id action data result }
+                jira(fields: ["key","summary","labels","description","issuelinks"]) }
     } }`,
   findByLabel: `query FindByLabel($jql: String!, $start: Int, $limit: Int!) {
     getTests(jql: $jql, start: $start, limit: $limit) {
       total results { issueId jira(fields: ["key","labels"]) } } }`,
+  testPlansOf: `query TestPlansOf($issueIds: [String]) {
+    getTests(issueIds: $issueIds, limit: 100) {
+      results { issueId testPlans(limit: 100) { total results { issueId jira(fields: ["key"]) } } } } }`,
   createFolder: `mutation CreateFolder($projectId: String, $path: String!) {
     createFolder(projectId: $projectId, path: $path) { folder { path } warnings } }`,
   createTest: `mutation CreateTest($steps: [CreateStepInput], $folder: String, $jira: JSON!) {
@@ -161,45 +159,14 @@ const Q = {
       results { issueId jira(fields: ["key","summary"]) } } }`,
   addToPlan: `mutation AddToPlan($issueId: String!, $testIssueIds: [String]!) {
     addTestsToTestPlan(issueId: $issueId, testIssueIds: $testIssueIds) { addedTests warning } }`,
+  removeFromPlan: `mutation RemoveFromPlan($issueId: String!, $testIssueIds: [String]!) {
+    removeTestsFromTestPlan(issueId: $issueId, testIssueIds: $testIssueIds) }`,
 };
 
-/* ------------------------------------------------------------------ payloads */
-
-// Preconditions have no structured home on a Manual test, so they lead the description.
-function description(t) {
-  const parts = [];
-  if (t.precondition) parts.push(`*Preconditions:* ${t.precondition}`);
-  if (t.ac?.length) parts.push(`*Covers:* ${t.ac.join(', ')}`);
-  if (plan.source?.key) parts.push(`*Source:* ${plan.source.key}${plan.source.summary ? ` — ${plan.source.summary}` : ''}`);
-  if (t.notes) parts.push(t.notes);
-  return parts.join('\n\n');
-}
-
-// Jira rejects labels containing whitespace.
-// The plan id leads. It is the test's identity, so publishing it to Jira means Xray carries the
-// id -> issue mapping too, and result.json becomes a cache rather than the only copy of it.
-const labelsFor = (t) => [...new Set([t.id, ...(t.suites || []), ...(t.labels || []), plan.source?.key].filter(Boolean))]
-  .map((l) => String(l).replace(/\s+/g, '-')).sort();
-
-const stepsOf = (t) => t.steps.map((s) => ({ action: s.action, data: s.data || '', result: s.result }));
-const sameSteps = (a, b) => JSON.stringify(a.map((s) => [s.action, s.data || '', s.result]))
-                         === JSON.stringify(b.map((s) => [s.action, s.data || '', s.result]));
-
+const stepInput = (s) => ({ action: s.action, data: s.data || undefined, result: s.result });
 const scoped = plan.tests.filter((t) => !only || only.includes(t.id));
 
 /* -------------------------------------------------------- identity by label */
-
-// Every pushed Test carries its plan id as a Jira label, so Xray holds the id -> issue mapping
-// independently of result.json. Resolve identity from Jira first and treat the file as a cache:
-//
-//   adopted   — nothing cached, but Jira has the label. Reuse that issue rather than creating a
-//               second one. This is what makes a fresh clone, or a colleague's checkout that
-//               predates your last push, safe to push from.
-//   mismatch  — cache and Jira name different issues for one plan id.
-//   duplicate — two issues claim one plan id.
-//
-// The last two are refused rather than guessed at: either way, picking wrong edits the steps of
-// a Test somebody else's execution history hangs off.
 
 async function findByPlanIds(ids) {
   const found = new Map();
@@ -208,7 +175,7 @@ async function findByPlanIds(ids) {
     const jql = `project = ${plan.project} AND labels in (${batch.map((id) => `'${id}'`).join(', ')})`;
     let start = 0;
     for (;;) {
-      const d = await gql(Q.findByLabel, { jql, start, limit: 100 });
+      const d = await gql(Q.findByLabel, { jql, start, limit: 100 }, { label: 'findByLabel' });
       const results = d?.getTests?.results || [];
       for (const r of results) {
         // An issue carries many labels; only the plan ids we asked about are identities.
@@ -226,22 +193,9 @@ async function findByPlanIds(ids) {
 }
 
 const labelled = await findByPlanIds(scoped.map((t) => t.id));
-const record = new Map();                      // plan id -> the issue this run will act on
-const ADOPTED = [], MISMATCH = [], DUPLICATE = [];
-for (const t of scoped) {
-  const rec = prior.tests[t.id];
-  const hits = labelled.get(t.id) || [];
-  if (hits.length > 1) { DUPLICATE.push({ id: t.id, keys: hits.map((h) => h.key) }); continue; }
-  const hit = hits[0];
-  if (rec?.issueId && hit && hit.issueId !== rec.issueId) {
-    MISMATCH.push({ id: t.id, cached: rec.key, live: hit.key });
-  } else if (rec?.issueId) {
-    record.set(t.id, rec);
-  } else if (hit) {
-    ADOPTED.push({ id: t.id, key: hit.key });
-    record.set(t.id, { issueId: hit.issueId, key: hit.key, suites: t.suites, ac: t.ac });
-  }
-}
+const {
+  record, adopted: ADOPTED, mismatch: MISMATCH, duplicate: DUPLICATE,
+} = resolveIdentity({ scoped, prior, labelled });
 const conflicted = new Set([...MISMATCH, ...DUPLICATE].map((c) => c.id));
 const recordFor = (id) => record.get(id) || prior.tests[id];
 
@@ -271,7 +225,7 @@ if (adopt) {
   }
   if (dryRun) console.log(`\n${resultPath} not written (--dry-run).`);
   else {
-    writeFileSync(resultPath, JSON.stringify({ ...prior, tests, testSets: sets }, null, 2) + '\n');
+    writeFileSync(resultPath, `${JSON.stringify({ ...prior, tests, testSets: sets }, null, 2)}\n`);
     console.log(`\nRecovered ${record.size}/${scoped.length} plan id(s) into ${resultPath}. Nothing was written to Xray.`);
   }
   process.exit(conflicted.size ? 1 : 0);
@@ -279,50 +233,78 @@ if (adopt) {
 
 /* ---------------------------------------------------------------- reconcile */
 
-const known = [...record.values()].filter((v) => v.issueId);
-const live = new Map();
-if (known.length) {
-  const data = await gql(Q.getTests, { issueIds: known.map((v) => v.issueId) });
-  for (const r of data.getTests.results || []) live.set(r.issueId, r);
+// Batched at the query's own limit. Unbatched, the 101st test came back absent, was classified as
+// deleted, and was recreated as a second issue carrying the same plan id — which the next run then
+// refused to touch. A short read now stops the run instead of being read as an absence.
+async function fetchLive(issueIds) {
+  const live = new Map();
+  for (let i = 0; i < issueIds.length; i += 100) {
+    const batch = issueIds.slice(i, i + 100);
+    const d = await gql(Q.getTests, { issueIds: batch }, { label: 'getTests' });
+    const page = d?.getTests;
+    const results = page?.results || [];
+    if ((page?.total ?? results.length) > results.length) {
+      fail(`getTests returned ${results.length} of ${page.total} for a batch of ${batch.length}`
+         + ' — refusing to treat the remainder as deleted. This is a paging bug; do not re-run with --force.');
+    }
+    for (const r of results) live.set(r.issueId, r);
+  }
+  return live;
 }
 
-const CREATE = [], UPDATE = [], UNCHANGED = [], GONE = [];
+const known = [...record.values()].filter((v) => v.issueId);
+const live = known.length ? await fetchLive(known.map((v) => v.issueId)) : new Map();
+
+const CREATE = []; const UPDATE = []; const UNCHANGED = []; const GONE = [];
 for (const t of scoped) {
   if (conflicted.has(t.id)) continue;          // identity is unresolved; touch nothing
   const rec = record.get(t.id);
   if (!rec) { CREATE.push(t); continue; }
   const cur = live.get(rec.issueId);
   if (!cur) { GONE.push({ t, rec }); CREATE.push(t); continue; }   // deleted outside this tool
-  const diffs = [];
-  if (!sameSteps(stepsOf(t), cur.steps)) diffs.push('steps');
-  if (cur.jira.summary !== t.summary) diffs.push('summary');
-  if (JSON.stringify([...(cur.jira.labels || [])].sort()) !== JSON.stringify(labelsFor(t))) diffs.push('labels');
+  const diffs = diffTest({ plan, t, cur });
   if (diffs.length || force) UPDATE.push({ t, rec, cur, diffs: diffs.length ? diffs : ['forced'] });
-  else UNCHANGED.push({ t, rec });
+  else UNCHANGED.push({ t, rec, cur });
 }
 // Tests recorded from an earlier run whose plan entry has since been removed.
 const ORPHANS = Object.entries(prior.tests)
   .filter(([id]) => !plan.tests.some((t) => t.id === id))
   .map(([id, rec]) => ({ id, rec }));
 
-/* -------------------------------------------------------------- suite drift */
+/* ---------------------------------------------------------------- link state */
 
-// Suite membership lives in Xray, not in a Jira link, so a stray removal in the Xray UI leaves no
-// trace. Compare each set's real membership against the plan before touching anything, in both
-// directions. Suites are project-wide and accumulate across tickets, so a set legitimately holds
-// tests from other plans — drift is only meaningful for the tests THIS plan owns:
-//   missing   — the plan claims the suite, the set doesn't have the test (a re-run restores it)
-//   unclaimed — the set has a test this plan owns, but the plan no longer claims that suite
-// Anything the plan has never heard of belongs to another ticket and is counted, never touched.
+// The requirement link is the only thing that produces Xray coverage, and it used to be emitted
+// only when a test was created or updated — so a run that was interrupted before the agent applied
+// the actions file left tests that existed, were never linked, and were reported "unchanged"
+// forever after. Read it back like everything else, on every run.
+//
+// A backwards link is called out rather than counted or replaced: it looks correct in the Jira UI,
+// contributes no coverage, and the fix is to delete it, which the MCP tools cannot do.
+const LINKS = { missing: [], reversed: [], unknown: [], present: 0 };
+if (plan.source?.key) {
+  for (const t of scoped) {
+    if (conflicted.has(t.id)) continue;
+    const rec = record.get(t.id);
+    const cur = rec && live.get(rec.issueId);
+    if (!cur) { LINKS.missing.push({ id: t.id, key: rec?.key || null, reason: 'new' }); continue; }
+    const state = linkState({ issuelinks: cur.jira?.issuelinks, specKey: plan.source.key });
+    if (state === 'present') LINKS.present += 1;
+    else if (state === 'reversed') LINKS.reversed.push({ id: t.id, key: rec.key });
+    else if (state === 'unknown') LINKS.unknown.push({ id: t.id, key: rec.key });
+    else LINKS.missing.push({ id: t.id, key: rec.key, reason: 'absent in Jira' });
+  }
+}
+
+/* -------------------------------------------------------------- suite drift */
 
 async function setMembers(issueId) {
   const members = new Set();
   let dangling = 0;
   let start = 0;
-  let seen = 0;
+  let seen2 = 0;
   let total = Infinity;
-  while (seen < total) {
-    const d = await gql(Q.getTestSet, { issueId, start, limit: 100 });
+  while (seen2 < total) {
+    const d = await gql(Q.getTestSet, { issueId, start, limit: 100 }, { label: 'getTestSet' });
     const page = d?.getTestSet?.tests;
     const results = page?.results || [];
     if (!page || !results.length) break;
@@ -334,7 +316,7 @@ async function setMembers(issueId) {
       if (r?.issueId) members.add(r.issueId);
       else dangling += 1;
     }
-    seen += results.length;
+    seen2 += results.length;
     start += results.length;
   }
   return { members, dangling };
@@ -352,27 +334,19 @@ for (const suite of SUITES) {
   const name = setNameFor(suite);
   const set = registry[name];
   const d = {
-    name, key: set?.key, desired: desired.length, missing: [], unclaimed: [], foreign: 0,
+    name,
+    key: set?.key,
+    desired: desired.length,
+    missing: [],
+    unclaimed: [],
+    foreign: 0,
     // Tests being created this run have no membership yet by definition — not drift.
     pending: desired.filter((t) => creating.has(t.id)).map((t) => t.id),
   };
   if (set?.issueId) {
     const { members, dangling } = await setMembers(set.issueId);
     d.dangling = dangling;
-    const want = new Set();
-    for (const t of desired) {
-      if (creating.has(t.id)) continue;
-      const rec = recordFor(t.id);
-      if (!rec?.issueId) continue;
-      want.add(rec.issueId);
-      if (!members.has(rec.issueId)) d.missing.push(`${rec.key} (${t.id})`);
-    }
-    for (const issueId of members) {
-      if (want.has(issueId)) continue;
-      const id = ownedByPlan.get(issueId);
-      if (id) d.unclaimed.push(`${recordFor(id).key} (${id})`);
-      else d.foreign += 1;
-    }
+    Object.assign(d, driftFor({ desired, members, creating, recordFor, ownedByPlan }));
   }
   DRIFT[suite] = d;
 }
@@ -383,7 +357,7 @@ for (const suite of SUITES) {
 // before it writes, not after it has created 16 issues.
 let testPlan = null;
 if (testPlanKey) {
-  const d = await gql(Q.findTestPlan, { jql: `key = ${testPlanKey}` });
+  const d = await gql(Q.findTestPlan, { jql: `key = ${testPlanKey}` }, { label: 'findTestPlan' });
   const hit = d?.getTestPlans?.results?.[0];
   if (!hit) fail(`--test-plan ${testPlanKey} is not an Xray Test Plan in this instance`);
   testPlan = { issueId: hit.issueId, key: hit.jira.key, summary: hit.jira.summary };
@@ -409,16 +383,24 @@ function report() {
   for (const { id, key } of ADOPTED) console.log(`  ADOPT     ${key}  ${id} — already in Jira, reusing it instead of creating a duplicate`);
   reportIdentityProblems();
   for (const t of CREATE) console.log(`  NEW       ${t.id}  ${t.summary}`);
-  for (const { t, rec, cur, diffs } of UPDATE) {
+  for (const {
+    t, rec, cur, diffs,
+  } of UPDATE) {
     console.log(`  UPDATE    ${rec.key}  ${t.id}  (${diffs.join(', ')})`);
     if (diffs.includes('summary')) {
       console.log(`      summary:  - ${cur.jira.summary}`);
       console.log(`                + ${t.summary}`);
     }
+    if (diffs.includes('description')) {
+      const a = (cur.jira.description || '').split('\n\n').filter(Boolean);
+      const b = describeTest(plan, t).split('\n\n').filter(Boolean);
+      for (const line of a.filter((x) => !b.includes(x))) console.log(`      desc:     - ${line}`);
+      for (const line of b.filter((x) => !a.includes(x))) console.log(`      desc:     + ${line}`);
+    }
     if (diffs.includes('steps')) {
-      const a = cur.steps, b = stepsOf(t);
-      for (let i = 0; i < Math.max(a.length, b.length); i++) {
-        const x = a[i], y = b[i];
+      const a = cur.steps; const b = stepsOf(t);
+      for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+        const x = a[i]; const y = b[i];
         if (x && y && x.action === y.action && (x.data || '') === (y.data || '') && x.result === y.result) continue;
         if (!x) { console.log(`      step ${i + 1}: + ${y.action} → ${y.result}`); continue; }
         if (!y) { console.log(`      step ${i + 1}: - ${x.action} → ${x.result}`); continue; }
@@ -430,9 +412,10 @@ function report() {
   for (const { id, rec } of ORPHANS) console.log(`  REVIEW    ${rec.key}  ${id} — dropped from the plan; deprecate it or restore the entry`);
   for (const id of deprecate) {
     const rec = recordFor(id);
-    console.log(rec ? `  DEPRECATE ${rec.key}  ${id} — removed from all suites, flagged for a 'deprecated' label`
-                    : `  DEPRECATE ${id} — no record; nothing to do`);
+    console.log(rec ? `  DEPRECATE ${rec.key}  ${id} — removed from all suites and Test Plans, flagged for a 'deprecated' label`
+      : `  DEPRECATE ${id} — no record; nothing to do`);
   }
+
   console.log('');
   console.log('  Test Sets:');
   for (const s of SUITES) {
@@ -452,11 +435,29 @@ function report() {
       console.log(`          DRIFT  missing from the set, will be re-added: ${d.missing.join(', ')}`);
     }
     if (d.unclaimed.length) {
-      console.log(`          DRIFT  in the set but the plan no longer claims this suite — review, never auto-removed:`);
+      console.log('          DRIFT  in the set but the plan no longer claims this suite — review, never auto-removed:');
       console.log(`                 ${d.unclaimed.join(', ')}`);
     }
     if (d.foreign) console.log(`          ${d.foreign} test(s) from other plans — left alone`);
     if (d.dangling) console.log(`          ⚠ ${d.dangling} membership row(s) point at a deleted Test — clean up in the Xray UI`);
+  }
+
+  if (plan.source?.key) {
+    console.log('');
+    console.log(`  Requirement links → ${plan.source.key}:`);
+    const bits = [`${LINKS.present} present`];
+    if (LINKS.missing.length) bits.push(`${LINKS.missing.length} to create`);
+    if (LINKS.reversed.length) bits.push(`${LINKS.reversed.length} BACKWARDS`);
+    if (LINKS.unknown.length) bits.push(`${LINKS.unknown.length} unreadable`);
+    console.log(`      ${bits.join(', ')}`);
+    if (LINKS.missing.length) {
+      console.log(`          ${LINKS.missing.map((l) => l.key || l.id).join(', ')}`);
+    }
+    if (LINKS.reversed.length) {
+      console.log('          ⚠ BACKWARDS — these link the story to the test, which renders correctly in Jira');
+      console.log('            and yields no Xray coverage. Delete each in the Jira UI, then re-run:');
+      console.log(`            ${LINKS.reversed.map((l) => l.key).join(', ')}`);
+    }
   }
 }
 
@@ -472,114 +473,202 @@ if (GONE.length) console.log(`\nnote: ${GONE.map(({ rec }) => rec.key).join(', '
 
 const created = { ...prior.tests };
 for (const [id, rec] of record) created[id] = { ...created[id], ...rec };
-const jiraActions = { source: plan.source?.key || null, project: plan.project, links: [], edits: [], deprecate: [], review: [] };
+const jiraActions = {
+  source: plan.source?.key || null, project: plan.project, links: [], relink: [], edits: [], deprecate: [], review: [],
+};
+const testSets = {};
 
-if (plan.folder && (CREATE.length || UPDATE.length)) {
-  const d = await gql(Q.createFolder,
-    { projectId: String(plan.projectId || ''), path: plan.folder }, { tolerant: true });
-  console.log(d?.createFolder?.folder ? `folder   created ${plan.folder}` : `folder   ${plan.folder} already exists`);
+// The ledger is written even when the run dies part-way. Adoption by label would recover the
+// mapping anyway, but a half-finished run should not also cost the record of what it managed.
+let applyError = null;
+function persist() {
+  writeFileSync(resultPath, `${JSON.stringify({ ...prior, tests: created, testSets }, null, 2)}\n`);
+  writeFileSync(actionsPath, `${JSON.stringify(jiraActions, null, 2)}\n`);
 }
 
-for (const t of CREATE) {
-  const d = await gql(Q.createTest, {
-    steps: stepsOf(t).map((s) => ({ action: s.action, data: s.data || undefined, result: s.result })),
-    folder: t.folder || plan.folder || undefined,
-    jira: { fields: { summary: t.summary, project: { key: plan.project }, labels: labelsFor(t),
-                      ...(plan.assignee ? { assignee: { id: plan.assignee } } : {}),
-                      ...(description(t) ? { description: description(t) } : {}) } },
-  });
-  const { issueId, jira } = d.createTest.test;
-  created[t.id] = { issueId, key: jira.key, suites: t.suites, ac: t.ac };
-  const warn = d.createTest.warnings?.length ? `  ⚠ ${d.createTest.warnings.join('; ')}` : '';
-  console.log(`created  ${t.id} → ${jira.key}${warn}`);
-  if (plan.source?.key) jiraActions.links.push({ test: jira.key, spec: plan.source.key, type: 'Test', reason: 'new' });
+async function restoreSteps(issueId, previous) {
+  if (await client.gql(Q.removeAllSteps, { issueId }, { tolerant: true }) === null) return false;
+  for (const s of previous) {
+    if (await client.gql(Q.addStep, { issueId, step: stepInput(s) }, { tolerant: true }) === null) return false;
+  }
+  return true;
 }
 
-for (const { t, rec, diffs } of UPDATE) {
-  if (diffs.includes('steps') || diffs.includes('forced')) {
-    await gql(Q.removeAllSteps, { issueId: rec.issueId });
-    for (const s of stepsOf(t)) {
-      await gql(Q.addStep, { issueId: rec.issueId, step: { action: s.action, data: s.data || undefined, result: s.result } });
+// Xray has no "replace steps" mutation, so a rewrite is destructive by construction: remove all,
+// then add back one at a time. If an add fails after the remove has landed, the Test is left empty
+// or half-written — so put the previous steps back before surfacing the error.
+async function rewriteSteps({ issueId, key, next, previous }) {
+  await gqlOrThrow(Q.removeAllSteps, { issueId }, { label: `removeAllSteps ${key}` });
+  try {
+    for (const s of next) {
+      await gqlOrThrow(Q.addStep, { issueId, step: stepInput(s) }, { label: `addStep ${key}` });
+    }
+  } catch (err) {
+    const restored = await restoreSteps(issueId, previous);
+    throw new Error(`${key}: step rewrite failed — ${err.message}\n`
+      + (restored
+        ? '            The previous steps were restored; the test is intact. Re-run to retry.'
+        : `            RESTORE ALSO FAILED. ${key} may now have no steps or partial steps.`
+          + ' Fix it in Xray before running again.'));
+  }
+}
+
+try {
+  if (plan.folder && (CREATE.length || UPDATE.length)) {
+    const d = await gqlOrThrow(Q.createFolder,
+      { projectId: String(plan.projectId || ''), path: plan.folder }, { tolerant: true, label: 'createFolder' });
+    console.log(d?.createFolder?.folder ? `folder   created ${plan.folder}` : `folder   ${plan.folder} already exists`);
+  }
+
+  for (const t of CREATE) {
+    const d = await gqlOrThrow(Q.createTest, {
+      steps: stepsOf(t).map(stepInput),
+      folder: t.folder || plan.folder || undefined,
+      jira: {
+        fields: {
+          summary: t.summary,
+          project: { key: plan.project },
+          labels: labelsFor(plan, t),
+          ...(plan.assignee ? { assignee: { id: plan.assignee } } : {}),
+          ...(describeTest(plan, t) ? { description: describeTest(plan, t) } : {}),
+        },
+      },
+    }, { label: `createTest ${t.id}` });
+    const { issueId, jira } = d.createTest.test;
+    created[t.id] = { issueId, key: jira.key, suites: t.suites, ac: t.ac };
+    const warn = d.createTest.warnings?.length ? `  ⚠ ${d.createTest.warnings.join('; ')}` : '';
+    console.log(`created  ${t.id} → ${jira.key}${warn}`);
+  }
+
+  for (const { t, rec, cur, diffs } of UPDATE) {
+    if (diffs.includes('steps') || diffs.includes('forced')) {
+      await rewriteSteps({ issueId: rec.issueId, key: rec.key, next: stepsOf(t), previous: cur.steps || [] });
+    }
+    // Jira-owned fields are always restated; the agent applies them over MCP.
+    jiraActions.edits.push({
+      key: rec.key,
+      planId: t.id,
+      changed: diffs,
+      fields: { summary: t.summary, labels: labelsFor(plan, t), description: describeTest(plan, t) },
+    });
+    created[t.id] = { ...rec, suites: t.suites, ac: t.ac };
+    console.log(`updated  ${t.id} → ${rec.key}  (${diffs.join(', ')})`);
+  }
+
+  // Keep the ledger's view of suites and criteria current even for tests nothing else touched,
+  // so result.json does not quietly describe an older plan.
+  for (const { t, rec } of UNCHANGED) created[t.id] = { ...rec, suites: t.suites, ac: t.ac };
+
+  for (const { id, rec } of ORPHANS) {
+    created[id] = rec;                                   // keep the record; never lose the mapping
+    jiraActions.review.push({ key: rec.key, planId: id, reason: 'no longer present in the plan' });
+  }
+
+  /* ------------------------------------------------------------------ links */
+
+  // Emitted from the reconciled state rather than from what this run happened to touch, so an
+  // unlinked test is picked up on every subsequent run until the link actually exists.
+  for (const l of LINKS.missing) {
+    const key = l.key || created[l.id]?.key;
+    if (key) jiraActions.links.push({ test: key, spec: plan.source.key, type: LINK_TYPE, reason: l.reason });
+  }
+  for (const l of LINKS.reversed) {
+    jiraActions.relink.push({
+      test: l.key,
+      spec: plan.source.key,
+      problem: 'link points story → test; Xray counts no coverage',
+      action: 'delete the existing link in the Jira UI, then re-run this push to emit the correct one',
+    });
+  }
+  for (const l of LINKS.unknown) {
+    jiraActions.links.push({
+      test: l.key, spec: plan.source.key, type: LINK_TYPE, reason: 'could not read existing links — verify before creating',
+    });
+  }
+
+  /* -------------------------------------------------------------- test sets */
+
+  for (const suite of SUITES) {
+    const ids = plan.tests
+      .filter((t) => (t.suites || []).includes(suite) && created[t.id])
+      .map((t) => created[t.id].issueId);
+    if (!ids.length) continue;
+    const summary = setNameFor(suite);
+    if (registry[summary]?.issueId) {
+      const d = await gqlOrThrow(Q.addToSet, { issueId: registry[summary].issueId, testIssueIds: ids }, { label: `addToSet ${suite}` });
+      const { addedTests, warning } = d.addTestsToTestSet;
+      const n = Array.isArray(addedTests) ? addedTests.length : addedTests;
+      console.log(`testset  ${suite}: +${n} → ${registry[summary].key} "${summary}"${warning ? `  ⚠ ${warning}` : ''}`);
+    } else {
+      const d = await gqlOrThrow(Q.createTestSet, {
+        testIssueIds: ids,
+        jira: { fields: { summary, project: { key: plan.project }, labels: [suite] } },
+      }, { label: `createTestSet ${suite}` });
+      const { issueId, jira } = d.createTestSet.testSet;
+      registry[summary] = { issueId, key: jira.key, suite };
+      console.log(`testset  ${suite}: created ${jira.key} "${summary}" with ${ids.length} test(s)`);
+    }
+    testSets[suite] = registry[summary];
+    writeFileSync(REGISTRY_PATH, `${JSON.stringify(registry, null, 2)}\n`);
+  }
+
+  /* --------------------------------------------------------- xray test plan */
+
+  // Membership is additive and idempotent — Xray ignores tests the plan already holds — so a
+  // re-run to pick up newly added cases is safe.
+  if (testPlan) {
+    const ids = scoped
+      .filter((t) => !conflicted.has(t.id) && created[t.id]?.issueId)
+      .map((t) => created[t.id].issueId);
+    if (ids.length) {
+      const d = await gqlOrThrow(Q.addToPlan, { issueId: testPlan.issueId, testIssueIds: ids }, { label: 'addToPlan' });
+      const { addedTests, warning } = d.addTestsToTestPlan;
+      const n = Array.isArray(addedTests) ? addedTests.length : addedTests;
+      console.log(`testplan +${n} → ${testPlan.key} "${testPlan.summary}"${warning ? `  ⚠ ${warning}` : ''}`);
     }
   }
-  // Jira-owned fields are always restated; the agent applies them over MCP.
-  jiraActions.edits.push({ key: rec.key, planId: t.id, changed: diffs,
-    fields: { summary: t.summary, labels: labelsFor(t), description: description(t) } });
-  if (plan.source?.key) jiraActions.links.push({ test: rec.key, spec: plan.source.key, type: 'Test', reason: 'updated by this ticket' });
-  created[t.id] = { ...rec, suites: t.suites, ac: t.ac };
-  console.log(`updated  ${t.id} → ${rec.key}  (${diffs.join(', ')})`);
-}
 
-for (const { id, rec } of ORPHANS) {
-  created[id] = rec;                                   // keep the record; never lose the mapping
-  jiraActions.review.push({ key: rec.key, planId: id, reason: 'no longer present in the plan' });
-}
+  /* ----------------------------------------------------------- deprecation */
 
-/* --------------------------------------------------------------- test sets */
-
-const testSets = {};
-for (const suite of SUITES) {
-  const ids = plan.tests
-    .filter((t) => (t.suites || []).includes(suite) && created[t.id])
-    .map((t) => created[t.id].issueId);
-  if (!ids.length) continue;
-  const summary = setNameFor(suite);
-  if (registry[summary]?.issueId) {
-    const d = await gql(Q.addToSet, { issueId: registry[summary].issueId, testIssueIds: ids });
-    const { addedTests, warning } = d.addTestsToTestSet;
-    const n = Array.isArray(addedTests) ? addedTests.length : addedTests;
-    console.log(`testset  ${suite}: +${n} → ${registry[summary].key} "${summary}"${warning ? `  ⚠ ${warning}` : ''}`);
-  } else {
-    const d = await gql(Q.createTestSet, { testIssueIds: ids,
-      jira: { fields: { summary, project: { key: plan.project }, labels: [suite] } } });
-    const { issueId, jira } = d.createTestSet.testSet;
-    registry[summary] = { issueId, key: jira.key, suite };
-    console.log(`testset  ${suite}: created ${jira.key} "${summary}" with ${ids.length} test(s)`);
+  // Suites answer "what kind of run is this" and Test Plans answer "is this slice tested yet", so
+  // retiring a test means leaving both. Dropping it from the suites alone left it sitting in every
+  // open sprint's Test Plan, unexecuted, holding that sprint's completion figure down.
+  for (const id of deprecate) {
+    const rec = recordFor(id);
+    if (!rec) { console.log(`skip     ${id} — no record to deprecate`); continue; }
+    for (const suite of SUITES) {
+      const set = registry[setNameFor(suite)];
+      if (!set?.issueId) continue;
+      await gqlOrThrow(Q.removeFromSet, { issueId: set.issueId, testIssueIds: [rec.issueId] }, { tolerant: true });
+    }
+    const d = await gqlOrThrow(Q.testPlansOf, { issueIds: [rec.issueId] }, { tolerant: true, label: 'testPlansOf' });
+    const plans = d?.getTests?.results?.[0]?.testPlans?.results || [];
+    for (const tp of plans) {
+      await gqlOrThrow(Q.removeFromPlan, { issueId: tp.issueId, testIssueIds: [rec.issueId] }, { tolerant: true });
+    }
+    const from = plans.length ? ` and ${plans.map((p) => p.jira.key).join(', ')}` : '';
+    jiraActions.deprecate.push({ key: rec.key, planId: id, addLabel: 'deprecated', removedFromTestPlans: plans.map((p) => p.jira.key) });
+    console.log(`deprecated ${id} → ${rec.key}  (removed from all suites${from})`);
   }
-  testSets[suite] = registry[summary];
-  writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2) + '\n');
+} catch (err) {
+  applyError = err;
+} finally {
+  persist();
 }
-
-/* ----------------------------------------------------------- xray test plan */
-
-// Membership is additive and idempotent — Xray ignores tests the plan already holds — so a
-// re-run to pick up newly added cases is safe.
-if (testPlan) {
-  const ids = scoped
-    .filter((t) => !conflicted.has(t.id) && created[t.id]?.issueId)
-    .map((t) => created[t.id].issueId);
-  if (ids.length) {
-    const d = await gql(Q.addToPlan, { issueId: testPlan.issueId, testIssueIds: ids });
-    const { addedTests, warning } = d.addTestsToTestPlan;
-    const n = Array.isArray(addedTests) ? addedTests.length : addedTests;
-    console.log(`testplan +${n} → ${testPlan.key} "${testPlan.summary}"${warning ? `  ⚠ ${warning}` : ''}`);
-  }
-}
-
-/* ------------------------------------------------------------- deprecation */
-
-for (const id of deprecate) {
-  const rec = recordFor(id);
-  if (!rec) { console.log(`skip     ${id} — no record to deprecate`); continue; }
-  for (const suite of SUITES) {
-    const set = registry[setNameFor(suite)];
-    if (!set?.issueId) continue;
-    await gql(Q.removeFromSet, { issueId: set.issueId, testIssueIds: [rec.issueId] }, { tolerant: true });
-  }
-  jiraActions.deprecate.push({ key: rec.key, planId: id, addLabel: 'deprecated' });
-  console.log(`deprecated ${id} → ${rec.key}  (removed from all suites)`);
-}
-
-writeFileSync(resultPath, JSON.stringify({ ...prior, tests: created, testSets }, null, 2) + '\n');
-writeFileSync(actionsPath, JSON.stringify(jiraActions, null, 2) + '\n');
 
 const pending = jiraActions.links.length + jiraActions.edits.length + jiraActions.deprecate.length;
 console.log(`\nRecorded in ${resultPath}`);
-if (pending || jiraActions.review.length) {
+if (pending || jiraActions.review.length || jiraActions.relink.length) {
   console.log(`Jira-side actions written to ${actionsPath}:`);
-  if (jiraActions.links.length)     console.log(`  ${jiraActions.links.length} link(s) to create`);
-  if (jiraActions.edits.length)     console.log(`  ${jiraActions.edits.length} field edit(s) — summary / labels / description`);
+  if (jiraActions.links.length) console.log(`  ${jiraActions.links.length} link(s) to create`);
+  if (jiraActions.relink.length) console.log(`  ${jiraActions.relink.length} backwards link(s) to delete by hand — they produce no coverage`);
+  if (jiraActions.edits.length) console.log(`  ${jiraActions.edits.length} field edit(s) — summary / labels / description`);
   if (jiraActions.deprecate.length) console.log(`  ${jiraActions.deprecate.length} 'deprecated' label(s) to add`);
-  if (jiraActions.review.length)    console.log(`  ${jiraActions.review.length} test(s) needing a human decision`);
+  if (jiraActions.review.length) console.log(`  ${jiraActions.review.length} test(s) needing a human decision`);
   console.log('The Xray API cannot write Jira fields or links — the qa-xray agent applies these over MCP.');
 }
+if (plan.source?.key) {
+  console.log(`\nVerify coverage actually registered:  node .claude/scripts/qa-coverage.mjs ${plan.source.key}`);
+}
+
+if (applyError) fail(`${applyError.message}\n            Everything completed before this point is recorded above.`);
