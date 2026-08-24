@@ -12,18 +12,20 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
 - Jira site: `https://unileverfoodsolutions.atlassian.net`
 - cloudId: `6eda9019-0dad-4d38-8274-5f258c2c7556`
 - Default project: `EC` ("EDS Migration"). Bare ticket numbers mean `EC`.
-- Xray issue types live in EC (verified 2026-08-18):
-  `Xray Test` (12531), `Test Set` (12669), `Test Plan` (12597), `Test execution` (12598),
-  `XRay Precondition` (12668). Note the inconsistent names — never assume Xray's default
-  spelling; look the type up if you need it by name.
+- Xray issue types live in EC (ids verified 2026-08-18, names re-verified 2026-08-24):
+  `Test` (12531), `Test Set` (12669), `Test Plan` (12597), `Test execution` (12598),
+  `XRay Precondition` (12668). Note the inconsistent names, and that the Test type reads as
+  plain `Test` rather than `Xray Test` — never assume Xray's default spelling; look the type
+  up if you need it by name.
 - Requirement traceability link type: `Test` (id `10500`) — outward `tests`, inward `is tested by`.
   The Test issue is the **outward** side: Test *tests* Story.
 - Xray is **Xray Cloud**: test steps and test type live behind the Xray GraphQL API, not in
   Jira fields. Never try to set steps through the Jira MCP tools — they will silently do nothing.
 - **This repo is not the site under test.** `robert-balan/adobe-ema-test` is an aem-boilerplate
   sandbox used to build and trial this QA tooling. Never treat the code here as the implementation
-  a ticket describes, and never write a test step against it. It is also a **public** repo — keep
-  proprietary spec and design detail out of any tracked file.
+  a ticket describes, and never write a test step against it. It is also a **public** repo, and
+  plans under `.claude/qa/plans/` are tracked in it — so treat every word you write into a plan
+  step as published. Keep client-confidential detail out of them.
 - The real site is `FoodSolutions-04/ufs`, authored in DA at `da.live/#/foodsolutions-04`. Both are
   restricted, but a **public preview per branch serves the code and the authored content**:
   `https://{branch}--ufs--foodsolutions-04.aem.page/blocks/{block}/{block}.js`, `/styles/styles.css`,
@@ -200,6 +202,18 @@ node .claude/scripts/xray-push.mjs .claude/qa/plans/<TICKET>.json --dry-run
 ```
 This validates the schema and prints what would be created. Fix anything it rejects.
 
+### 5b. On a fresh clone, recover the ledger first
+Each pushed Test carries its plan id as a Jira label, so identity survives a missing
+`<FEATURE>.result.json`. A normal push adopts labelled issues automatically rather than creating
+duplicates; run this when you want the ledger repaired without pushing:
+
+```bash
+node .claude/scripts/xray-push.mjs .claude/qa/plans/<FEATURE>.json --adopt
+```
+
+If the ledger and the labels contradict each other, the push refuses and reports it. Do not work
+around that by editing `result.json` to match — find out which issue is the real one first.
+
 ### 6. Apply, only on explicit approval
 ```bash
 node .claude/scripts/xray-push.mjs .claude/qa/plans/<TICKET>.json
@@ -210,7 +224,8 @@ sorts every test into one of four outcomes:
 
 | Outcome | Action |
 | --- | --- |
-| in the plan, no record | created |
+| in the plan, no record and no labelled issue in Jira | created |
+| in the plan, no record but Jira has the plan-id label | **adopted** — reuses that issue |
 | in both, identical | left alone |
 | in both, differs | **updated in place** — same ticket, same key, history preserved |
 | recorded but dropped from the plan | reported for review, **never deleted** |
@@ -288,7 +303,9 @@ Include the comment text in the approval preview; it is a write to a live ticket
   repeating it in the summary is noise. Freeze the prefix at creation: if the spec ticket is
   later retitled, do not silently rewrite existing test summaries.
 - Labels: the block or feature name, plus dimension tags (`a11y`, `rtl`, `mobile`, `desktop`,
-  `authoring`, `perf`). The script adds suite labels and the source key automatically.
+  `authoring`, `perf`). The script adds the plan id, the suite labels and the source key
+  automatically. The plan id label is the test's identity in Jira — never remove or edit one by
+  hand, and never give two issues the same one.
 - Test Repository folder: `/<feature area>/<block name>` via `folder` on the plan or a case.
 - Set `assignee` on the plan to an Atlassian accountId so created Tests are owned rather than
   landing unassigned. Robert Balan is `712020:543dd2f2-c9ed-422b-822d-d75634813a18`.

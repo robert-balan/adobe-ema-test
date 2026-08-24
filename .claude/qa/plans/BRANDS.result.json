@@ -1,0 +1,202 @@
+{
+  "tests": {
+    "BRANDS-TC-01": {
+      "issueId": "301999",
+      "key": "EC-120",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-11",
+        "AC-12"
+      ]
+    },
+    "BRANDS-TC-02": {
+      "issueId": "302000",
+      "key": "EC-121",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-11"
+      ]
+    },
+    "BRANDS-TC-03": {
+      "issueId": "302001",
+      "key": "EC-122",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-4",
+        "AC-13"
+      ]
+    },
+    "BRANDS-TC-04": {
+      "issueId": "302002",
+      "key": "EC-123",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-11",
+        "AC-13"
+      ]
+    },
+    "BRANDS-TC-05": {
+      "issueId": "302003",
+      "key": "EC-124",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-8"
+      ]
+    },
+    "BRANDS-TC-06": {
+      "issueId": "302004",
+      "key": "EC-125",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-6",
+        "AC-7"
+      ]
+    },
+    "BRANDS-TC-07": {
+      "issueId": "302005",
+      "key": "EC-126",
+      "suites": [
+        "regression",
+        "e2e"
+      ],
+      "ac": [
+        "AC-9",
+        "AC-10"
+      ]
+    },
+    "BRANDS-TC-08": {
+      "issueId": "302006",
+      "key": "EC-127",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-9",
+        "AC-20"
+      ]
+    },
+    "BRANDS-TC-09": {
+      "issueId": "302007",
+      "key": "EC-128",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-2",
+        "AC-4",
+        "AC-10",
+        "AC-19"
+      ]
+    },
+    "BRANDS-TC-10": {
+      "issueId": "302008",
+      "key": "EC-129",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-3",
+        "AC-7",
+        "AC-19"
+      ]
+    },
+    "BRANDS-TC-11": {
+      "issueId": "302009",
+      "key": "EC-130",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-5",
+        "AC-13",
+        "AC-20"
+      ]
+    },
+    "BRANDS-TC-12": {
+      "issueId": "302010",
+      "key": "EC-131",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-14",
+        "AC-15"
+      ]
+    },
+    "BRANDS-TC-13": {
+      "issueId": "302011",
+      "key": "EC-132",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-16"
+      ]
+    },
+    "BRANDS-TC-14": {
+      "issueId": "302012",
+      "key": "EC-133",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-17",
+        "AC-18"
+      ]
+    },
+    "BRANDS-TC-15": {
+      "issueId": "302013",
+      "key": "EC-134",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "Standing requirement - RTL"
+      ]
+    },
+    "BRANDS-TC-16": {
+      "issueId": "302014",
+      "key": "EC-135",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "Standing requirement - i18n"
+      ]
+    }
+  },
+  "testSets": {
+    "sanity": {
+      "issueId": "301670",
+      "key": "EC-104",
+      "suite": "sanity"
+    },
+    "regression": {
+      "issueId": "301671",
+      "key": "EC-105",
+      "suite": "regression"
+    },
+    "e2e": {
+      "issueId": "301672",
+      "key": "EC-106",
+      "suite": "e2e"
+    }
+  }
+}

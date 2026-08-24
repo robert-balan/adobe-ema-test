@@ -10,7 +10,10 @@ extraction recipe live in [`design-sources.md`](design-sources.md) — read it b
 test step that asserts a colour, size, spacing or timing.
 
 Note this repo is an aem-boilerplate **sandbox** for building the QA tooling, not the site under
-test, and it is public. Keep proprietary spec and design detail out of tracked files.
+test, and it is **public**. Plans under `plans/` are tracked so they can be reviewed and shared,
+which means every word of a test step is world-readable and permanent once pushed. Keep
+client-confidential detail out of plan text — or move `plans/` into a private repo checked out
+at that path, which the tooling supports unchanged.
 
 ## Prerequisites
 
@@ -76,11 +79,14 @@ field, that mutation would not need to exist.
 
 ### 2. Test Set issue type enabled in EC — done
 
-Enabled on 2026-08-18. EC now exposes `Xray Test` (12531), `Test Set` (12669), `Test Plan`
+Enabled on 2026-08-18. EC now exposes `Test` (12531), `Test Set` (12669), `Test Plan`
 (12597), `Test execution` (12598) and `XRay Precondition` (12668), all reachable over the Jira
 API, so `xray-push.mjs` can create Test Sets.
 
-One caveat: those names are inconsistently spelled (`Xray Test` vs `XRay Precondition` vs
+The Test type reads as plain `Test` in the API, not `Xray Test` — verified against the live
+instance on 2026-08-24. Look the type up rather than matching on a name you remember.
+
+One caveat: those names are inconsistently spelled (`Test` vs `XRay Precondition` vs
 `Test execution`), which suggests they were added by hand. Xray identifies its issue types by
 internal mapping rather than by name, and that mapping cannot be read through the Jira API — so
 whether Xray itself treats them as real Test Sets is only provable by calling the Xray GraphQL
@@ -106,8 +112,9 @@ node .claude/scripts/xray-push.mjs .claude/qa/plans/EC-18.json --dry-run   # val
 node .claude/scripts/xray-push.mjs .claude/qa/plans/EC-18.json             # apply
 ```
 
-Created keys are recorded in `.claude/qa/plans/EC-18.result.json`. Re-running skips tests that
-already exist, so the push is safe to repeat after a partial failure.
+Created keys are recorded in `.claude/qa/plans/EC-18.result.json`, and each Test is labelled
+with its plan id in Jira. Re-running reconciles against both, so the push is safe to repeat after
+a partial failure — and safe to run from a clone that has never seen the result file.
 
 ### Before each sprint — check for spec drift
 
@@ -123,6 +130,38 @@ for an agent to resolve over MCP.
 
 Plans and test ids are keyed on a **feature slug**, not a ticket key — `BRANDS-TC-01` in
 `plans/BRANDS.json` — precisely so a renumbered ticket costs nothing but re-pointing `source.key`.
+
+### Working with someone else on the same project
+
+Three things are shared, and each is shared differently:
+
+| What | Lives in | Why |
+|---|---|---|
+| The tooling and the doctrine | git | reviewed like code; disagreements are PRs against `qa-xray.md` |
+| Plans and their result ledgers | git (`plans/`) | the plan is the master copy; the ledger maps plan ids to issues |
+| Test identity | **Jira labels** | every Test carries its plan id, so identity survives a lost file |
+
+Each pushed Test is labelled with its plan id (`BRANDS-TC-01`). That makes `result.json` a cache
+rather than the only copy of the mapping, which is what makes collaboration safe: a push from a
+fresh clone, or from a checkout that predates a colleague's last push, **adopts** the existing
+issues instead of creating a second set of them.
+
+On a fresh clone, or after losing a ledger:
+
+```sh
+node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --adopt
+```
+
+That rebuilds `BRANDS.result.json` from the labels and writes nothing to Xray. A normal push
+adopts automatically, so `--adopt` is only needed when you want the ledger repaired without
+pushing.
+
+If the ledger and the labels disagree — they name different issues for one plan id, or two
+issues claim the same one — the push refuses and reports it rather than guessing. Guessing here
+edits the steps of a Test that somebody's execution history hangs off. Fix the labels in Jira,
+or re-run with `--adopt`.
+
+Still commit `result.json` after a push. Adoption is the safety net, not the plan.
 
 ### Revising tests when a spec changes
 
@@ -167,7 +206,7 @@ keyed by summary, so a different name simply means a different set.
 | `.claude/qa/design-sources.md` | Handover + token URLs and how to extract exact design values |
 | `.claude/qa/plan.schema.json` | Schema for a test plan |
 | `.claude/scripts/spec-drift.mjs` | Flags plans whose spec ticket was repurposed — run before each sprint |
-| `.claude/qa/plans/` | Generated plans and their push results |
+| `.claude/qa/plans/` | Plans and their result ledgers — tracked; `*.jira-actions.json` is not |
 | `.claude/qa/testsets.json` | Shared registry of the three project-wide Test Sets (created on first push) |
 | `.claude/scripts/xray-api.sh` | Auth + raw GraphQL against Xray Cloud |
 | `.claude/scripts/xray-push.mjs` | Validates a plan, creates Tests and Test Sets, idempotently |
