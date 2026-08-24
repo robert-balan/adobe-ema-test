@@ -1,0 +1,989 @@
+<title>Your First Test Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:        #f7f7fa;
+    --paper-sunk:   #eeeef4;
+    --paper-raised: #ffffff;
+    --rule:         #d9d9e4;
+    --rule-soft:    #e8e8f0;
+    --ink:          #16161d;
+    --ink-mid:      #4a4a5c;
+    --ink-faint:    #74748a;
+    --accent:       #3a3d98;
+    --accent-soft:  #e6e7f6;
+    --accent-line:  #b9bbe4;
+    --caution:      #b4531f;
+    --caution-soft: #fbeee5;
+    --caution-line: #eccbb0;
+    --confirm:      #1f6b4a;
+    --confirm-soft: #e7f2ec;
+    --confirm-line: #b6d8c6;
+
+    --measure: 65ch;
+
+    --f-display: "IBM Plex Sans Condensed", "Helvetica Neue", Arial, sans-serif;
+    --f-body:    "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --f-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:        #131318;
+      --paper-sunk:   #0d0d11;
+      --paper-raised: #1c1c24;
+      --rule:         #33333f;
+      --rule-soft:    #26262f;
+      --ink:          #eaeaf2;
+      --ink-mid:      #a8a8bd;
+      --ink-faint:    #7c7c93;
+      --accent:       #9296f2;
+      --accent-soft:  #21223a;
+      --accent-line:  #3f4173;
+      --caution:      #e59a6a;
+      --caution-soft: #2b1e15;
+      --caution-line: #59371f;
+      --confirm:      #63c295;
+      --confirm-soft: #14231c;
+      --confirm-line: #2b4c3a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:        #131318;
+    --paper-sunk:   #0d0d11;
+    --paper-raised: #1c1c24;
+    --rule:         #33333f;
+    --rule-soft:    #26262f;
+    --ink:          #eaeaf2;
+    --ink-mid:      #a8a8bd;
+    --ink-faint:    #7c7c93;
+    --accent:       #9296f2;
+    --accent-soft:  #21223a;
+    --accent-line:  #3f4173;
+    --caution:      #e59a6a;
+    --caution-soft: #2b1e15;
+    --caution-line: #59371f;
+    --confirm:      #63c295;
+    --confirm-soft: #14231c;
+    --confirm-line: #2b4c3a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    max-width: 78rem;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+  }
+
+  @media (min-width: 62rem) {
+    .shell {
+      grid-template-columns: 14rem minmax(0, 1fr);
+      gap: 4rem;
+      padding-inline: 3rem;
+    }
+  }
+
+  /* ---------------------------------------------------------- masthead */
+
+  .masthead {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--rule);
+    padding: clamp(3rem, 8vw, 5rem) 0 2.5rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 1.25rem;
+  }
+
+  .masthead h1 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 7vw, 4.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 1.25rem;
+  }
+
+  .standfirst {
+    max-width: var(--measure);
+    font-size: 1.1875rem;
+    line-height: 1.6;
+    color: var(--ink-mid);
+    margin: 0;
+  }
+
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  .masthead-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    margin-top: 2rem;
+    font-family: var(--f-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+  }
+
+  .masthead-meta span { white-space: nowrap; }
+  .masthead-meta b { color: var(--ink-mid); font-weight: 500; }
+
+  /* ---------------------------------------------------------- contents */
+
+  .contents { display: none; }
+
+  @media (min-width: 62rem) {
+    .contents {
+      display: block;
+      position: sticky;
+      top: 2.5rem;
+      align-self: start;
+      max-height: calc(100vh - 5rem);
+      overflow-y: auto;
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+    .contents h2 {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      font-weight: 500;
+      margin: 0 0 1rem;
+    }
+    .contents ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+    .contents a {
+      color: var(--ink-mid);
+      text-decoration: none;
+      display: block;
+      border-left: 2px solid var(--rule-soft);
+      padding-left: 0.75rem;
+    }
+    .contents a:hover, .contents a:focus-visible {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+  }
+
+  /* ---------------------------------------------------------- prose */
+
+  main { grid-column: 1 / -1; min-width: 0; }
+  @media (min-width: 62rem) { main { grid-column: 2; } }
+
+  section { margin-bottom: 4.5rem; scroll-margin-top: 2rem; }
+
+  h2 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 3.2vw, 2.125rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.1875rem;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+    margin: 2.5rem 0 0.75rem;
+  }
+
+  p, ul, ol { max-width: var(--measure); }
+  p { margin: 0 0 1.15rem; }
+
+  ul, ol { margin: 0 0 1.15rem; padding-left: 1.25rem; }
+  li { margin-bottom: 0.5rem; }
+  li::marker { color: var(--ink-faint); }
+
+  a { color: var(--accent); text-underline-offset: 0.15em; }
+
+  code {
+    font-family: var(--f-mono);
+    font-size: 0.855em;
+    background: var(--paper-sunk);
+    border: 1px solid var(--rule-soft);
+    border-radius: 3px;
+    padding: 0.1em 0.35em;
+    word-break: break-word;
+  }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  /* ---------------------------------------------------------- steps */
+
+  .step {
+    position: relative;
+    padding-left: 3.25rem;
+    margin-bottom: 3rem;
+  }
+
+  .step::before {
+    content: attr(data-n);
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    width: 2.125rem;
+    height: 2.125rem;
+    display: grid;
+    place-items: center;
+    font-family: var(--f-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-radius: 50%;
+  }
+
+  .step > h3 { margin-top: 0.25rem; }
+
+  .step-note {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: -0.4rem 0 1rem;
+  }
+
+  /* ---------------------------------------------------------- code blocks */
+
+  .cmd {
+    position: relative;
+    max-width: var(--measure);
+    margin: 0 0 1.15rem;
+    background: var(--paper-sunk);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+
+  .cmd-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid var(--rule-soft);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .cmd pre {
+    margin: 0;
+    padding: 0.85rem 0.9rem;
+    overflow-x: auto;
+    font-family: var(--f-mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--ink);
+    tab-size: 2;
+  }
+
+  .cmd .c { color: var(--ink-faint); }
+
+  .copy {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 0.15rem 0.5rem;
+    cursor: pointer;
+    flex: none;
+  }
+  .copy:hover, .copy:focus-visible { color: var(--accent); border-color: var(--accent-line); }
+  .copy[data-done="1"] { color: var(--confirm); border-color: var(--confirm-line); }
+
+  /* ---------------------------------------------------------- expect / caution */
+
+  .expect, .caution {
+    max-width: var(--measure);
+    margin: 0 0 1.15rem;
+    padding: 0.85rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .expect  { background: var(--confirm-soft); border: 1px solid var(--confirm-line); }
+  .caution { background: var(--caution-soft); border: 1px solid var(--caution-line); }
+
+  .expect > :last-child, .caution > :last-child { margin-bottom: 0; }
+
+  .expect b, .caution b {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .expect b  { color: var(--confirm); }
+  .caution b { color: var(--caution); }
+
+  .expect code, .caution code { background: transparent; border-color: transparent; padding: 0; }
+
+  /* ---------------------------------------------------------- tables */
+
+  .scroller { max-width: var(--measure); overflow-x: auto; margin: 0 0 1.15rem; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9375rem;
+  }
+
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.6rem 0.9rem 0.6rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  th {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom-color: var(--rule);
+    white-space: nowrap;
+  }
+
+  td code { white-space: nowrap; }
+
+  /* ---------------------------------------------------------- callout card */
+
+  .card {
+    max-width: var(--measure);
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.25rem 1.35rem;
+    margin: 0 0 1.15rem;
+  }
+  .card > :last-child { margin-bottom: 0; }
+  .card h3 { margin-top: 0; }
+
+  /* ---------------------------------------------------------- flow */
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.5rem;
+    max-width: var(--measure);
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .flow li {
+    flex: 1 1 8rem;
+    margin: 0;
+    padding: 0.8rem 0.9rem;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-top: 2px solid var(--accent-line);
+    border-radius: 3px;
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .flow b {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+
+  /* ---------------------------------------------------------- footer */
+
+  footer {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--rule);
+    padding-top: 1.75rem;
+    font-family: var(--f-mono);
+    font-size: 0.75rem;
+    line-height: 1.7;
+    color: var(--ink-faint);
+    max-width: var(--measure);
+  }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+
+  html { scroll-behavior: smooth; }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">EC · EDS Migration · QA tooling</p>
+    <h1>Your First Test Plan</h1>
+    <p class="standfirst">
+      This repo has an agent that reads a Jira ticket, works out what needs testing, and creates
+      real Xray tests for you. It takes about <strong>40 minutes</strong> to set up, and most of
+      that is waiting on other people for access. Work through it top to bottom — each step
+      assumes the one before it worked.
+    </p>
+    <div class="masthead-meta">
+      <span><b>For</b> QA joining the EC project</span>
+      <span><b>You need</b> a terminal and Claude Code</span>
+      <span><b>Prior knowledge</b> none assumed</span>
+    </div>
+  </header>
+
+  <nav class="contents" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#what">What this actually does</a></li>
+      <li><a href="#ask">Ask for these first</a></li>
+      <li><a href="#setup">Setting up</a></li>
+      <li><a href="#first">Your first plan</a></li>
+      <li><a href="#rules">Four rules</a></li>
+      <li><a href="#wrong">When it looks wrong</a></li>
+      <li><a href="#more">Where to read more</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============================================= WHAT -->
+    <section id="what">
+      <h2>What this actually does</h2>
+
+      <p>
+        Writing test cases by hand is slow, and the slowest part isn't the thinking — it's typing
+        forty near-identical tickets into Jira. This tooling does the typing. You still make every
+        real decision.
+      </p>
+
+      <ol class="flow">
+        <li><b>You ask</b>Point the agent at a ticket, e.g. EC-14</li>
+        <li><b>It reads</b>The ticket, the design handover, and the real site code</li>
+        <li><b>It drafts</b>A plan file on your machine — nothing in Jira yet</li>
+        <li><b>You approve</b>Read it, change what's wrong, say go</li>
+        <li><b>A script pushes</b>Real Xray tests appear in EC</li>
+      </ol>
+
+      <p>
+        Step four is the important one. <strong>Nothing reaches Jira until you say so.</strong> The
+        agent drafts, you decide. If a plan is wrong, you edit a file — no cleanup in Jira needed.
+      </p>
+
+      <h3>Three places things live</h3>
+
+      <p>
+        Worth knowing up front, because it explains why some things are in git and some aren't.
+      </p>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Where</th><th>What's kept there</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>The git repo</b></td>
+              <td>The agent itself, the scripts, and the plans. This is the master copy of your test content.</td>
+            </tr>
+            <tr>
+              <td><b>Jira &amp; Xray</b></td>
+              <td>The published tests that people actually run, plus their execution history.</td>
+            </tr>
+            <tr>
+              <td><b>Jira labels</b></td>
+              <td>Each test carries a hidden-ish id like <code>BRANDS-TC-01</code>. That's how the tooling recognises a test it already made, so re-running never creates duplicates.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="caution">
+        <b>Read this before you write anything</b>
+        <p>
+          This repo is <strong>public on GitHub</strong>, and test plans are committed to it. Every
+          word you put in a test step is world-readable and permanent once pushed. Write steps
+          about behaviour — "the label shows the new text" — and keep anything genuinely
+          confidential out of them.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================= ASK -->
+    <section id="ask">
+      <h2>Ask for these first</h2>
+
+      <p>
+        Three things need another human, so send the messages now and set up while you wait.
+      </p>
+
+      <h3>1 · Push access to the repo</h3>
+      <p>
+        The repo is public, so you can clone it today without asking anyone. You only need an
+        invite to <em>push</em> your own changes. Ask Robert to add you as a collaborator on
+        <code>robert-balan/adobe-ema-test</code>.
+      </p>
+
+      <h3>2 · Jira and Xray access</h3>
+      <p>
+        You need an account on <code>unileverfoodsolutions.atlassian.net</code> with the <b>EC</b>
+        project, and permission to create issues, edit them, add comments and link them. You also
+        need Xray enabled for your user.
+      </p>
+
+      <h3>3 · Your own Xray API key</h3>
+      <p>
+        This one has a catch worth understanding. Xray Cloud keeps test steps in its own database,
+        not in Jira, so the normal Jira connection can't write them. The scripts need a separate
+        Xray key.
+      </p>
+      <p>
+        Creating one needs Jira/Xray admin rights, so an admin has to do it for you:
+        <b>settings gear → Apps → Marketplace Apps → Xray → API Keys → Create API Key</b>, with
+        your name in the User field. They should send you the <b>Client ID</b> and <b>Client
+        Secret</b> through a password manager — not Slack, not email. The secret is shown once and
+        can never be retrieved again.
+      </p>
+
+      <div class="caution">
+        <b>Don't borrow someone else's key</b>
+        <p>
+          A key is tied to one Jira user, and every test it creates is attributed to that person.
+          Use a colleague's key and your work shows up under their name.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================= SETUP -->
+    <section id="setup">
+      <h2>Setting up</h2>
+
+      <p>
+        Six steps. Each shows the command to run and what a working result looks like — if what
+        you see doesn't match, stop there rather than carrying on.
+      </p>
+
+      <div class="step" data-n="1">
+        <h3>Check you have Node and jq</h3>
+        <p class="step-note">Two minutes</p>
+        <p>
+          The push script runs on Node, and the Xray helper uses <code>jq</code> to handle JSON.
+          Both are probably already there.
+        </p>
+        <div class="cmd">
+          <div class="cmd-label"><span>Terminal</span></div>
+          <pre>node --version
+jq --version</pre>
+        </div>
+        <div class="expect">
+          <b>You should see</b>
+          <p>
+            A version number from each, Node v18 or newer. If <code>jq</code> is missing:
+            <code>brew install jq</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-n="2">
+        <h3>Clone the repo</h3>
+        <p class="step-note">One minute</p>
+        <div class="cmd">
+          <div class="cmd-label"><span>Terminal</span></div>
+          <pre>git clone https://github.com/robert-balan/adobe-ema-test.git
+cd adobe-ema-test</pre>
+        </div>
+        <div class="expect">
+          <b>You should see</b>
+          <p>
+            A folder containing <code>.claude/</code>. The agent, the scripts and any existing test
+            plans all arrive with the clone — there's nothing extra to install for the QA work.
+            (<code>npm install</code> is only needed if you're editing the website itself.)
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-n="3">
+        <h3>Store your Xray key</h3>
+        <p class="step-note">Five minutes · needs the key from step 3 above</p>
+        <p>
+          Put the two values in your macOS Keychain, where they're encrypted at rest. Using
+          <code>-w</code> with no value makes it prompt, so the secret never lands in your shell
+          history.
+        </p>
+        <div class="cmd">
+          <div class="cmd-label"><span>Terminal · paste each value when prompted</span></div>
+          <pre>security add-generic-password -a "$USER" -s xray-client-id -w
+security add-generic-password -a "$USER" -s xray-client-secret -w</pre>
+        </div>
+        <p>Then add these lines to your <code>~/.zshrc</code> so every new terminal picks them up:</p>
+        <div class="cmd">
+          <div class="cmd-label"><span>~/.zshrc</span></div>
+          <pre>export XRAY_CLIENT_ID="$(security find-generic-password -a "$USER" -s xray-client-id -w 2>/dev/null)"
+export XRAY_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s xray-client-secret -w 2>/dev/null)"</pre>
+        </div>
+        <p>Open a new terminal window so those take effect.</p>
+        <div class="caution">
+          <b>Never put these in a file inside the repo</b>
+          <p>
+            The repo is public. A committed secret is scraped by credential scanners within
+            minutes. Not in <code>.mcp.json</code>, not in settings, not in a comment.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-n="4">
+        <h3>Check the key works</h3>
+        <p class="step-note">One minute</p>
+        <div class="cmd">
+          <div class="cmd-label"><span>Terminal · in the repo</span></div>
+          <pre>.claude/scripts/xray-api.sh check</pre>
+        </div>
+        <div class="expect">
+          <b>You should see</b>
+          <p>
+            <code>auth OK</code> followed by <code>API OK</code>. That's your key talking to Xray
+            successfully. If it says a variable isn't set, your <code>~/.zshrc</code> edit hasn't
+            been picked up — open a fresh terminal.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-n="5">
+        <h3>Connect Claude Code to Jira</h3>
+        <p class="step-note">Three minutes</p>
+        <p>
+          The agent reads tickets through Atlassian's MCP server. The repo already has the
+          connection configured, but each person authenticates as themselves. Start Claude Code in
+          the repo folder — it'll ask whether to enable the <code>atlassian</code> server. Say yes.
+          Then:
+        </p>
+        <div class="cmd">
+          <div class="cmd-label"><span>In Claude Code</span></div>
+          <pre>/mcp</pre>
+        </div>
+        <div class="expect">
+          <b>You should see</b>
+          <p>
+            A prompt to log in through your browser. Once you're back,
+            <code>atlassian</code> shows as connected. The agent can now read EC tickets as you.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-n="6">
+        <h3>Do a dry run on something that already exists</h3>
+        <p class="step-note">Two minutes · this proves the whole chain works</p>
+        <p>
+          <code>BRANDS.json</code> is a finished plan of 16 tests that are already live in Jira.
+          Running it in preview mode touches nothing and confirms every piece is connected.
+        </p>
+        <div class="cmd">
+          <div class="cmd-label"><span>Terminal</span></div>
+          <pre>node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --dry-run</pre>
+        </div>
+        <div class="expect">
+          <b>You should see</b>
+          <p>
+            <code>0 to create</code>, <code>0 to update</code>, <code>16 unchanged</code>, and the
+            three test suites reported as <code>in sync</code>. That means the tooling found all 16
+            existing tests and correctly decided to leave them alone.
+          </p>
+          <p>
+            You may also see <code>16 adopted from Jira by label</code> — that's fine and expected.
+            It means your clone hadn't seen these tests before, so it looked them up in Jira rather
+            than creating copies.
+          </p>
+        </div>
+        <div class="caution">
+          <b>If it says "16 to create", stop</b>
+          <p>
+            That would mean it can't recognise the existing tests, and running it for real would
+            duplicate all sixteen. Don't run it without <code>--dry-run</code>. Ask before going
+            further.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================= FIRST -->
+    <section id="first">
+      <h2>Your first plan</h2>
+
+      <p>
+        Setup done. Here's the actual working loop, which you'll repeat for every ticket.
+      </p>
+
+      <h3>Ask the agent for tests</h3>
+      <p>In Claude Code, in plain English:</p>
+      <div class="cmd">
+        <div class="cmd-label"><span>In Claude Code</span></div>
+        <pre>use the qa-xray agent to write test cases for EC-22</pre>
+      </div>
+      <p>
+        It'll read the ticket, cross-check the design handover and the live site code, and then
+        show you three things: a table of proposed tests, a <b>coverage matrix</b> mapping every
+        acceptance criterion to the tests covering it, and a list of <b>clarifications</b> — the
+        parts of the ticket that can't be tested as written.
+      </p>
+      <p>
+        That last list is often the most valuable output. Vague criteria like "must feel smooth"
+        get flagged rather than quietly invented around.
+      </p>
+
+      <h3>Read it properly</h3>
+      <p>
+        The plan lands at <code>.claude/qa/plans/&lt;FEATURE&gt;.json</code>. It's a plain text
+        file — open it, edit anything that's wrong, ask the agent to change things. This is the
+        cheap moment to fix mistakes. Nothing exists in Jira yet.
+      </p>
+
+      <h3>Preview, then push</h3>
+      <div class="cmd">
+        <div class="cmd-label"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
+        <pre><span class="c"># see exactly what would happen — writes nothing</span>
+node .claude/scripts/xray-push.mjs .claude/qa/plans/MEGAMENU.json --dry-run
+
+<span class="c"># do it for real</span>
+node .claude/scripts/xray-push.mjs .claude/qa/plans/MEGAMENU.json</pre>
+      </div>
+      <p>
+        The script prints the Jira key of every test it creates. It then writes a to-do list of
+        things only Jira can do — issue links, labels — which the agent applies for you. Ask it to
+        finish the job and it will.
+      </p>
+
+      <h3>Commit</h3>
+      <div class="cmd">
+        <div class="cmd-label"><span>Terminal</span></div>
+        <pre>git add .claude/qa/plans/
+git commit -m "Add test plan for MEGAMENU"
+git push</pre>
+      </div>
+      <div class="expect">
+        <b>Why this matters</b>
+        <p>
+          The <code>.result.json</code> file records which plan entry became which Jira ticket.
+          Committing it means the next person's changes update your tests instead of guessing. It's
+          a safety net, not the only one — but don't skip it.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================= RULES -->
+    <section id="rules">
+      <h2>Four rules</h2>
+
+      <p>Each of these exists because breaking it caused a real mess.</p>
+
+      <div class="card">
+        <h3>Never renumber a test id</h3>
+        <p>
+          <code>BRANDS-TC-01</code> is how the tooling knows which Jira ticket a plan entry belongs
+          to. Change it and you orphan a test and create a duplicate. Adding new tests? Give them
+          new numbers on the end. Removing one? See the next rule.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Never delete a test to retire it</h3>
+        <p>
+          Deleting destroys its execution history — the record of every time someone ran it.
+          Instead: <code>--deprecate BRANDS-TC-09</code>. That pulls it out of every suite so nobody
+          runs it, and leaves the ticket and its history intact.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Always <code>--dry-run</code> first</h3>
+        <p>
+          It's free, it takes seconds, and it prints a line-by-line diff of what would change,
+          including individual test steps. There is no reason to skip it.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Plans are named after features, not tickets</h3>
+        <p>
+          <code>BRANDS.json</code>, not <code>EC-14.json</code>. Tickets get renumbered and
+          repurposed — it's happened here already, stranding thirteen tests. Features don't move.
+          Each plan records which ticket currently specifies it, and that pointer can be updated
+          for free.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================= WRONG -->
+    <section id="wrong">
+      <h2>When it looks wrong</h2>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>What you see</th><th>What it means</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>XRAY_CLIENT_ID is not set</code></td>
+              <td>Your <code>~/.zshrc</code> hasn't loaded. Open a fresh terminal window.</td>
+            </tr>
+            <tr>
+              <td><code>MISMATCH</code></td>
+              <td>The local record and Jira disagree about which ticket a test is. The script refuses to guess, because guessing would rewrite the wrong test. Ask before resolving it.</td>
+            </tr>
+            <tr>
+              <td><code>DUPLICATE</code></td>
+              <td>Two Jira tickets claim the same test id. One of them shouldn't. Same advice — ask.</td>
+            </tr>
+            <tr>
+              <td><code>N adopted from Jira by label</code></td>
+              <td>Completely normal. Your copy of the records was out of date, so it looked the tests up in Jira instead of duplicating them.</td>
+            </tr>
+            <tr>
+              <td>It wants to create tests that already exist</td>
+              <td>Run with <code>--adopt</code> to rebuild the local record from Jira, then dry-run again.</td>
+            </tr>
+            <tr>
+              <td>Suite drift, <code>unclaimed</code></td>
+              <td>A test sits in a suite the plan no longer claims. It's only reported, never removed automatically. Have a look and decide.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The repair command, for a fresh clone or a lost record file:
+      </p>
+      <div class="cmd">
+        <div class="cmd-label"><span>Terminal · writes nothing to Xray</span></div>
+        <pre>node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --adopt</pre>
+      </div>
+      <p>
+        And before each sprint, this checks whether any ticket behind a plan has been quietly
+        repurposed:
+      </p>
+      <div class="cmd">
+        <div class="cmd-label"><span>Terminal</span></div>
+        <pre>node .claude/scripts/spec-drift.mjs</pre>
+      </div>
+    </section>
+
+    <!-- ============================================= MORE -->
+    <section id="more">
+      <h2>Where to read more</h2>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>File</th><th>What's in it</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>.claude/qa/README.md</code></td><td>The full setup and workflow reference, including collaboration</td></tr>
+            <tr><td><code>.claude/qa/how-the-agent-works.html</code></td><td>A walkthrough of what the agent does internally</td></tr>
+            <tr><td><code>.claude/agents/qa-xray.md</code></td><td>The agent's instructions — how it designs and groups tests</td></tr>
+            <tr><td><code>.claude/qa/design-sources.md</code></td><td>Where exact colours, sizes and timings come from</td></tr>
+            <tr><td><code>.claude/qa/plan.schema.json</code></td><td>The shape of a plan file, if you're editing one by hand</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The agent file is worth a read even though it's written for the agent. It records decisions
+        the team argued about and settled — why tests are grouped by functional area rather than one
+        per criterion, why there are exactly five categories. If you disagree with any of it, that's
+        a pull request against that file, not a habit you keep to yourself.
+      </p>
+    </section>
+
+  </main>
+
+  <footer>
+    EC · EDS Migration — QA tooling onboarding.<br>
+    Stuck on any step? Ask rather than working around it — most of the guardrails
+    here exist because something went wrong once already.
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    document.querySelectorAll('.cmd').forEach(function (block) {
+      var label = block.querySelector('.cmd-label');
+      var pre = block.querySelector('pre');
+      if (!label || !pre) return;
+      var btn = label.querySelector('.copy');
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'copy';
+        btn.textContent = 'Copy';
+        label.appendChild(btn);
+      }
+      btn.addEventListener('click', function () {
+        var text = Array.prototype.map.call(pre.childNodes, function (n) {
+          return n.nodeType === 1 && n.classList.contains('c') ? '' : n.textContent;
+        }).join('').replace(/\n{3,}/g, '\n\n').trim();
+        try {
+          navigator.clipboard.writeText(text).then(function () {
+            btn.textContent = 'Copied';
+            btn.setAttribute('data-done', '1');
+            setTimeout(function () {
+              btn.textContent = 'Copy';
+              btn.removeAttribute('data-done');
+            }, 1600);
+          }, function () { btn.textContent = 'Select manually'; });
+        } catch (e) {
+          btn.textContent = 'Select manually';
+        }
+      });
+    });
+  })();
+</script>
