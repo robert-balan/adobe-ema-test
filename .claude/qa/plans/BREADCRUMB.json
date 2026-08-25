@@ -1,0 +1,339 @@
+{
+  "project": "EC",
+  "feature": "BREADCRUMB",
+  "projectId": "11590",
+  "assignee": "712020:543dd2f2-c9ed-422b-822d-d75634813a18",
+  "source": {
+    "key": "EC-22",
+    "summary": "Block: Breadcrumb",
+    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-22"
+  },
+  "folder": "/Blocks/Breadcrumb",
+  "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "fixtures": [
+    {
+      "id": "BREADCRUMB-FX-01",
+      "title": "Auto trail from the URL",
+      "purpose": "Breadcrumb: auto on a deeply nested page, so the trail has enough levels to collapse on mobile",
+      "page": "/drafts/qa/breadcrumb/products/sauces-and-condiments/ketchup",
+      "metadata": { "Breadcrumb": "auto", "Language": "en" }
+    },
+    {
+      "id": "BREADCRUMB-FX-02",
+      "title": "Authored label trail",
+      "purpose": "A pipe-delimited override, including an ampersand and a label that looks like markup, to check labels render as plain text",
+      "page": "/drafts/qa/breadcrumb/labels",
+      "metadata": { "Breadcrumb": "Products | Sauces & Condiments | <b>Ketchup</b>", "Language": "en" }
+    },
+    {
+      "id": "BREADCRUMB-FX-03",
+      "title": "Manual block beats the metadata",
+      "purpose": "A hand-authored breadcrumb block AND Breadcrumb: auto on the same page — only the manual trail should render, never both",
+      "page": "/drafts/qa/breadcrumb/manual",
+      "metadata": { "Breadcrumb": "auto", "Language": "en" },
+      "sections": [
+        {
+          "name": "breadcrumb",
+          "rows": [
+            ["<p><a href=\"/\">Home</a></p>"],
+            ["<p><a href=\"/training\">Training</a></p>"],
+            ["<p><a href=\"/training/courses\">Courses</a></p>"],
+            ["<p>Professional Development</p>"]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BREADCRUMB-FX-04",
+      "title": "Explicit opt-out",
+      "purpose": "Breadcrumb: false on a nested page — no breadcrumb at all, even though the URL would produce one",
+      "page": "/drafts/qa/breadcrumb/optout/deeper",
+      "metadata": { "Breadcrumb": "false", "Language": "en" }
+    },
+    {
+      "id": "BREADCRUMB-FX-05",
+      "title": "No Breadcrumb row at all",
+      "purpose": "A nested page with no Breadcrumb metadata — the block is opt-in, so nothing should render",
+      "page": "/drafts/qa/breadcrumb/absent/deeper",
+      "metadata": { "Language": "en" }
+    },
+    {
+      "id": "BREADCRUMB-FX-06",
+      "title": "Shortest possible trail",
+      "purpose": "Home plus the current page only, which is the case where mobile should show no collapse control",
+      "page": "/drafts/qa/breadcrumb/short",
+      "metadata": { "Breadcrumb": "Ketchup", "Language": "en" }
+    },
+    {
+      "id": "BREADCRUMB-FX-07",
+      "title": "RTL",
+      "purpose": "The FX-02 trail on a right-to-left page, so direction, mirroring and the mobile behaviour can be checked together",
+      "page": "/drafts/qa/breadcrumb/rtl",
+      "metadata": { "Breadcrumb": "Products | Sauces & Condiments | Ketchup", "Language": "ar-MA" }
+    },
+    {
+      "id": "BREADCRUMB-FX-08",
+      "title": "Accessibility page",
+      "purpose": "A multi-level trail on a page of its own, so tab order, screen-reader output and an axe scan describe this block and nothing else",
+      "page": "/drafts/qa/breadcrumb/a11y",
+      "metadata": { "Breadcrumb": "Products | Sauces & Condiments | Hot Sauces | Ketchup", "Language": "en" }
+    }
+  ],
+  "tests": [
+    {
+      "id": "BREADCRUMB-TC-01",
+      "summary": "Block: Breadcrumb - Authoring - Trail sources, opt-out and label handling",
+      "scope": "Where a breadcrumb comes from and when it should not appear at all: the URL-derived auto trail, an authored pipe-delimited label trail, a hand-authored block that must win over the metadata, the explicit opt-out values, and an absent row. Also that labels are rendered as text and never interpreted as markup.",
+      "ac": ["AC-8", "AC-9", "AC-10"],
+      "suites": ["sanity", "regression"],
+      "labels": ["breadcrumb", "authoring"],
+      "fixtures": ["BREADCRUMB-FX-01", "BREADCRUMB-FX-02", "BREADCRUMB-FX-03", "BREADCRUMB-FX-04", "BREADCRUMB-FX-05", "BREADCRUMB-FX-06"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01, which sets Breadcrumb to auto on a nested page.",
+          "result": "A breadcrumb renders, beginning with Home and following the URL hierarchy, with the final segment as the current page."
+        },
+        {
+          "action": "Compare each crumb's label against the matching URL segment.",
+          "data": "Hyphens become spaces and each word is capitalised, so sauces-and-condiments reads \"Sauces And Condiments\"",
+          "result": "Every segment of the path appears once, in order, humanised from the slug."
+        },
+        {
+          "action": "Open fixture FX-02, which supplies its own labels.",
+          "data": "Breadcrumb: Products | Sauces & Condiments | <b>Ketchup</b>",
+          "result": "The trail reads Home, Products, Sauces & Condiments, then the current page — Home is added automatically because the authored list does not start with it."
+        },
+        {
+          "action": "Inspect the last crumb of FX-02.",
+          "result": "It shows the literal text \"<b>Ketchup</b>\". The markup is displayed as characters, not interpreted — no bold text and no injected element."
+        },
+        {
+          "action": "Open fixture FX-03, which has both a hand-authored breadcrumb block and Breadcrumb: auto.",
+          "result": "Exactly one trail renders — the authored one, ending at \"Professional Development\". There is no second, URL-derived trail anywhere on the page."
+        },
+        {
+          "action": "Open fixture FX-04, a nested page with Breadcrumb set to false.",
+          "result": "No breadcrumb renders, and no empty container is left in its place, even though the URL would have produced a trail."
+        },
+        {
+          "action": "Open fixture FX-05, a nested page with no Breadcrumb row at all.",
+          "result": "No breadcrumb renders. The block is opt-in, so a page that says nothing gets nothing."
+        },
+        {
+          "action": "Open fixture FX-06, whose authored trail is a single label.",
+          "result": "The trail is Home followed by the current page — two crumbs, one separator."
+        },
+        {
+          "action": "Compare the structure of FX-01, FX-02 and FX-06 with each other.",
+          "result": "Changing how many crumbs there are, or what they are called, changes only the content — the markup, separators and layout are identical in each case."
+        }
+      ]
+    },
+    {
+      "id": "BREADCRUMB-TC-02",
+      "summary": "Block: Breadcrumb - Functionality - Navigation, the current crumb, and the mobile control",
+      "scope": "What happens when someone uses it: ancestor crumbs navigate, the current page does not, hovering a link responds, and on mobile the collapse control reveals the hidden ancestors without glitching when used repeatedly.",
+      "ac": ["AC-5", "AC-6", "AC-7"],
+      "suites": ["sanity", "regression", "e2e"],
+      "labels": ["breadcrumb", "functional"],
+      "fixtures": ["BREADCRUMB-FX-01", "BREADCRUMB-FX-06"],
+      "notes": "Steps 4 to 6 are expected to fail on current code. The mobile collapse control the spec describes is not implemented on any branch — see the note on BREADCRUMB-TC-04, which carries the evidence. They are written against the spec because the ticket is Ready for Testing; raise them as product defects.",
+      "steps": [
+        {
+          "action": "Open fixture FX-01 on a desktop viewport and click an ancestor crumb.",
+          "result": "The browser navigates to that ancestor's path."
+        },
+        {
+          "action": "Return and try to click the last crumb, the current page.",
+          "result": "Nothing happens. It is not a link and has no pointer affordance."
+        },
+        {
+          "action": "Hover an ancestor crumb.",
+          "data": "Expected: a colour change plus an underline",
+          "result": "The link responds with the expected hover treatment, and no neighbouring crumb moves."
+        },
+        {
+          "action": "Open fixture FX-01 on a mobile viewport.",
+          "result": "Only Home, a collapse control, and the current page are shown; the intermediate ancestors are hidden behind the control."
+        },
+        {
+          "action": "Tap the collapse control.",
+          "result": "Every previously hidden ancestor is revealed, in hierarchy order."
+        },
+        {
+          "action": "Collapse and expand it several times in quick succession.",
+          "result": "No duplicated crumbs, no stuck state, and no layout shift in the content below the breadcrumb."
+        },
+        {
+          "action": "Open fixture FX-06, whose trail is only Home plus the current page, on a mobile viewport.",
+          "result": "No collapse control is shown — there is nothing to hide."
+        }
+      ]
+    },
+    {
+      "id": "BREADCRUMB-TC-03",
+      "summary": "Block: Breadcrumb - Visual - Placement, tokens, separators and spacing",
+      "scope": "How it looks against the handover design at a desktop reference viewport: where it sits on the page, the colours of links, the current crumb and the separators, the chevron treatment, the padding, and that it never pushes the page sideways.",
+      "ac": ["AC-1", "AC-4", "AC-17"],
+      "suites": ["regression"],
+      "labels": ["breadcrumb", "visual", "desktop"],
+      "fixtures": ["BREADCRUMB-FX-01", "BREADCRUMB-FX-08"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a 1440px-wide desktop viewport.",
+          "result": "The breadcrumb sits at the top of the page content, flush to the page's start edge, above everything else in the main content."
+        },
+        {
+          "action": "Inspect the separators between crumbs.",
+          "result": "A chevron separates each pair of crumbs, and there is no separator after the last one."
+        },
+        {
+          "action": "Inspect the colour of an ancestor link and of the current crumb.",
+          "data": "Both come from the design tokens; the current crumb is the darker, heavier of the two",
+          "result": "Both match the handover, and the current crumb is visibly distinct from the links beside it."
+        },
+        {
+          "action": "Inspect the block's horizontal padding at this viewport.",
+          "data": "Expected --space-8 at 900px and above",
+          "result": "The padding matches the desktop token."
+        },
+        {
+          "action": "Hover a link and then move focus to it with the keyboard.",
+          "result": "The hover and focus treatments both match the handover, and neither changes the height of the row or moves the crumbs."
+        },
+        {
+          "action": "Open fixture FX-08, which has a longer four-level trail, at 1440px, 1280px and 1024px.",
+          "result": "The trail stays on one line, nothing is clipped, and the document never scrolls horizontally."
+        },
+        {
+          "action": "Compare placement, spacing and typography against the approved handover design.",
+          "result": "All match for the desktop layout."
+        }
+      ]
+    },
+    {
+      "id": "BREADCRUMB-TC-04",
+      "summary": "Block: Breadcrumb - Compatibility - Full trail on desktop, collapsed on mobile",
+      "scope": "The same trail at both ends of the range: every crumb shown on desktop, the shortened Home-ellipsis-current form on mobile, the mobile padding, and that resizing across the breakpoint switches between the two without losing or duplicating a crumb.",
+      "ac": ["AC-2", "AC-3", "AC-18"],
+      "suites": ["sanity", "regression"],
+      "labels": ["breadcrumb", "responsive"],
+      "fixtures": ["BREADCRUMB-FX-01"],
+      "notes": "Steps 3 to 6 are expected to fail on current code, and this is the most significant finding on this ticket.\n\nThe mobile collapse the spec describes — Home, an ellipsis control, current page — does not exist in the implementation. Verified on develop, main and stage: blocks/breadcrumb/breadcrumb.js builds one flat ordered list containing every crumb, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep. There is no button, no aria-expanded and no ellipsis anywhere in the block or in the auto-block builder in scripts.js.\n\nWhat mobile does instead is make the trail horizontally scrollable at 600px and below, with the scrollbar hidden. That is a different design decision, not a partial implementation of this one.\n\nA second, smaller mismatch: the spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the scroll treatment starts at 600px — so between 601px and 899px the block behaves like neither.\n\nThese steps are written against the spec because the ticket is Ready for Testing. Raise them as product defects rather than re-running for a pass.",
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a desktop viewport of 1440px.",
+          "result": "Every crumb in the trail is shown, ancestors as links and the last as the current page."
+        },
+        {
+          "action": "Confirm the current crumb's markup.",
+          "result": "It is not a link and carries aria-current=\"page\"."
+        },
+        {
+          "action": "Resize down to a mobile viewport of 390px.",
+          "data": "The spec places the switch at 900px",
+          "result": "The trail shortens to Home, a collapse control, and the current page. Home and the current page are always visible."
+        },
+        {
+          "action": "Inspect the block's horizontal padding at 390px.",
+          "data": "Expected --space-6 below 900px",
+          "result": "The padding matches the mobile token."
+        },
+        {
+          "action": "Resize slowly up through 900px and watch the trail.",
+          "result": "At 900px it switches back to the full trail, with every crumb present, none lost and none duplicated."
+        },
+        {
+          "action": "Resize back down through 900px.",
+          "result": "It returns to the collapsed form, and the current-page marker is still on the last crumb."
+        }
+      ]
+    },
+    {
+      "id": "BREADCRUMB-TC-05",
+      "summary": "Block: Breadcrumb - Accessibility - Landmark, semantics, keyboard and contrast",
+      "scope": "WCAG 2.1 AA for the trail: that it is a labelled navigation landmark containing an ordered list, that the current page is marked, that decorative separators are hidden from assistive technology, that every control is reachable and operable by keyboard, and that the colours meet contrast.",
+      "ac": ["AC-13", "AC-14", "AC-15", "AC-16"],
+      "suites": ["regression"],
+      "labels": ["breadcrumb", "a11y"],
+      "fixtures": ["BREADCRUMB-FX-08"],
+      "notes": "Steps 6 and 7 concern the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04 for the evidence. They are expected to fail and should be raised with that defect rather than separately.",
+      "steps": [
+        {
+          "action": "Open fixture FX-08 and inspect the element wrapping the trail.",
+          "result": "It is a nav element with aria-label=\"Breadcrumb\", containing an ordered list — one list item per crumb."
+        },
+        {
+          "action": "Inspect the last crumb.",
+          "result": "It carries aria-current=\"page\" and is not a link."
+        },
+        {
+          "action": "Inspect a chevron separator.",
+          "result": "It is aria-hidden, so a screen reader does not announce it between crumbs."
+        },
+        {
+          "action": "Tab through the breadcrumb from the start of the page.",
+          "result": "Every ancestor link is reachable in reading order, and focus leaves the trail cleanly at the end — no keyboard trap."
+        },
+        {
+          "action": "With a link focused, press Enter.",
+          "data": "Links activate on Enter only; Space is for buttons",
+          "result": "The link activates, and a visible focus ring is shown against the background while focused."
+        },
+        {
+          "action": "On a mobile viewport, Tab to the collapse control.",
+          "result": "It is reachable by keyboard, exposes an accessible name, and reports its state with aria-expanded."
+        },
+        {
+          "action": "Activate the collapse control by keyboard.",
+          "result": "The hidden crumbs are revealed, aria-expanded flips to true, and the change is announced to assistive technology."
+        },
+        {
+          "action": "Measure the contrast of the link colour, the current-crumb colour and the separator against the page background.",
+          "data": "AA requires 4.5:1 for normal text and 3:1 for non-text graphics",
+          "result": "All meet their thresholds."
+        },
+        {
+          "action": "Run axe-core against the page, then a Lighthouse accessibility audit.",
+          "result": "axe reports no new violations attributable to the breadcrumb, and the accessibility score is 100 barring pre-existing issues elsewhere."
+        }
+      ]
+    },
+    {
+      "id": "BREADCRUMB-TC-06",
+      "summary": "Block: Breadcrumb - Internationalization - RTL direction, mirroring and collapse",
+      "scope": "That the trail works in a right-to-left locale: it reads right to left from the start edge, the chevrons point the other way, and the mobile shortening behaves the same way without clipping or pushing the page sideways.",
+      "ac": ["AC-11", "AC-12"],
+      "suites": ["regression"],
+      "labels": ["breadcrumb", "i18n", "rtl"],
+      "fixtures": ["BREADCRUMB-FX-07"],
+      "notes": "Step 5 concerns the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04. Expected to fail, and part of that same defect.",
+      "steps": [
+        {
+          "action": "Open fixture FX-07 on a desktop viewport and confirm the document direction.",
+          "result": "The page carries dir=\"rtl\" and the Arabic locale in its lang attribute."
+        },
+        {
+          "action": "Read the trail from the start edge.",
+          "result": "Home sits at the right-hand edge and the trail reads right to left, ending with the current page on the left."
+        },
+        {
+          "action": "Inspect a chevron separator.",
+          "result": "It points in the mirrored direction, following the reading order rather than staying pointed right."
+        },
+        {
+          "action": "Check the block's alignment and padding against the page's start edge.",
+          "result": "The trail is flush to the right-hand start edge, with the same spacing the left edge has in a left-to-right locale."
+        },
+        {
+          "action": "Switch to a mobile viewport and open the collapsed trail.",
+          "result": "The shortened form and its control appear in mirrored order, and expanding it reveals the ancestors in the correct right-to-left sequence."
+        },
+        {
+          "action": "At both viewports, check the document for horizontal overflow.",
+          "result": "Nothing is clipped and the page never scrolls horizontally in either direction."
+        }
+      ]
+    }
+  ]
+}

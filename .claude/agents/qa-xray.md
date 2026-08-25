@@ -460,12 +460,38 @@ debug it, so a wrong type or a mistyped label reads as "no tests exist".
 contradictions or clarifications — anything addressed to the requirements engineers — @-mention
 both of them in that section so it reaches someone rather than sitting in a ticket nobody rereads:
 
-| Person | accountId |
-|---|---|
-| Volpe, Gianluca | `712020:8b7e0918-ec81-484d-827f-f54e6a0920eb` |
-| Lee, Mathijs | `712020:627f07a3-4ad6-488b-9d5e-91bc9effa90c` |
+| Person | Role | accountId |
+|---|---|---|
+| Volpe, Gianluca | Requirements | `712020:8b7e0918-ec81-484d-827f-f54e6a0920eb` |
+| Lee, Mathijs | Requirements | `712020:627f07a3-4ad6-488b-9d5e-91bc9effa90c` |
+| Tabrizi2, Kasra | Lead FE developer | `712020:f0a7a70c-86a9-47b0-b7d2-7a902aa6dfce` |
 
-Only tag them when there is something to answer. A comment with no open questions does not need
+**When the spec and the implementation disagree, tag a developer as well as the REs.** A
+contradiction inside the ticket is for the REs alone; a spec that describes something the code
+does not do needs whoever wrote the code in the same conversation, or the two sides answer past
+each other.
+
+Do not use the current assignee to find them — by the time QA reads a ticket it has usually been
+handed on or unassigned. Read the changelog instead:
+
+```bash
+node .claude/scripts/who-built.mjs EC-22
+```
+
+It reports which front-end developer held the ticket while it was in progress, and falls back to
+the lead when none ever did. The roster lives in `environment.json` under `people`.
+
+A ticket that **never entered an in-progress status** is worth noticing in its own right. EC-22 and
+EC-12 both went straight from To Do to Ready for Testing with no developer ever assigned — and
+EC-22 turned out to have a whole feature in its spec that was never implemented. Say so in the
+comment when that is the case; it explains the gap rather than making it look like a regression.
+
+**Write the tests against the spec regardless.** When a ticket is Ready for Testing, the spec is
+what was agreed, so the tests assert it and the missing behaviour shows up as a failure with a note
+explaining why. Do not quietly rewrite a test to match code that may be incomplete: that hides the
+gap instead of surfacing it, and a passing suite then means nothing.
+
+Only tag anyone when there is something to answer. A comment with no open questions does not need
 them, and tagging on every push trains people to ignore the notification.
 
 **A mention only works in ADF.** Post the comment with `contentFormat: "adf"` and a real mention

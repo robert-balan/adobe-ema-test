@@ -8,12 +8,18 @@
     "id": "11590"
   },
   "coverage": {
-    "coverableIssueTypeIds": ["11809"],
+    "coverableIssueTypeIds": [
+      "11809"
+    ],
     "issueLinkTypeId": "10500",
     "issueLinkTypeName": "Test",
     "issueLinkTypeDirection": "INWARD"
   },
-  "testEnvironments": ["develop-eds-ufs", "stage-eds-ufs", "main-eds-ufs"],
+  "testEnvironments": [
+    "develop-eds-ufs",
+    "stage-eds-ufs",
+    "main-eds-ufs"
+  ],
   "issueTypes": {
     "Story": "11809",
     "Test": "12531",
@@ -22,5 +28,33 @@
     "Test execution": "12598",
     "XRay Precondition": "12668"
   },
-  "verifiedOn": "2026-08-24"
+  "verifiedOn": "2026-08-24",
+  "people": {
+    "_comment": "Who to tag on a QA-scope comment. Requirements engineers answer contradictions inside a spec; a front-end developer is needed as well when the spec describes something the code does not do.",
+    "requirements": [
+      {
+        "name": "Volpe, Gianluca",
+        "accountId": "712020:8b7e0918-ec81-484d-827f-f54e6a0920eb"
+      },
+      {
+        "name": "Lee, Mathijs",
+        "accountId": "712020:627f07a3-4ad6-488b-9d5e-91bc9effa90c"
+      }
+    ],
+    "frontend": [
+      {
+        "name": "Tabrizi2, Kasra",
+        "accountId": "712020:f0a7a70c-86a9-47b0-b7d2-7a902aa6dfce",
+        "lead": true
+      },
+      {
+        "name": "Bharadwaj, Piyush",
+        "accountId": "712020:aa1e7b44-b55f-491a-82b2-d50ca4fa8b7a"
+      },
+      {
+        "name": "Lubbe, Sybrand",
+        "accountId": "712020:54484866-f4d8-477e-981f-ddb6f49a7a46"
+      }
+    ]
+  }
 }
