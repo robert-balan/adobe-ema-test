@@ -33,11 +33,19 @@ command=$(printf '%s' "$payload" | jq -r '.tool_input.command // empty')
 # Only an actual invocation counts. Reading, grepping or naming the script in a message is not a
 # write, and a guard that blocks those gets switched off — which costs more than it saves.
 invokes() {
+  local script="$1"
   printf '%s' "$command" | grep -Eq \
-    -e '(^|[;&|]|[[:space:]])(node|nodejs)[[:space:]]+[^;&|]*xray-push\.mjs' \
-    -e '(^|[;&|][[:space:]]*)([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*(\.{0,2}/)[^[:space:];&|]*xray-push\.mjs'
+    -e "(^|[;&|]|[[:space:]])(node|nodejs)[[:space:]]+[^;&|]*${script}" \
+    -e "(^|[;&|][[:space:]]*)([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*(\.{0,2}/)[^[:space:];&|]*${script}"
 }
-invokes || allow
+
+if invokes 'xray-push\.mjs'; then
+  tool=xray; approval=XRAY_PUSH_APPROVED; target="real Jira issues"
+elif invokes 'da-fixture\.mjs'; then
+  tool=fixture; approval=DA_FIXTURE_APPROVED; target="content in the client's authoring environment"
+else
+  allow
+fi
 
 # Read-only modes write nothing to Xray and need no approval.
 case "$command" in
@@ -45,16 +53,18 @@ case "$command" in
 esac
 
 case "$command" in
-  *XRAY_PUSH_APPROVED=1*) allow ;;
+  *"${approval}=1"*) allow ;;
 esac
 
-deny "Blocked: this would create or modify real Jira issues, and the run is not marked as approved.
+script=$([ "$tool" = xray ] && echo xray-push.mjs || echo da-fixture.mjs)
+
+deny "Blocked: this would create or modify ${target}, and the run is not marked as approved.
 
 Show the user the dry run first:
-    node .claude/scripts/xray-push.mjs <plan.json> --dry-run
+    node .claude/scripts/${script} <plan.json> --dry-run
 
 Once they have seen it and said go, repeat their approval in the command itself:
-    XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs <plan.json>
+    ${approval}=1 node .claude/scripts/${script} <plan.json>
 
 Do not set that variable on your own initiative — it stands for a person's decision, and it is
 recorded in the transcript as one."

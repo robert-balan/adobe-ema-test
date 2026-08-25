@@ -88,7 +88,7 @@ export function planProblems(plan) {
     seenFixtures.add(f.id);
     // Fixtures are written into a client's authoring environment. A path outside the drafts area
     // is the mistake that publishes test content to a live site, so it is refused rather than warned.
-    for (const [field, value] of [['page', f.page], ['nav', f.nav]]) {
+    for (const [field, value] of [["page", f.page], ["nav", f.nav?.path]]) {
       if (value && !value.startsWith('/drafts/')) {
         problems.push(`fixtures (${f.id}): ${field} "${value}" is outside /drafts/ — `
           + 'fixtures must never sit on a publishable path');

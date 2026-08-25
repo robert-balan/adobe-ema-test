@@ -18,57 +18,88 @@
       "title": "Happy path — 8 brand logos",
       "purpose": "8 image-only links plus the label; overflows the strip on desktop so both arrows have work to do",
       "page": "/drafts/qa/brands/happy",
-      "nav": "/drafts/qa/brands/nav-happy",
-      "metadata": {
-        "nav": "/drafts/qa/brands/nav-happy"
-      }
+      "nav": {
+        "path": "/drafts/qa/brands/nav-happy",
+        "from": "/nav",
+        "count": 8
+      },
+      "metadata": {}
     },
     {
       "id": "BRANDS-FX-02",
       "title": "Below overflow — 2 brand logos",
       "purpose": "The minimum that still classifies as a carousel, and few enough that nothing overflows",
       "page": "/drafts/qa/brands/few",
-      "nav": "/drafts/qa/brands/nav-few",
-      "metadata": {
-        "nav": "/drafts/qa/brands/nav-few"
-      }
+      "nav": {
+        "path": "/drafts/qa/brands/nav-few",
+        "from": "/nav",
+        "count": 2
+      },
+      "metadata": {}
     },
     {
       "id": "BRANDS-FX-03",
       "title": "Below threshold — 1 image link",
       "purpose": "One image-only link, under the two-link rule, so no carousel should be built at all",
       "page": "/drafts/qa/brands/single",
-      "nav": "/drafts/qa/brands/nav-single",
-      "metadata": {
-        "nav": "/drafts/qa/brands/nav-single"
-      }
+      "nav": {
+        "path": "/drafts/qa/brands/nav-single",
+        "from": "/nav",
+        "count": 1
+      },
+      "metadata": {}
     },
     {
       "id": "BRANDS-FX-04",
       "title": "Captioned links — should not classify",
       "purpose": "Image links carrying captions, which the spec says render as featured products rather than a brand carousel",
       "page": "/drafts/qa/brands/captioned",
-      "nav": "/drafts/qa/brands/nav-captioned",
-      "metadata": {
-        "nav": "/drafts/qa/brands/nav-captioned"
-      }
+      "nav": {
+        "path": "/drafts/qa/brands/nav-captioned",
+        "from": "/nav",
+        "count": 3,
+        "links": [
+          {
+            "caption": "Knorr range"
+          },
+          {
+            "caption": "Hellmanns range"
+          },
+          {
+            "caption": "Carte dOr range"
+          }
+        ]
+      },
+      "metadata": {}
     },
     {
       "id": "BRANDS-FX-05",
       "title": "Hostile content",
       "purpose": "24 logos, one broken image src, no label, one non-square logo and one very long alt text",
       "page": "/drafts/qa/brands/hostile",
-      "nav": "/drafts/qa/brands/nav-hostile",
-      "metadata": {
-        "nav": "/drafts/qa/brands/nav-hostile"
-      }
+      "nav": {
+        "path": "/drafts/qa/brands/nav-hostile",
+        "from": "/nav",
+        "count": 24,
+        "removeLabel": true,
+        "links": [
+          {},
+          {
+            "alt": "Broken brand logo",
+            "src": "https://develop--ufs--foodsolutions-04.aem.page/drafts/qa/brands/does-not-exist.png"
+          },
+          {
+            "alt": "A deliberately long accessible name used to check that an over-long alt attribute cannot widen its tile or break the row layout"
+          }
+        ]
+      },
+      "metadata": {}
     },
     {
       "id": "BRANDS-FX-06",
       "title": "RTL",
       "purpose": "Happy-path content on a page whose Language metadata is an RTL locale, so scripts.js sets html dir=rtl",
       "page": "/drafts/qa/brands/rtl",
-      "nav": "/drafts/qa/brands/nav-happy",
       "metadata": {
         "nav": "/drafts/qa/brands/nav-happy",
         "Language": "ar-MA"
@@ -79,7 +110,6 @@
       "title": "Accessibility page",
       "purpose": "Happy-path content on a page of its own, so tab order, screen-reader output and an axe scan describe the carousel and nothing else",
       "page": "/drafts/qa/brands/a11y",
-      "nav": "/drafts/qa/brands/nav-happy",
       "metadata": {
         "nav": "/drafts/qa/brands/nav-happy"
       }

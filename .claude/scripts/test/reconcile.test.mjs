@@ -357,7 +357,7 @@ test('planProblems: a fixture outside /drafts/ is refused', () => {
   assert.match(planProblems(page).join(), /page "\/products\/happy" is outside \/drafts\//);
 
   const nav = planOf({
-    fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/drafts/qa/ok', nav: '/nav' }],
+    fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/drafts/qa/ok', nav: { path: '/nav', from: '/nav' } }],
   });
   assert.match(planProblems(nav).join(), /nav "\/nav" is outside \/drafts\//);
 });

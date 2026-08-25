@@ -52,7 +52,7 @@
     },
     "testSets": {
       "type": "object",
-      "description": "Optional override of the Test Set summary per suite. Omit it \u2014 the default is three project-wide sets (\"Sanity testing\", \"Regression testing\", \"E2E testing\") that accumulate tests across every ticket. Naming them here creates ticket-scoped sets instead, since the registry is keyed by summary.",
+      "description": "Optional override of the Test Set summary per suite. Omit it — the default is three project-wide sets (\"Sanity testing\", \"Regression testing\", \"E2E testing\") that accumulate tests across every ticket. Naming them here creates ticket-scoped sets instead, since the registry is keyed by summary.",
       "properties": {
         "sanity": {
           "type": "string"
@@ -95,8 +95,42 @@
             "description": "Path of the fixture page in DA, e.g. /drafts/qa/brands/happy. Never under a published path."
           },
           "nav": {
-            "type": "string",
-            "description": "Path of a nav document this page points at via its `nav` metadata. Header-family blocks live in the nav document, so a variant means a whole nav rather than a section."
+            "type": "object",
+            "description": "A nav document generated for this fixture by transforming a live one. Header-family blocks live in the site-wide nav, so a variant means a whole nav rather than a section; the page's `nav` metadata row is derived from `path` automatically.",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "from"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Where the generated nav is written, under /drafts/."
+              },
+              "from": {
+                "type": "string",
+                "description": "The live document it is derived from, e.g. /nav. Deriving keeps the fixture identical to production except on the axis under test."
+              },
+              "count": {
+                "type": "integer",
+                "description": "How many brand links the strip should hold. Logos cycle from the source when more are wanted than exist."
+              },
+              "label": {
+                "type": "string",
+                "description": "Replacement text for the strip label."
+              },
+              "removeLabel": {
+                "type": "boolean",
+                "description": "Drop the label entirely, for the degraded case."
+              },
+              "links": {
+                "type": "array",
+                "description": "Per-link overrides, positional: { alt, src, caption }.",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
           },
           "metadata": {
             "type": "object",
@@ -129,11 +163,11 @@
           "id": {
             "type": "string",
             "pattern": "^[A-Z][A-Z0-9]*(-[0-9]+)?-TC-[0-9]{2,}$",
-            "description": "Stable identity, and the idempotency key for pushes \u2014 NEVER renumber one. Prefer a feature slug (BRANDS-TC-01) over a ticket key (EC-14-TC-01): spec tickets get repurposed and renumbered, features do not."
+            "description": "Stable identity, and the idempotency key for pushes — NEVER renumber one. Prefer a feature slug (BRANDS-TC-01) over a ticket key (EC-14-TC-01): spec tickets get repurposed and renumbered, features do not."
           },
           "summary": {
             "type": "string",
-            "description": "Jira summary. The format is defined once, in the Conventions section of .claude/agents/qa-xray.md \u2014 do not restate it here, because two statements of it drift apart."
+            "description": "Jira summary. The format is defined once, in the Conventions section of .claude/agents/qa-xray.md — do not restate it here, because two statements of it drift apart."
           },
           "ac": {
             "type": "array",
