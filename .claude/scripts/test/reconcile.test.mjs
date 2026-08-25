@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
   stepsOf, sameSteps, labelsFor, describeTest,
-  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems, sameText, parseUnclaim,
+  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems, sameText, parseUnclaim, requirementLinkId,
 } from '../lib/reconcile.mjs';
 
 const sha = (s) => `sha256:${createHash('sha256').update(s).digest('hex').slice(0, 16)}`;
@@ -407,4 +407,17 @@ test('parseUnclaim: a test absent from the plan can still be unclaimed', () => {
   const { pairs, problems } = parseUnclaim(['BRANDS-TC-99:e2e'], { tests: [] });
   assert.deepEqual(problems, []);
   assert.equal(pairs[0].id, 'BRANDS-TC-99');
+});
+
+test('requirementLinkId: finds the link to the spec, whichever way round it points', () => {
+  const links = [
+    { id: '1', type: { name: 'Defect' }, outwardIssue: { key: 'EC-14' } },
+    { id: '2', type: { name: 'Test' }, outwardIssue: { key: 'EC-99' } },
+    { id: '3', type: { name: 'Test' }, outwardIssue: { key: 'EC-14' } },
+  ];
+  assert.equal(requirementLinkId(links, 'EC-14'), '3');
+  // A backwards link still needs removing when the test is retired.
+  assert.equal(requirementLinkId([{ id: '9', type: { name: 'Test' }, inwardIssue: { key: 'EC-14' } }], 'EC-14'), '9');
+  assert.equal(requirementLinkId(links, 'EC-77'), null);
+  assert.equal(requirementLinkId(undefined, 'EC-14'), null);
 });

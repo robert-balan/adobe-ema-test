@@ -45,7 +45,7 @@ import { createClient } from './lib/gql.mjs';
 import { validate } from './lib/schema.mjs';
 import {
   SUITES, LINK_TYPE, stepsOf, labelsFor, describeTest,
-  resolveIdentity, diffTest, linkState, driftFor, planProblems, parseUnclaim,
+  resolveIdentity, diffTest, linkState, driftFor, planProblems, parseUnclaim, requirementLinkId,
 } from './lib/reconcile.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -131,6 +131,9 @@ const Q = {
   findByLabel: `query FindByLabel($jql: String!, $start: Int, $limit: Int!) {
     getTests(jql: $jql, start: $start, limit: $limit) {
       total results { issueId jira(fields: ["key","labels"]) } } }`,
+  linksOf: `query LinksOf($issueIds: [String]) {
+    getTests(issueIds: $issueIds, limit: 100) {
+      results { issueId jira(fields: ["key","issuelinks"]) } } }`,
   testPlansOf: `query TestPlansOf($issueIds: [String]) {
     getTests(issueIds: $issueIds, limit: 100) {
       results { issueId testPlans(limit: 100) { total results { issueId jira(fields: ["key"]) } } } } }`,
@@ -478,7 +481,7 @@ if (GONE.length) console.log(`\nnote: ${GONE.map(({ rec }) => rec.key).join(', '
 const created = { ...prior.tests };
 for (const [id, rec] of record) created[id] = { ...created[id], ...rec };
 const jiraActions = {
-  source: plan.source?.key || null, project: plan.project, links: [], relink: [], edits: [], deprecate: [], review: [],
+  source: plan.source?.key || null, project: plan.project, links: [], relink: [], unlink: [], edits: [], deprecate: [], review: [],
 };
 const testSets = {};
 
@@ -664,8 +667,24 @@ try {
       await gqlOrThrow(Q.removeFromPlan, { issueId: tp.issueId, testIssueIds: [rec.issueId] }, { tolerant: true });
     }
     const from = plans.length ? ` and ${plans.map((p) => p.jira.key).join(', ')}` : '';
+
+    // The requirement link has to go too. Xray counts coverage from it, so a retired test that
+    // keeps its link is still counted against the story — and since it will never run again, that
+    // story's coverage can never come out green. The link is Jira's, and neither Xray's API nor
+    // the MCP tools can delete one, so it is emitted with its link id for the agent to remove.
+    let unlinked = '';
+    if (plan.source?.key) {
+      const d2 = await gqlOrThrow(Q.linksOf, { issueIds: [rec.issueId] }, { tolerant: true, label: 'linksOf' });
+      const links = d2?.getTests?.results?.[0]?.jira?.issuelinks;
+      const linkId = requirementLinkId(links, plan.source.key);
+      if (linkId) {
+        jiraActions.unlink.push({ test: rec.key, spec: plan.source.key, linkId, planId: id });
+        unlinked = `, link ${linkId} to ${plan.source.key} flagged for removal`;
+      }
+    }
+
     jiraActions.deprecate.push({ key: rec.key, planId: id, addLabel: 'deprecated', removedFromTestPlans: plans.map((p) => p.jira.key) });
-    console.log(`deprecated ${id} → ${rec.key}  (removed from all suites${from})`);
+    console.log(`deprecated ${id} → ${rec.key}  (removed from all suites${from}${unlinked})`);
   }
 } catch (err) {
   applyError = err;
@@ -681,6 +700,7 @@ if (pending || jiraActions.review.length || jiraActions.relink.length) {
   if (jiraActions.relink.length) console.log(`  ${jiraActions.relink.length} backwards link(s) to delete by hand — they produce no coverage`);
   if (jiraActions.edits.length) console.log(`  ${jiraActions.edits.length} field edit(s) — summary / labels / description`);
   if (jiraActions.deprecate.length) console.log(`  ${jiraActions.deprecate.length} 'deprecated' label(s) to add`);
+  if (jiraActions.unlink.length) console.log(`  ${jiraActions.unlink.length} requirement link(s) to REMOVE — a retired test still counts as coverage until its link goes`);
   if (jiraActions.review.length) console.log(`  ${jiraActions.review.length} test(s) needing a human decision`);
   console.log('The Xray API cannot write Jira fields or links — the qa-xray agent applies these over MCP.');
 }

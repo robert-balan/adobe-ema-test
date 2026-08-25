@@ -366,6 +366,21 @@ The Xray API cannot write Jira fields or issue links, so the script emits
   push to emit the correct ones.
 - `edits` → `editJiraIssue` with the given summary / labels / description.
 - `deprecate` → `editJiraIssue` adding the `deprecated` label.
+- `unlink` → **the requirement link of a retired test must be removed.** Xray counts coverage from
+  that link, so a deprecated test keeps counting against the story and, since it will never run
+  again, that story's coverage can never come out green. This is the one place the "keep links for
+  lineage" rule does not apply: a test that verifies nothing must not claim to verify this.
+
+  Neither the Xray API nor the MCP tools can delete an issue link — Xray has no link mutations at
+  all, and MCP can only create. Only Jira REST can, so this is the single task in the toolchain
+  that needs a Jira API token rather than MCP:
+
+  ```bash
+  node .claude/scripts/jira-unlink.mjs .claude/qa/plans/<FEATURE>.json
+  ```
+
+  Without a token it prints each link and its id so a person can remove them by hand. Either way,
+  confirm afterwards with `qa-coverage.mjs`, which fails when a deprecated test is still counted.
 - `review` → do **not** act automatically. Tell the user which tests dropped out of the plan and
   ask whether to deprecate them or restore the plan entry.
 

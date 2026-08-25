@@ -217,6 +217,21 @@ export function sameText(a, b) {
  * all, which is how every test in this project once ended up covering nothing, so a backwards
  * link is reported as its own state rather than being counted as present or quietly re-created.
  */
+/**
+ * The id of the requirement link from a Test to its spec ticket, or null.
+ *
+ * Needed to remove one. A retired test must lose this link, because Xray counts coverage from it:
+ * leave it and the story reports tests that will never run again, so its coverage can never come
+ * out green and the figure stops meaning anything. This is the one case where the "keep links for
+ * lineage" rule does not apply — a test that verifies nothing should not claim to verify this.
+ */
+export function requirementLinkId(issuelinks, specKey, linkType = LINK_TYPE) {
+  if (!Array.isArray(issuelinks)) return null;
+  const hit = issuelinks.find((l) => l?.type?.name === linkType
+    && (l.outwardIssue?.key === specKey || l.inwardIssue?.key === specKey));
+  return hit?.id || null;
+}
+
 export function linkState({ issuelinks, specKey, linkType = LINK_TYPE }) {
   if (!Array.isArray(issuelinks)) return 'unknown';
   let reversed = false;

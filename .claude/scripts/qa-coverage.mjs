@@ -84,6 +84,17 @@ for (const key of keys) {
   const flag = total === 0 ? '  ← no tests count toward this story' : '';
   console.log(`${key.padEnd(8)} ${String(r.status?.name || '?').padEnd(10)} ${String(total).padStart(3)} test(s)  ${r.jira.summary}${flag}`);
   if (total === 0) bad += 1;
+
+  // A retired test that kept its requirement link still counts here, and will never be executed
+  // again — so the story's coverage can never come out green and the figure stops meaning
+  // anything. This is the safety net for a deprecation whose unlink step was skipped.
+  const retired = (r.tests?.results || []).filter((t) => (t.jira.labels || []).includes('deprecated'));
+  if (retired.length) {
+    bad += 1;
+    console.log(`         ${retired.length} of those are DEPRECATED and still counted: ${retired.map((t) => t.jira.key).join(', ')}`);
+    console.log('         They will never run again, so this coverage can never complete.');
+    console.log('         Remove their links:  node .claude/scripts/jira-unlink.mjs <plan.json>');
+  }
 }
 
 /* --------------------------------------------- did the plan's tests land? */

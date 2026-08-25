@@ -232,6 +232,27 @@ XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.
 
 It refuses if the plan still claims that suite, because the next push would simply put it back.
 
+### Retiring a test also means unlinking it
+
+Removing a test from the suites is only half of retiring it. The link to its spec ticket is what
+Xray counts coverage from, so a deprecated test keeps counting against the story — and because it
+will never run again, that story can never reach full coverage. EC-14 read "16 tests" with only 7
+live for exactly this reason.
+
+`--deprecate` now records the link to remove, and:
+
+```sh
+node .claude/scripts/jira-unlink.mjs .claude/qa/plans/BRANDS.json
+```
+
+removes them. This is the one job that cannot go through MCP: Xray has no issue-link mutations,
+and the MCP server can create a link but not delete one. Only Jira REST can, so it needs
+`JIRA_EMAIL` and `JIRA_API_TOKEN`. Without them the script prints every link and its id so you can
+remove them by hand.
+
+`qa-coverage.mjs` is the safety net — it fails when a story still counts a deprecated test, so a
+skipped unlink is caught on the next check rather than quietly rotting the coverage figure.
+
 Still commit `result.json` after a push. Adoption is the safety net, not the plan.
 
 ### Revising tests when a spec changes
