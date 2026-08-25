@@ -15,13 +15,13 @@
   "fixtures": [
     {
       "id": "BRANDS-FX-01",
-      "title": "Happy path — 8 brand logos",
-      "purpose": "8 image-only links plus the label; overflows the strip on desktop so both arrows have work to do",
+      "title": "Happy path — 14 brand logos",
+      "purpose": "14 image-only links plus the label; enough to overflow the strip on desktop, so both arrows have work to do",
       "page": "/drafts/qa/brands/happy",
       "nav": {
         "path": "/drafts/qa/brands/nav-happy",
         "from": "/nav",
-        "count": 8
+        "count": 14
       },
       "metadata": {
         "Language": "en"
