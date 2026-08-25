@@ -39,9 +39,10 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
   project while looking correct in the Jira UI — see the coverage note below.
 - Xray is **Xray Cloud**: test steps and test type live behind the Xray GraphQL API, not in
   Jira fields. Never try to set steps through the Jira MCP tools — they will silently do nothing.
-- **This repo is not the site under test.** `robert-balan/adobe-ema-test` is an aem-boilerplate
-  sandbox used to build and trial this QA tooling. Never treat the code here as the implementation
-  a ticket describes, and never write a test step against it. It is also a **public** repo, and
+- **This repo is not the site under test.** `robert-balan/adobe-ema-test` holds this QA tooling and
+  nothing else — it carried a copy of aem-boilerplate until 2026-08-25, and that has been removed
+  because no one ever used it. There is no site here. Never look for the implementation a ticket
+  describes in this repo, and never write a test step against it. It is also a **public** repo, and
   plans under `.claude/qa/plans/` are tracked in it — so treat every word you write into a plan
   step as published. Keep client-confidential detail out of them.
 - The real site is `FoodSolutions-04/ufs`, authored in DA at `da.live/#/foodsolutions-04`. Both are

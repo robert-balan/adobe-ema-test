@@ -1,34 +1,65 @@
-# Your Project's Title...
-Your project's description...
+# qa-xray
 
-## Environments
-- Preview: https://main--{repo}--{owner}.aem.page/
-- Live: https://main--{repo}--{owner}.aem.live/
+Turns Jira specifications into Xray test cases, and keeps them honest afterwards.
 
-## Documentation
+This repository holds a Claude Code agent and the tooling it drives. Point it at a spec ticket and
+it reads the acceptance criteria, grounds each assertion in the real implementation and the design
+handover, writes a reviewable plan file, and — only once a human has approved it — creates the Xray
+Tests in Jira, adds them to the right suites, and links them to the ticket so Xray actually counts
+the coverage.
 
-Before using the aem-boilerplate, we recommand you to go through the documentation on https://www.aem.live/docs/ and more specifically:
-1. [Developer Tutorial](https://www.aem.live/developer/tutorial)
-2. [The Anatomy of a Project](https://www.aem.live/developer/anatomy-of-a-project)
-3. [Web Performance](https://www.aem.live/developer/keeping-it-100)
-4. [Markup, Sections, Blocks, and Auto Blocking](https://www.aem.live/developer/markup-sections-blocks)
-
-## Installation
+The site under test lives elsewhere. Nothing is built or served from here.
 
 ```sh
-npm i
+npm test        # the tooling's own tests — no dependencies, about a second
 ```
 
-## Linting
+## Start here
 
-```sh
-npm run lint
+**[`.claude/qa/README.md`](.claude/qa/README.md)** — setup, the Xray API key, how a push
+reconciles rather than recreates, and how two people share the work without creating duplicate
+tests.
+
+**[`.claude/qa/onboarding.html`](.claude/qa/onboarding.html)** — a walkthrough for QA collaborators
+who have not used the agent before.
+
+**[`.claude/agents/qa-xray.md`](.claude/agents/qa-xray.md)** — the doctrine: how test cases are
+designed, how they are grouped, what every block must be covered against, and why. Every rule
+carries the reason it exists, so it can be argued with.
+
+## The shape of it
+
+```
+> use the qa-xray agent to write test cases for EC-18
+
+.claude/qa/plans/UTILITY.json          the plan — the master copy, reviewed in a PR
+                    ↓  xray-push.mjs
+EC-140 … EC-152                        Xray Tests, labelled with their plan id
+                    ↓  qa-coverage.mjs
+EC-18  COVERED  13 tests               what Xray actually counts
 ```
 
-## Local development
+The plan file is the master copy and Jira is the published copy. Re-running a revised plan edits
+the existing tickets in place rather than creating a second set, because each test carries its plan
+id as a Jira label — so a colleague pushing from a fresh clone adopts your tests instead of
+duplicating them. Nothing is ever deleted; retiring a test removes it from the suites and keeps its
+execution history.
 
-1. Create a new repository based on the `aem-boilerplate` template
-1. Add the [AEM Code Sync GitHub App](https://github.com/apps/aem-code-sync) to the repository
-1. Install the [AEM CLI](https://github.com/adobe/helix-cli): `npm install -g @adobe/aem-cli`
-1. Start AEM Proxy: `aem up` (opens your browser at `http://localhost:3000`)
-1. Open the `{repo}` directory in your favorite IDE and start coding :)
+Three things are checked in both directions before anything is written, because each can drift
+without leaving a trace anywhere a person would look: the test's own fields, its suite membership,
+and the requirement link — which renders identically in Jira whether it is right or backwards, and
+counts for nothing when it is backwards.
+
+## A note on this repository being public
+
+Plan files are tracked so they can be reviewed and shared, which means every word of a test step is
+world-readable and permanent once pushed. Keep client-confidential detail out of them — or move
+`.claude/qa/plans/` into a private repository checked out at that path, which the tooling supports
+unchanged.
+
+## History
+
+This started as a copy of [aem-boilerplate](https://github.com/adobe/aem-boilerplate/) and carried
+a full Edge Delivery site for a while. None of it was ever used, and all of it has been removed.
+The `LICENSE`, `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` still date from that inheritance and
+describe Adobe's contribution process rather than this project's.

@@ -6,11 +6,11 @@
  * "validates the schema", which it did not: a plan with a malformed test id or a typo'd property
  * passed and reached Xray. Two definitions of valid, one of them unenforced, drifting apart.
  *
- * Kept dependency-free on purpose. This repo is an aem-boilerplate site whose package.json ships
- * to a public project; adding a validation library to it so that .claude/ tooling can lint a JSON
- * file is a poor trade. The supported keywords are listed in KEYWORDS below — anything else in the
- * schema is reported as unsupported rather than silently ignored, so the schema cannot quietly
- * grow past what this understands.
+ * Kept dependency-free on purpose. The whole point of this tooling is that it can be trusted to
+ * edit live Jira issues, and every dependency is a thing to audit, pin and keep current for that
+ * trust to hold; pulling in a library to lint one JSON file is a poor trade. The supported
+ * keywords are listed in KEYWORDS below — anything else in the schema is reported as unsupported
+ * rather than silently ignored, so the schema cannot quietly grow past what this understands.
  */
 
 const KEYWORDS = new Set([

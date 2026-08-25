@@ -1,14 +1,16 @@
-name: Build
-on: [push]
+name: Test
 
+on: [push, pull_request]
+
+# No install step: the QA tooling is deliberately dependency-free, so there is nothing to
+# restore and no lockfile to keep honest. If that ever changes, add `npm ci` here and a
+# lockfile alongside it — do not let the two drift.
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
-    - name: Use Node.js 20
-      uses: actions/setup-node@v6
-      with:
-        node-version: 24
-    - run: npm ci
-    - run: npm run lint
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: npm test

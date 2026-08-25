@@ -16,8 +16,8 @@ The Jira spec is the contract; the handover prototype is where its values come f
 extraction recipe live in [`design-sources.md`](design-sources.md) — read it before writing any
 test step that asserts a colour, size, spacing or timing.
 
-Note this repo is an aem-boilerplate **sandbox** for building the QA tooling, not the site under
-test, and it is **public**. Plans under `plans/` are tracked so they can be reviewed and shared,
+Note this repo holds the QA tooling, **not the site under test**, and it is **public**. Plans
+under `plans/` are tracked so they can be reviewed and shared,
 which means every word of a test step is world-readable and permanent once pushed. Keep
 client-confidential detail out of plan text — or move `plans/` into a private repo checked out
 at that path, which the tooling supports unchanged.
@@ -315,4 +315,5 @@ is safe, and a key that is not a Test Plan is rejected before anything is writte
 | `.claude/scripts/lib/` | The parts with no I/O in them: reconcile logic, schema validation, the API client |
 | `.claude/scripts/test/` | Tests for all of the above — `node --test .claude/scripts/test/*.test.mjs` |
 
-Everything lives under `.claude/`, which `.hlxignore` excludes from the published site.
+Everything lives under `.claude/`. There is nothing else in this repository — the aem-boilerplate
+site it was created from was removed on 2026-08-25, unused.
