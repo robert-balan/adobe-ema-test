@@ -23,7 +23,9 @@
         "from": "/nav",
         "count": 8
       },
-      "metadata": {}
+      "metadata": {
+        "Language": "en"
+      }
     },
     {
       "id": "BRANDS-FX-02",
@@ -35,7 +37,9 @@
         "from": "/nav",
         "count": 2
       },
-      "metadata": {}
+      "metadata": {
+        "Language": "en"
+      }
     },
     {
       "id": "BRANDS-FX-03",
@@ -47,7 +51,9 @@
         "from": "/nav",
         "count": 1
       },
-      "metadata": {}
+      "metadata": {
+        "Language": "en"
+      }
     },
     {
       "id": "BRANDS-FX-04",
@@ -70,7 +76,9 @@
           }
         ]
       },
-      "metadata": {}
+      "metadata": {
+        "Language": "en"
+      }
     },
     {
       "id": "BRANDS-FX-05",
@@ -93,7 +101,9 @@
           }
         ]
       },
-      "metadata": {}
+      "metadata": {
+        "Language": "en"
+      }
     },
     {
       "id": "BRANDS-FX-06",
@@ -111,7 +121,8 @@
       "purpose": "Happy-path content on a page of its own, so tab order, screen-reader output and an axe scan describe the carousel and nothing else",
       "page": "/drafts/qa/brands/a11y",
       "metadata": {
-        "nav": "/drafts/qa/brands/nav-happy"
+        "nav": "/drafts/qa/brands/nav-happy",
+        "Language": "en"
       }
     }
   ],
