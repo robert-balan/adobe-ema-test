@@ -57,9 +57,14 @@ world-readable and permanent once pushed. Keep client-confidential detail out of
 `.claude/qa/plans/` into a private repository checked out at that path, which the tooling supports
 unchanged.
 
-## History
+## History, and licensing
 
 This started as a copy of [aem-boilerplate](https://github.com/adobe/aem-boilerplate/) and carried
-a full Edge Delivery site for a while. None of it was ever used, and all of it has been removed.
-The `LICENSE`, `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` still date from that inheritance and
-describe Adobe's contribution process rather than this project's.
+a full Edge Delivery site for a while. None of it was ever used, and all of it has been removed —
+along with the Apache licence, contribution guide and code of conduct that came with it, which
+described Adobe's project rather than this one.
+
+**Nothing here is licensed for reuse.** The repository is public so the work can be reviewed and
+shared with the team, not so it can be copied. Without a licence file that is the default position
+in any case: all rights reserved. If this should carry an explicit notice, or an open-source
+licence, that needs a named copyright holder — decide it deliberately rather than inheriting one.

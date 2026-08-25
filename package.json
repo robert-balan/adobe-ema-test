@@ -7,5 +7,5 @@
   "scripts": {
     "test": "node --test .claude/scripts/test/*.test.mjs"
   },
-  "license": "Apache-2.0"
+  "license": "UNLICENSED"
 }
