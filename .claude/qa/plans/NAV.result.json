@@ -1,0 +1,104 @@
+{
+  "tests": {
+    "NAV-TC-01": {
+      "issueId": "302470",
+      "key": "EC-163",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-8"
+      ]
+    },
+    "NAV-TC-02": {
+      "issueId": "302471",
+      "key": "EC-164",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-5",
+        "AC-6",
+        "AC-8"
+      ]
+    },
+    "NAV-TC-03": {
+      "issueId": "302472",
+      "key": "EC-165",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-14"
+      ]
+    },
+    "NAV-TC-04": {
+      "issueId": "302473",
+      "key": "EC-166",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-6",
+        "AC-15"
+      ]
+    },
+    "NAV-TC-05": {
+      "issueId": "302474",
+      "key": "EC-167",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-7",
+        "AC-15"
+      ]
+    },
+    "NAV-TC-06": {
+      "issueId": "302475",
+      "key": "EC-168",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-10",
+        "AC-11",
+        "AC-12",
+        "AC-13"
+      ]
+    },
+    "NAV-TC-07": {
+      "issueId": "302476",
+      "key": "EC-169",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-9",
+        "AC-4"
+      ]
+    }
+  },
+  "testSets": {
+    "sanity": {
+      "issueId": "301670",
+      "key": "EC-104",
+      "suite": "sanity"
+    },
+    "regression": {
+      "issueId": "301671",
+      "key": "EC-105",
+      "suite": "regression"
+    }
+  }
+}

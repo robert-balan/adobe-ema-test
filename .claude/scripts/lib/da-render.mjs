@@ -177,16 +177,121 @@ export function transformUtility(navHtml, spec = {}) {
   return out;
 }
 
-export function transformNav(navHtml, spec = {}) {
-  // A spec may target more than one region of the same nav. Utility first, so a later brand-strip
-  // search runs against the already-edited document rather than a stale copy of it.
-  if (spec.utility) {
-    const after = transformUtility(navHtml, spec.utility);
-    const rest = { ...spec };
-    delete rest.utility;
-    return Object.keys(rest).length ? transformNav(after, rest) : after;
+/**
+ * Match the `</div>` that closes the `<div` starting at `open`, and return the index just past it.
+ * Nav regions nest divs several deep, so a non-greedy regex closes on the wrong tag every time.
+ */
+function closeDiv(html, open) {
+  const re = /<div\b[^>]*>|<\/div>/g;
+  re.lastIndex = open;
+  let depth = 0;
+  let m;
+  while ((m = re.exec(html))) {
+    if (m[0] === '</div>') {
+      depth -= 1;
+      if (depth === 0) return re.lastIndex;
+    } else depth += 1;
   }
-  const strip = findBrandStrip(navHtml);
+  return html.length;
+}
+
+/** The direct child `<div>`s of a block — its rows. */
+function rowsOf(blockHtml) {
+  const inner = blockHtml.slice(blockHtml.indexOf('>') + 1, blockHtml.lastIndexOf('</div>'));
+  const rows = [];
+  let i = 0;
+  while (i < inner.length) {
+    const open = inner.indexOf('<div', i);
+    if (open === -1) break;
+    const end = closeDiv(inner, open);
+    rows.push(inner.slice(open, end));
+    i = end;
+  }
+  return rows;
+}
+
+/**
+ * Replace the nav's logo.
+ *
+ * The logo is an icon token inside a link — `<a href="/" title="…">:ufs-logo:</a>`. The Content
+ * Slots table gives it one fallback ("text brand if no image"), and an author produces that by
+ * typing the brand name where the icon token was. So that is exactly what this does: swap the
+ * token for text, leaving the link itself alone.
+ *
+ * @param {string} navHtml
+ * @param {object} spec  { text }
+ */
+export function transformLogo(navHtml, spec = {}) {
+  const i = navHtml.indexOf(':ufs-logo:');
+  if (i === -1) throw new Error('no logo token found in the source nav');
+  if (spec.text === undefined) return navHtml;
+  return navHtml.slice(0, i) + esc(spec.text) + navHtml.slice(i + ':ufs-logo:'.length);
+}
+
+/**
+ * Rebuild the nav's top-level items.
+ *
+ * Every top-level item is one `div.nav-menu` block: row 1 holds the link that shows on the bar,
+ * and rows 2+ are its megamenu columns. A block with only row 1 is a plain link with nothing to
+ * open — which is how the content model distinguishes the two, with no flag to set.
+ *
+ * Items are built by cycling the live blocks, the same way the brand strip cycles logos, so a
+ * fixture with six items still carries real megamenu content rather than something invented.
+ *
+ * @param {string} navHtml
+ * @param {object} spec  { items: [{ label, href, plain }] }
+ */
+export function transformMenus(navHtml, spec = {}) {
+  if (!spec.items) return navHtml;
+  const MENU = /<div class="nav-menu[^"]*">/g;
+  const pool = [];
+  let m;
+  while ((m = MENU.exec(navHtml))) {
+    const end = closeDiv(navHtml, m.index);
+    pool.push({ start: m.index, end, text: navHtml.slice(m.index, end) });
+    MENU.lastIndex = end;
+  }
+  if (!pool.length) throw new Error('no nav-menu blocks found in the source nav');
+
+  const built = spec.items.map((item, i) => {
+    const base = pool[i % pool.length];
+    const rows = rowsOf(base.text);
+    const label = item.label === undefined ? null : esc(item.label);
+    const href = esc(item.href || '/');
+    // Row 1, cell 1 is the bar link. Rewrite it rather than rebuilding the row, so anything else
+    // the authors put in that row survives.
+    let first = rows[0];
+    if (label !== null) {
+      // Replace the row's FIRST CELL, not the first `</div>` after the row opens — those are two
+      // different tags, and a non-greedy regex takes the wrong one and eats the row itself.
+      const cellStart = first.indexOf('<div', first.indexOf('>') + 1);
+      const cellEnd = closeDiv(first, cellStart);
+      // Keep the <p> wrapper the authors actually use: the stylesheet targets `li > p > a` as well
+      // as `li > a`, so dropping it would style the fixture differently from production.
+      first = `${first.slice(0, cellStart)}<div><p><a href="${href}">${label}</a></p></div>${first.slice(cellEnd)}`;
+    }
+    const keep = item.plain ? [first] : [first, ...rows.slice(1)];
+    return `<div class="nav-menu">${keep.join('')}</div>`;
+  });
+
+  return navHtml.slice(0, pool[0].start) + built.join('') + navHtml.slice(pool[pool.length - 1].end);
+}
+
+export function transformNav(navHtml, spec = {}) {
+  // A spec may target more than one region of the same nav. The other regions run first, so a
+  // later brand-strip search reads the already-edited document rather than a stale copy of it.
+  let src = navHtml;
+  if (spec.utility) src = transformUtility(src, spec.utility);
+  if (spec.logo) src = transformLogo(src, spec.logo);
+  if (spec.menus) src = transformMenus(src, spec.menus);
+
+  // The brand strip is only touched when the spec actually asks for it. A fixture that edits the
+  // utility bar of a nav whose Products megamenu was left alone must not go rummaging for a strip.
+  const wantsStrip = ['count', 'label', 'removeLabel', 'links'].some((k) => spec[k] !== undefined);
+  if (!wantsStrip && (spec.utility || spec.logo || spec.menus)) return src;
+
+  const navSrc = src;
+  const strip = findBrandStrip(navSrc);
   if (!strip) throw new Error('no brand strip found in the source nav — it needs 2+ consecutive image-only links');
 
   const pool = strip.links;
@@ -197,7 +302,7 @@ export function transformNav(navHtml, spec = {}) {
     built.push(editLink(base, (spec.links || [])[i] || {}));
   }
 
-  let out = navHtml.slice(0, strip.start) + built.join('\n') + navHtml.slice(strip.end);
+  let out = navSrc.slice(0, strip.start) + built.join('\n') + navSrc.slice(strip.end);
 
   if (spec.removeLabel) {
     // The label is the paragraph immediately preceding the strip.

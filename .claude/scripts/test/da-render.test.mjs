@@ -14,10 +14,14 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
   metadataBlock, block, document_, fixturePage, findBrandStrip, editLink, transformNav, transformUtility,
+  transformMenus, transformLogo,
 } from '../lib/da-render.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const NAV = readFileSync(join(HERE, 'fixtures', 'nav-sample.html'), 'utf8');
+// A second sample, trimmed from the real /nav, because the top-level items have a shape the older
+// sample does not: one div.nav-menu per item, row 1 the bar link, rows 2+ the megamenu columns.
+const MENUS = readFileSync(join(HERE, 'fixtures', 'nav-menus-sample.html'), 'utf8');
 const countLinks = (s) => (s.match(/<a\b[^>]*>\s*<picture>/g) || []).length;
 
 /* -------------------------------------------------------------- primitives */
@@ -179,4 +183,80 @@ test('transformNav: a spec can target the utility bar and the brand strip togeth
   const out = transformNav(NAV, { utility: { links: ['Solo|/solo'] }, count: 3 });
   assert.equal(countLi(out), 1, 'utility bar edited');
   assert.equal((out.match(/<a\b[^>]*>\s*<picture>/g) || []).length, 3, 'brand strip edited too');
+});
+
+/* ------------------------------------------------------ top-level nav items */
+
+const menuBlocks = (s) => (s.match(/<div class="nav-menu">/g) || []).length;
+const barLabels = (s) => [...s.matchAll(/<div class="nav-menu"><div><div><p><a href="[^"]*">([^<]*)</g)].map((m) => m[1]);
+
+test('transformMenus: rebuilds the bar links, keeping the megamenu columns', () => {
+  const out = transformMenus(MENUS, { items: [{ label: 'Products', href: '/products' }] });
+  assert.equal(menuBlocks(out), 1);
+  assert.deepEqual(barLabels(out), ['Products']);
+  assert.match(out, /Chef&#x27;s Pick|Chef's Pick/, 'the columns came along');
+});
+
+// The content model has no flag for "plain link" — an item is plain when it has nothing but row 1.
+test('transformMenus: a plain item is one with no megamenu rows', () => {
+  const out = transformMenus(MENUS, { items: [{ label: 'Loyalty Program', href: '/loyalty', plain: true }] });
+  assert.doesNotMatch(out.slice(out.indexOf('nav-menu')), /Chef/, 'no columns survive');
+  assert.match(out, /<a href="\/loyalty">Loyalty Program<\/a>/);
+});
+
+test('transformMenus: keeps the <p> wrapper production authoring uses', () => {
+  const out = transformMenus(MENUS, { items: [{ label: 'Recipes', href: '/recipes' }] });
+  assert.match(out, /<div><p><a href="\/recipes">Recipes<\/a><\/p><\/div>/);
+});
+
+test('transformMenus: cycles the live blocks when more items are wanted than exist', () => {
+  const items = ['One', 'Two', 'Three', 'Four', 'Five'].map((label, i) => ({ label, href: `/x${i}` }));
+  const out = transformMenus(MENUS, { items });
+  assert.equal(menuBlocks(out), 5);
+  assert.deepEqual(barLabels(out), ['One', 'Two', 'Three', 'Four', 'Five']);
+});
+
+test('transformMenus: leaves the rest of the nav alone', () => {
+  const out = transformMenus(MENUS, { items: [{ label: 'Solo', href: '/solo' }] });
+  assert.match(out, /About Us/, 'utility bar untouched');
+  assert.match(out, /:ufs-logo:/, 'logo untouched');
+  assert.match(out, /:cart:/, 'tools untouched');
+});
+
+test('transformMenus: refuses a nav with no top-level items', () => {
+  assert.throws(() => transformMenus('<body><main><div><p>nothing</p></div></main></body>', { items: [{ label: 'A' }] }),
+    /no nav-menu blocks/);
+});
+
+/* ------------------------------------------------------------------- logo */
+
+test('transformLogo: swaps the icon token for the text fallback, keeping the link', () => {
+  const out = transformLogo(MENUS, { text: 'Unilever Food Solutions' });
+  assert.match(out, /<a href="\/" title="Unilever Home">Unilever Food Solutions<\/a>/);
+  assert.doesNotMatch(out, /:ufs-logo:/);
+});
+
+test('transformLogo: refuses a nav with no logo rather than silently doing nothing', () => {
+  assert.throws(() => transformLogo('<body><main><div><p>nothing</p></div></main></body>', { text: 'X' }),
+    /no logo token/);
+});
+
+/* ----------------------------------------------------------- region routing */
+
+// The brand strip lives inside the Products megamenu. A fixture that only edits the bar must not
+// go looking for it — this sample has no strip at all, so a stray search would throw.
+test('transformNav: leaves the brand strip alone unless the spec asks for it', () => {
+  const out = transformNav(MENUS, { menus: { items: [{ label: 'Solo', href: '/solo' }] } });
+  assert.equal(menuBlocks(out), 1);
+});
+
+test('transformNav: applies logo, menus and utility to the same document', () => {
+  const out = transformNav(MENUS, {
+    logo: { text: 'UFS' },
+    menus: { items: [{ label: 'Solo', href: '/solo', plain: true }] },
+    utility: { links: ['Only|/only'] },
+  });
+  assert.match(out, /">UFS</);
+  assert.match(out, /<a href="\/solo">Solo<\/a>/);
+  assert.match(out, /<a href="\/only">Only<\/a>/);
 });
