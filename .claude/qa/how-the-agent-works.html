@@ -323,7 +323,7 @@
         <div class="stage-num">04</div>
         <div class="stage-body">
           <div class="stage-title"><h3>Design the cases</h3><span class="chip chip-local">working</span></div>
-          <p>Every block is covered against the same five categories — <strong>authoring, functional, visual, a11y, i18n</strong> — so coverage is comparable across tickets. Cases are grouped by <strong>fixture</strong>: a new test starts whenever a case needs different authored content, because setting up content is the expensive part for a manual tester and everything else is cheap. Around 10–16 tests per block, 4–8 steps each.</p>
+          <p>Every block is covered against the same six categories — <strong>authoring, functionality, visual, compatibility, accessibility, internationalization</strong> — so coverage is comparable across tickets. <strong>One test per category</strong>, 6–14 steps each, with compatibility splitting into desktop and mobile only where the two are different designs rather than one design at two sizes. Every acceptance criterion is covered by at least one <em>step</em> rather than by its own test: Xray scores steps independently, so per-criterion pass/fail survives the consolidation. Grouping by fixture is retired — fixtures are generated now, so a step simply cites the URL it opens.</p>
         </div>
       </div>
 

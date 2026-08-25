@@ -23,14 +23,79 @@ export const sameSteps = (a, b) => JSON.stringify(a.map((s) => [s.action, s.data
 export const labelsFor = (plan, t) => [...new Set([t.id, ...(t.suites || []), ...(t.labels || []), plan.source?.key].filter(Boolean))]
   .map((l) => String(l).replace(/\s+/g, '-')).sort();
 
-// Preconditions have no structured home on a Manual test, so they lead the description.
-export function describeTest(plan, t) {
+/**
+ * The Jira description. A tester opens this and should need nothing else — what the test covers,
+ * which criteria it traces to, and the fixture URLs to open. Preconditions lead because a Manual
+ * test has no structured home for them.
+ *
+ * Fixture links are the reason a handful of broad tests works at all: the step says "open this
+ * URL" rather than describing authoring work, so breadth costs the tester nothing.
+ */
+export function describeTest(plan, t, { previewBase } = {}) {
   const parts = [];
   if (t.precondition) parts.push(`*Preconditions:* ${t.precondition}`);
   if (t.ac?.length) parts.push(`*Covers:* ${t.ac.join(', ')}`);
+  if (t.scope) parts.push(`*Scope:* ${t.scope}`);
+
+  const byId = new Map((plan.fixtures || []).map((f) => [f.id, f]));
+  const cited = (t.fixtures || []).map((id) => byId.get(id)).filter(Boolean);
+  if (cited.length) {
+    const base = previewBase || plan.previewBase || '';
+    const lines = cited.map((f) => `  ${f.id}  ${base}${f.page}${f.purpose ? `  — ${f.purpose}` : ''}`);
+    parts.push(`*Fixtures:*\n${lines.join('\n')}`);
+  }
+
   if (plan.source?.key) parts.push(`*Source:* ${plan.source.key}${plan.source.summary ? ` — ${plan.source.summary}` : ''}`);
   if (t.notes) parts.push(t.notes);
   return parts.join('\n\n');
+}
+
+/* ----------------------------------------------------------------- plan rules */
+
+/**
+ * Rules the JSON Schema cannot express: uniqueness, cross-references between tests and fixtures,
+ * and the two places where being permissive would be dangerous rather than convenient.
+ *
+ * @returns {string[]} problems, empty when the plan is coherent.
+ */
+export function planProblems(plan) {
+  const problems = [];
+  const seenTests = new Set();
+  const fixtureIds = new Set((plan.fixtures || []).map((f) => f.id));
+
+  for (const t of plan.tests || []) {
+    if (!t.id) continue;
+    if (seenTests.has(t.id)) problems.push(`tests: duplicate id "${t.id}" — ids are the idempotency key and must be unique`);
+    seenTests.add(t.id);
+    if (plan.feature && !t.id.startsWith(`${plan.feature}-TC-`)) {
+      problems.push(`tests (${t.id}): does not start with the plan's feature slug "${plan.feature}-TC-"`);
+    }
+    // A test may trace to no acceptance criterion only when it covers a standing requirement the
+    // doctrine mandates regardless of the ticket — WCAG 2.1 AA, RTL. It then has to say so, or
+    // "traces to nothing" becomes indistinguishable from "nobody checked".
+    if (!(t.ac || []).length && !t.notes) {
+      problems.push(`tests (${t.id}): cites no acceptance criterion, so it must explain in "notes" `
+        + 'which standing requirement it covers and why the ticket states none');
+    }
+    for (const fx of t.fixtures || []) {
+      if (!fixtureIds.has(fx)) problems.push(`tests (${t.id}): cites unknown fixture "${fx}"`);
+    }
+  }
+
+  const seenFixtures = new Set();
+  for (const f of plan.fixtures || []) {
+    if (seenFixtures.has(f.id)) problems.push(`fixtures: duplicate id "${f.id}"`);
+    seenFixtures.add(f.id);
+    // Fixtures are written into a client's authoring environment. A path outside the drafts area
+    // is the mistake that publishes test content to a live site, so it is refused rather than warned.
+    for (const [field, value] of [['page', f.page], ['nav', f.nav]]) {
+      if (value && !value.startsWith('/drafts/')) {
+        problems.push(`fixtures (${f.id}): ${field} "${value}" is outside /drafts/ — `
+          + 'fixtures must never sit on a publishable path');
+      }
+    }
+  }
+  return problems;
 }
 
 /* ------------------------------------------------------------------- identity */

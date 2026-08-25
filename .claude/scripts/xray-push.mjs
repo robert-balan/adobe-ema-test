@@ -43,7 +43,7 @@ import { createClient } from './lib/gql.mjs';
 import { validate } from './lib/schema.mjs';
 import {
   SUITES, LINK_TYPE, stepsOf, labelsFor, describeTest,
-  resolveIdentity, diffTest, linkState, driftFor,
+  resolveIdentity, diffTest, linkState, driftFor, planProblems,
 } from './lib/reconcile.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -92,15 +92,8 @@ const setNameFor = (suite) => plan.testSets?.[suite] || DEFAULT_SET_NAMES[suite]
 const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'));
 const problems = validate(plan, schema);
 
-const seen = new Set();
-for (const t of plan.tests || []) {
-  if (!t.id) continue;
-  if (seen.has(t.id)) problems.push(`tests: duplicate id "${t.id}" — ids are the idempotency key and must be unique`);
-  seen.add(t.id);
-  if (plan.feature && !t.id.startsWith(`${plan.feature}-TC-`)) {
-    problems.push(`tests (${t.id}): does not start with the plan's feature slug "${plan.feature}-TC-"`);
-  }
-}
+problems.push(...planProblems(plan));
+
 if (problems.length) fail(`plan is invalid (checked against ${SCHEMA_PATH}):\n  - ${problems.join('\n  - ')}`);
 
 /* ------------------------------------------------------------------ graphql */

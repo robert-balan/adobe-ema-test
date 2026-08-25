@@ -46,6 +46,10 @@
       "type": "string",
       "description": "Default Xray Test Repository folder path, e.g. \"/Header/Megamenu\"."
     },
+    "previewBase": {
+      "type": "string",
+      "description": "Origin the fixture paths are opened from, e.g. https://develop--ufs--foodsolutions-04.aem.page. Branch-specific by nature, so it is stated once here rather than baked into a step — the Test Execution's environment records which branch a result belongs to."
+    },
     "testSets": {
       "type": "object",
       "description": "Optional override of the Test Set summary per suite. Omit it \u2014 the default is three project-wide sets (\"Sanity testing\", \"Regression testing\", \"E2E testing\") that accumulate tests across every ticket. Naming them here creates ticket-scoped sets instead, since the registry is keyed by summary.",
@@ -61,6 +65,52 @@
         }
       },
       "additionalProperties": false
+    },
+    "fixtures": {
+      "type": "array",
+      "description": "Authored test content in Document Authoring, generated rather than hand-built. A step cites a fixture instead of describing the authoring work, which is what makes a small number of broad tests workable.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "page"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9]*-FX-[0-9]{2,}$",
+            "description": "Stable identity, e.g. BRANDS-FX-01. Never renumber one — tests cite it."
+          },
+          "title": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string",
+            "description": "What this fixture exists to prove, in one line."
+          },
+          "page": {
+            "type": "string",
+            "description": "Path of the fixture page in DA, e.g. /drafts/qa/brands/happy. Never under a published path."
+          },
+          "nav": {
+            "type": "string",
+            "description": "Path of a nav document this page points at via its `nav` metadata. Header-family blocks live in the nav document, so a variant means a whole nav rather than a section."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Page metadata rows, e.g. { \"nav\": \"/drafts/qa/brands/nav-happy\", \"Theme\": \"light\" }."
+          },
+          "sections": {
+            "type": "array",
+            "description": "Sections on the page, in order. Omit for a fixture whose content is entirely in its nav document.",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
     },
     "tests": {
       "type": "array",
@@ -87,11 +137,10 @@
           },
           "ac": {
             "type": "array",
-            "minItems": 1,
             "items": {
               "type": "string"
             },
-            "description": "Acceptance criteria this test traces to."
+            "description": "Acceptance criteria this test traces to. May be empty ONLY for a standing requirement the agent must cover whether or not the ticket mentions it (WCAG 2.1 AA, RTL) — and such a test must then explain itself in `notes` and be listed under Coverage gaps. xray-push enforces that pairing; an empty list with no explanation is rejected."
           },
           "suites": {
             "type": "array",
@@ -111,9 +160,21 @@
             },
             "description": "Extra dimension labels; whitespace is hyphenated on push."
           },
+          "scope": {
+            "type": "string",
+            "description": "What this test covers, in plain English, for a reader who has not read the ticket. Published into the Jira description."
+          },
+          "fixtures": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9]*-FX-[0-9]{2,}$"
+            },
+            "description": "Fixture ids this test runs against. Their URLs are published into the Jira description so a tester never has to author anything."
+          },
           "precondition": {
             "type": "string",
-            "description": "Fixture/environment state required before step 1."
+            "description": "Environment state required before step 1, beyond opening a fixture."
           },
           "notes": {
             "type": "string"

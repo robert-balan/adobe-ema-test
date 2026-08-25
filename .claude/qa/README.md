@@ -251,6 +251,36 @@ Because the Xray API cannot write Jira fields or links, each run also emits
 `<plan>.jira-actions.json` listing the links, field edits and labels for the agent to apply over
 MCP.
 
+### Fixtures — generated test content
+
+A test step should never ask a tester to author anything. Fixtures are declared in the plan's
+`fixtures` block, generated into Document Authoring under `/drafts/qa/{feature}/`, and their URLs
+published into each test's Jira description.
+
+Two rules are enforced by the tooling rather than trusted to a reviewer:
+
+- **A fixture path outside `/drafts/` is refused.** That is the mistake that publishes test
+  content to the client's live site.
+- **The fixture tooling calls the preview endpoint and never `/live/`.** Not a flag, not an
+  override — the folder convention is the second line of defence, not the first.
+
+Header-family blocks (header, megamenu, utility bar, brand carousel) live in one site-wide `nav`
+document, so a fixture page carries a `nav` metadata row pointing at its own nav document;
+`header.js` reads `getMetadata('nav')` and loads that instead. RTL is reached the same way, with a
+`Language` row that `decorateLocale()` turns into `lang` and `dir` on `<html>`.
+
+Accessibility and hostile-content fixtures get a page to themselves. Tab order runs through
+everything on a page, axe reports per page, stacked instances manufacture duplicate-name
+violations that do not exist in production, and a block that throws during decoration can take out
+every block after it. Sections give separation, not isolation.
+
+Check what the environment will allow before building against it:
+
+```sh
+node .claude/scripts/da-probe.mjs                # read-only
+node .claude/scripts/da-probe.mjs --write-test   # opt-in, cleans up after itself
+```
+
 ### Test Sets are project-wide
 
 There is one `Sanity testing`, one `Regression testing` and one `E2E testing` Test Set for the

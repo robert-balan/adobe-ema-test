@@ -55,10 +55,13 @@ test('an unknown suite is rejected', () => {
   assert.match(validate(p, schema).join(), /"smoke" is not one of/);
 });
 
-test('a test with no acceptance criteria is rejected', () => {
+// An empty ac list is schema-legal, because a standing requirement (WCAG, RTL) traces to no
+// criterion in the ticket. The pairing it must satisfy — empty ac implies an explanation in
+// notes — is a cross-field rule, so it lives in planProblems and is tested there.
+test('an empty acceptance-criteria list is schema-legal for standing requirements', () => {
   const p = valid();
   p.tests[0].ac = [];
-  assert.match(validate(p, schema).join(), /at least 1 item/);
+  assert.deepEqual(validate(p, schema), []);
 });
 
 test('a step missing its expected result is rejected', () => {

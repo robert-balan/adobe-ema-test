@@ -156,8 +156,10 @@ Note which are functional, which are accessibility, which are authoring/content 
 AC that is not objectively verifiable (e.g. "must feel smooth") as needing clarification.
 
 ### 3. Design the cases
-- **Minimum one test per AC.** A broad AC ("must meet WCAG 2.1 AA including focus indicators,
-  contrast, touch targets") splits into several tests, one assertion each.
+- **Every AC covered by at least one step.** Not one test per AC — Xray scores each step
+  independently in a Test Run, so per-criterion pass/fail lives at the step, and that is where
+  traceability belongs. A broad AC ("must meet WCAG 2.1 AA including focus indicators, contrast,
+  touch targets") becomes several steps, one assertion each, inside the accessibility test.
 - Add negative, boundary, and fallback cases the ACs imply: missing/empty authored fields,
   zero-row data sources, failed fetch, one item vs. many, oversized text, broken image URL.
 - Cover EDS-specific risk that these specs consistently care about:
@@ -172,46 +174,71 @@ AC that is not objectively verifiable (e.g. "must feel smooth") as needing clari
   viewport, the page path, the authored fixture state, the exact element, the exact expectation.
   Each step needs `action` and `result`; use `data` for fixture/input detail.
 
-### Granularity — group by functional area, not by assertion
+### Granularity — one test per category
 
-**Target 10–15 Tests per block, each with 4–8 steps.** Never one Test per assertion: that
-produced 42 tickets for a single block and was rejected as unmaintainable.
+**Six tests per block, each with 6–14 steps.** One per category, in this order. Agreed 2026-08-25,
+replacing an earlier target of 10–15 tests that itself replaced one-test-per-assertion (which
+produced 42 tickets for a single block and was rejected).
 
-Group assertions into a Test when a tester would check them **against the same fixture in one
-sitting** — all the arrow behaviour, all the fallback states, all the keyboard operation. Xray
-scores every step independently in a Test Run, so consolidating assertions into steps keeps
-per-assertion pass/fail while cutting ticket count by roughly two thirds.
+| # | Category | Label | Owns |
+|---|---|---|---|
+| 1 | Authoring | `authoring` | Document→DOM contract: content model, variants, slots, empty/missing/malformed content, classification rules, special characters and long strings, media ingestion, escaping of authored HTML |
+| 2 | Functionality | `functional` | Runtime behaviour on a pointer device: state changes, controls, events, navigation targets, idempotent re-decoration, no console errors, graceful suppression when there is nothing to render |
+| 3 | Visual | `visual` | Appearance at **one reference viewport**: tokens, colour, spacing, typography, hover and focus styling, no page-level horizontal overflow |
+| 4 | Compatibility | `responsive` | Behaviour **across viewport and input**: per-viewport layout and position, pointer vs touch, control availability, and crossing each breakpoint in both directions without losing content |
+| 5 | Accessibility | `a11y` | Keyboard operation, screen reader semantics and ARIA, contrast, target size, focus indicators, reduced motion, automated scans |
+| 6 | Internationalization | `i18n` | RTL mirroring **including control inversion**, text expansion (German), locale formats, `lang`/`dir` correctness |
 
-Every block is covered against the same five categories, so coverage is comparable across
-tickets. Each category is a **label**, not a single Test — it holds as many Tests as the block
-needs. Agreed 2026-08-21.
+**Visual and Compatibility are the pair most easily confused.** Visual asks *does it look right*,
+at a single viewport, against the handover. Compatibility asks *does it work everywhere* — and
+owns the breakpoints. Put a colour in Visual and a breakpoint in Compatibility, never the reverse.
 
-| Label | Owns | Tests/block |
-|---|---|---|
-| `authoring` | Document→DOM contract: table shapes, variants via authoring headings, slots, empty/missing/malformed content, special characters and long unbroken strings, media ingestion, escaping of authored HTML | 2–3 |
-| `functional` | Runtime behaviour: state changes, controls, events, navigation targets, idempotent re-decoration, no console errors, graceful suppression when there is nothing to render | 2–4 |
-| `visual` | Layout at the breakpoint boundaries, token/theme application, no page-level horizontal overflow | 2–3 |
-| `a11y` | Keyboard operation, screen reader semantics and ARIA, contrast, target size, focus indicators, reduced motion | 2–3 |
-| `i18n` | RTL mirroring **including control inversion**, text expansion (German), locale formats, `lang`/`dir` correctness | 1–2 |
+**Split Compatibility in two — desktop and mobile — only when the two are different designs
+rather than one design at two sizes.** The test is whether position, chrome and interaction model
+all differ. The brand carousel qualifies: bottom of the panel in a tinted band with arrows on
+desktop, top of the section, transparent and swipe-only on mobile. A block that merely reflows
+does not. That is the only sanctioned way to exceed six tests.
 
 Performance and analytics are deliberately **out of scope**: performance is covered by the
 developers and the AEM Code Sync bot, and there is no data layer to assert against yet. An
-accessibility AC that names axe-core or a Lighthouse accessibility score still belongs to `a11y`.
+accessibility AC that names axe-core or a Lighthouse accessibility score still belongs to
+Accessibility.
 
-**Split by fixture.** Within a category, start a new Test whenever a case needs different authored
-content — fixture setup is the expensive part for a manual tester, and everything else is cheap.
-Also split any group that exceeds ~8 steps. Never merge two groups that need different authored
-data. Where practical, design one clean happy-path fixture and one deliberately nasty fixture per
-block, and let several categories share them.
+Cross-browser is an execution axis, not a category: it is decided once at project level, not per
+block, and recorded on the Test Execution. E2E journeys cross block and page boundaries, so they
+are written per journey and sit outside these six categories.
 
-**Viewports.** Split a Test by viewport only where the spec says behaviour genuinely differs;
-otherwise cover both viewports in one Test. Coverage is not limited to what the ACs mention — if a
-behaviour exists on mobile and the ACs only describe it on desktop, test it on mobile too and note
-it under Coverage gaps.
+**Fixtures, not fixture-splitting.** An earlier rule said to start a new Test whenever a case
+needed different authored content, because fixture setup was the expensive part for a manual
+tester. Generated fixtures removed that cost, and with it the rule: **a step cites a fixture URL
+and moves on**, so one test can walk five different content states in five steps. This is what
+makes six broad tests workable rather than a loss of coverage — see *Fixtures* below.
 
-Cross-browser is an execution axis, not a category: it is decided once at project level, not
-per block. E2E journeys cross block and page boundaries, so they are written per journey and sit
-outside these five categories.
+### Fixtures — the authored content a test runs against
+
+A step must never ask a tester to author anything. It cites a fixture, and the fixture already
+exists. Fixtures are declared in the plan's `fixtures` block, generated into Document Authoring,
+and their URLs are published into each test's Jira description.
+
+- **They live under `/drafts/qa/{feature}/` and nowhere else.** `xray-push` refuses a plan whose
+  fixture path sits outside `/drafts/`, because that is the mistake that publishes test content to
+  the client's live site. The fixture tooling calls the preview endpoint and **never** `/live/`.
+- **Ids are `<FEATURE>-FX-nn`**, stable like test ids, because tests cite them.
+- **Header-family blocks need a whole nav document, not a section.** The header, megamenu, utility
+  bar and brand carousel are all authored in one site-wide `nav`. A fixture page therefore carries
+  a `nav` metadata row pointing at its own nav document — `header.js` reads `getMetadata('nav')`
+  and loads that instead. A variant means a whole nav, generated from the live one with one region
+  changed.
+- **RTL is page metadata.** A `Language` or `Locale` row (`ar-MA`) is read by `decorateLocale()`
+  in `scripts.js`, which sets `lang` and `dir` on `<html>`. There is no separate RTL fixture
+  mechanism.
+- **Isolation is a test-design property, not a layout preference.** Several variants may share a
+  page for Authoring, Visual and Compatibility. **Accessibility and hostile-content fixtures get a
+  page to themselves**: tab order runs through everything on the page, axe reports per page,
+  duplicate instances manufacture duplicate-name violations that do not exist in production, and a
+  block that throws during decoration can take out every block after it.
+- Design one clean happy-path fixture and one deliberately nasty one per block, plus whatever
+  boundary cases the classification rules demand, and let the broad tests share them.
 
 ### Mandatory coverage for every block
 
@@ -225,8 +252,15 @@ Every block plan must include these two, **whether or not the ticket's ACs menti
 2. **RTL** — layout mirrors correctly, scroll and directional controls invert, and accessible
    names describe logical rather than visual direction.
 
-If the ticket is silent on either, still write the test and note under "Coverage gaps" that it
-was added as a standing requirement rather than derived from an AC.
+If the ticket is silent on either, still write the test — and because it then traces to no
+acceptance criterion, it must **explain itself in `notes`** and appear under "Coverage gaps".
+`xray-push` enforces that pairing: an empty `ac` with no explanation is refused.
+
+The reason is that "cites no criterion" would otherwise mean two indistinguishable things — a
+deliberate standing requirement, or a criterion nobody bothered to link. The note keeps them
+apart. This rule exists because the schema demanded every test cite an AC while this section
+demanded RTL coverage the ticket never mentions; the first test to need both was refused by the
+first rule and required by the second.
 
 ### 4. Classify into suites
 Every test belongs to at least one of:
@@ -410,12 +444,18 @@ Include the comment text in the approval preview; it is a write to a live ticket
   renumbered — EC-18 became a different spec and stranded 13 tests whose ids claimed otherwise —
   whereas the feature does not move. One plan per feature, named `<FEATURE>.json`, revised as
   tickets come and go; `source.key` points at whichever ticket currently specifies it.
-- Test summary: `<spec ticket title> - <test title>` — the source ticket's summary verbatim, then
-  a space-hyphen-space, then the test title. No ticket key, no AC ids. E.g.
-  `Header: Products Brand Carousel - Navigation to brand pages`.
-  Traceability lives in the `tests` issue link and the `Covers:` line in the description, so
-  repeating it in the summary is noise. Freeze the prefix at creation: if the spec ticket is
-  later retitled, do not silently rewrite existing test summaries.
+- Test summary: `<spec ticket title> - <category> - <test title>` — the source ticket's summary
+  verbatim, then the category from the granularity table, then the test title, each separated by
+  space-hyphen-space. No ticket key, no AC ids. E.g.
+  `Header: Products Brand Carousel - Compatibility - Desktop layout and arrow behaviour`.
+  The category token makes a project-wide test list sortable and lets a reader see at a glance
+  what a block is and is not covered for. Traceability lives in the `tests` issue link and the
+  `Covers:` line, so repeating it in the summary is noise. Freeze the spec-title prefix at
+  creation: if the ticket is later retitled, do not silently rewrite existing summaries — that
+  prefix is what `spec-drift.mjs` reports as stale.
+- Test description: written by the script from `scope`, `ac` and the cited `fixtures`, so a tester
+  opening the ticket sees what it covers and the URLs to open, and needs nothing else. Write
+  `scope` for someone who has not read the spec.
 - Labels: the block or feature name, plus dimension tags (`a11y`, `rtl`, `mobile`, `desktop`,
   `authoring`, `functional`, `visual`, `i18n`). No `perf` — performance is out of scope, see the
   category table. The script adds the plan id, the suite labels and the source key automatically.

@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
   stepsOf, sameSteps, labelsFor, describeTest,
-  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText,
+  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems,
 } from '../lib/reconcile.mjs';
 
 const sha = (s) => `sha256:${createHash('sha256').update(s).digest('hex').slice(0, 16)}`;
@@ -290,4 +290,74 @@ test('plainText: a JSON-encoded ADF string is flattened, not digested as JSON', 
   const adf = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'hello' }] }] };
   assert.equal(plainText(JSON.stringify(adf)).trim(), 'hello');
   assert.equal(plainText(null), '');
+});
+
+// The description is the tester's whole briefing: what it covers, and where to open it.
+test('describeTest: publishes scope and resolved fixture URLs', () => {
+  const plan = {
+    ...PLAN,
+    previewBase: 'https://develop--ufs--foodsolutions-04.aem.page',
+    fixtures: [
+      { id: 'BRANDS-FX-01', title: 'happy', page: '/drafts/qa/brands/happy', purpose: '8 logos, label present' },
+      { id: 'BRANDS-FX-09', title: 'unused', page: '/drafts/qa/brands/unused' },
+    ],
+  };
+  const t = aTest({ scope: 'Whether the authored model produces a carousel.', fixtures: ['BRANDS-FX-01'] });
+  const out = describeTest(plan, t);
+  assert.match(out, /\*Scope:\* Whether the authored model produces a carousel\./);
+  assert.match(out, /BRANDS-FX-01 {2}https:\/\/develop--ufs--foodsolutions-04\.aem\.page\/drafts\/qa\/brands\/happy {2}— 8 logos, label present/);
+  assert.doesNotMatch(out, /BRANDS-FX-09/, 'only cited fixtures are published');
+});
+
+test('describeTest: a test citing no fixtures gets no Fixtures section', () => {
+  const out = describeTest({ ...PLAN, fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/p' }] }, aTest());
+  assert.doesNotMatch(out, /\*Fixtures:\*/);
+});
+
+/* ------------------------------------------------------------- plan rules */
+
+const planOf = (over = {}) => ({
+  feature: 'BRANDS',
+  fixtures: [{ id: 'BRANDS-FX-01', title: 'happy', page: '/drafts/qa/brands/happy' }],
+  tests: [aTest({ fixtures: ['BRANDS-FX-01'] })],
+  ...over,
+});
+
+test('planProblems: a coherent plan has no problems', () => {
+  assert.deepEqual(planProblems(planOf()), []);
+});
+
+test('planProblems: duplicate test ids are rejected', () => {
+  const p = planOf({ tests: [aTest(), aTest()] });
+  assert.match(planProblems(p).join(), /duplicate id "BRANDS-TC-01"/);
+});
+
+test('planProblems: a test id not matching the feature slug is rejected', () => {
+  const p = planOf({ tests: [aTest({ id: 'OTHER-TC-01' })] });
+  assert.match(planProblems(p).join(), /does not start with the plan's feature slug/);
+});
+
+// The rule that only surfaced when a standing-requirement test met a schema demanding an AC.
+test('planProblems: no AC is allowed only when notes explain why', () => {
+  const bare = planOf({ tests: [aTest({ ac: [] })] });
+  assert.match(planProblems(bare).join(), /cites no acceptance criterion/);
+
+  const explained = planOf({ tests: [aTest({ ac: [], notes: 'Standing RTL requirement; EC-14 states none.' })] });
+  assert.deepEqual(planProblems(explained), []);
+});
+
+test('planProblems: a test citing an unknown fixture is rejected', () => {
+  const p = planOf({ tests: [aTest({ fixtures: ['BRANDS-FX-99'] })] });
+  assert.match(planProblems(p).join(), /cites unknown fixture "BRANDS-FX-99"/);
+});
+
+// The mistake that would publish test content to a client's live site.
+test('planProblems: a fixture outside /drafts/ is refused', () => {
+  const page = planOf({ fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/products/happy' }] });
+  assert.match(planProblems(page).join(), /page "\/products\/happy" is outside \/drafts\//);
+
+  const nav = planOf({
+    fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/drafts/qa/ok', nav: '/nav' }],
+  });
+  assert.match(planProblems(nav).join(), /nav "\/nav" is outside \/drafts\//);
 });
