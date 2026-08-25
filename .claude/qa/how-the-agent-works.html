@@ -265,8 +265,8 @@
   <section>
     <div class="section-head prose">
       <p class="eyebrow">First, the words</p>
-      <h2>Five things, and what they actually are</h2>
-      <p style="color:var(--ink-muted);font-size:0.97rem">Xray adds its own vocabulary on top of Jira. You only need these five.</p>
+      <h2>Six words you'll keep hearing</h2>
+      <p style="color:var(--ink-muted);font-size:0.97rem">Xray adds its own vocabulary on top of Jira. These are the only ones you need.</p>
     </div>
     <dl class="vocab">
       <div><dt>Spec ticket</dt><dd>The ordinary Jira Story describing what should be built — EC‑14, for example. It carries the acceptance criteria the tests trace back to.</dd></div>
@@ -275,13 +275,14 @@
       <div><dt>Test Plan</dt><dd>What you intend to run for a release or sprint. Draws from the sets.</dd></div>
       <div><dt>Test Execution</dt><dd>One actual run. This is where pass/fail is recorded, per step. It is also the only thing that creates history worth preserving.</dd></div>
       <div><dt>The plan file</dt><dd><code>.claude/qa/plans/BRANDS.json</code> — the draft on your machine. This is the master copy; Jira is the published copy.</dd></div>
+      <div><dt>Fixture</dt><dd>A ready-made test page. Instead of a step telling you to go and build content, it gives you a link to open. The agent creates these for you in Document Authoring (DA), the tool authors use to write pages.</dd></div>
     </dl>
   </section>
 
   <section>
     <div class="section-head prose">
       <p class="eyebrow">The sequence</p>
-      <h2>Eleven steps, one of them yours</h2>
+      <h2>Twelve steps, one of them yours</h2>
       <p style="color:var(--ink-muted);font-size:0.97rem">Every step is tagged with what it touches. Read the tags alone and you have the safety model: nine steps read things or write a local file, one step is your decision, and only the last two change anything in Jira.</p>
     </div>
 
@@ -353,7 +354,7 @@
 
       <div class="gate">
         <p class="eyebrow" style="color:var(--amber)">Stop</p>
-        <h3>Nothing above this line reached Jira. Nothing below it happens without you.</h3>
+        <h3>Nothing above this line reached Jira or DA. Nothing below it happens without you.</h3>
         <p>The agent presents the full proposal and waits. What you get:</p>
         <ul>
           <li>A table of every test — its id, its category, its suites, the ACs it covers</li>
@@ -368,13 +369,22 @@
       <div class="stage">
         <div class="stage-num">08</div>
         <div class="stage-body">
+          <div class="stage-title"><h3>Build the test pages first</h3><span class="chip chip-live">writes to da</span></div>
+          <p>The steps link to ready-made pages, so those pages have to exist before the tests do — otherwise a tester follows a link and gets a 404. The agent builds them in DA under <code>/drafts/qa/</code>, one per situation you need to check: eight logos, two logos, one logo, a deliberately broken one, and so on.</p>
+          <p>Two things it cannot do, by design. It can't put a page anywhere outside <code>/drafts/</code>, and it can't publish — it only ever makes a preview. So a test page can't accidentally end up on the live site.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">09</div>
+        <div class="stage-body">
           <div class="stage-title"><h3>Create the tests in Xray</h3><span class="chip chip-live">writes to jira</span></div>
           <p>Only now do tickets appear. The push <strong>reconciles</strong> rather than blindly creating: a test in the plan with no ticket is created, one that matches is left alone, one that differs is <strong>updated in place</strong> — same ticket, same key, execution history intact — and one that has been dropped from the plan is reported for you to decide on, never deleted.</p>
         </div>
       </div>
 
       <div class="stage">
-        <div class="stage-num">09</div>
+        <div class="stage-num">10</div>
         <div class="stage-body">
           <div class="stage-title"><h3>Wire up the Jira side</h3><span class="chip chip-live">writes to jira</span></div>
           <p>Xray’s API can write steps but not Jira fields or links, so a second pass adds the traceability link to the spec ticket, the labels, and a short “QA scope” comment so a tester knows what to run without reading any of this.</p>
@@ -382,7 +392,7 @@
       </div>
 
       <div class="stage">
-        <div class="stage-num">10</div>
+        <div class="stage-num">11</div>
         <div class="stage-body">
           <div class="stage-title"><h3>Report what actually exists</h3><span class="chip chip-reads">reads</span></div>
           <p>Real ticket keys, verified against the API — not a restatement of what the script said it would do.</p>
@@ -399,9 +409,9 @@
     </div>
     <div class="rules">
       <div class="rule-card">
-        <h3>Titles start with the spec’s title</h3>
-        <p><code>Header: Products Brand Carousel - Keyboard operation</code> — the ticket’s summary, verbatim, then the test’s own name. No ticket key, no AC numbers.</p>
-        <p class="why"><b>Why:</b> tests are read in flat lists — suites, plans, execution boards — where the linked ticket isn’t visible. Leading with the spec title makes the list self-describing and groups a block’s tests together.</p>
+        <h3>Titles are spec, then category, then name</h3>
+        <p><code>Header: Products Brand Carousel - Accessibility - Keyboard, semantics and contrast</code> — the ticket’s summary, then which of the six categories it belongs to, then the test’s own name. No ticket key, no AC numbers.</p>
+        <p class="why"><b>Why:</b> tests are read in flat lists — suites, plans, execution boards — where the linked ticket isn’t visible. Leading with the spec title groups a block’s tests together, and the category tells you at a glance what a block is and isn’t covered for.</p>
       </div>
       <div class="rule-card">
         <h3>Ids are named after the feature, not the ticket</h3>
@@ -449,19 +459,34 @@
   <section>
     <div class="section-head prose">
       <p class="eyebrow">Reference</p>
-      <h2>The four commands</h2>
+      <h2>The commands you'll actually use</h2>
     </div>
-    <pre><span class="c"># has any spec ticket been repurposed since we wrote its plan?</span>
+    <pre><span class="c"># is the Jira/Xray setup still what we think it is?</span>
+node .claude/scripts/verify-environment.mjs
+
+<span class="c"># has a spec ticket changed since we wrote its tests?</span>
 node .claude/scripts/spec-drift.mjs
 
-<span class="c"># validate a plan and preview every change — writes nothing</span>
+<span class="c"># build the test pages the steps link to — dry run writes nothing</span>
+node .claude/scripts/da-fixture.mjs .claude/qa/plans/BRANDS.json --dry-run
+DA_FIXTURE_APPROVED=1 node .claude/scripts/da-fixture.mjs .claude/qa/plans/BRANDS.json
+
+<span class="c"># preview every change to the tests — still writes nothing</span>
 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --dry-run
 
 <span class="c"># apply it, for real</span>
-node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json
+XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json
 
-<span class="c"># retire one test without destroying its history</span>
-node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --deprecate BRANDS-TC-09</pre>
+<span class="c"># did Xray actually count it? linked is not the same as covered</span>
+node .claude/scripts/qa-coverage.mjs --plan .claude/qa/plans/BRANDS.json
+
+<span class="c"># retire a test without destroying its history</span>
+XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --deprecate BRANDS-TC-09</pre>
+    <div class="prose">
+      <p>Those <code>_APPROVED=1</code> prefixes aren't red tape. Anything that writes to Jira, or to
+      the client's content, is blocked until a person types their approval into the command — so it's
+      visible in the history, and the agent can't decide to do it on its own.</p>
+    </div>
   </section>
 
   <footer>

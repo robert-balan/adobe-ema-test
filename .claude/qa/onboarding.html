@@ -580,7 +580,15 @@
         need Xray enabled for your user.
       </p>
 
-      <h3>3 · Your own Xray API key</h3>
+      <h3>3 · Access to DA (da.live)</h3>
+      <p>
+        DA, short for Document Authoring, is where the site's pages are actually written. You need
+        it because the agent creates the little test pages your steps link to. Ask for access to
+        <b>foodsolutions-04 / ufs</b>, and mention you'll be writing into <code>/drafts/qa/</code> —
+        a corner set aside for QA that never goes near the live site.
+      </p>
+
+      <h3>4 · Your own Xray API key</h3>
       <p>
         This one has a catch worth understanding. Xray Cloud keeps test steps in its own database,
         not in Jira, so the normal Jira connection can't write them. The scripts need a separate
@@ -681,6 +689,33 @@ export XRAY_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s xray-c
       </div>
 
       <div class="step" data-n="4">
+        <h3>Store your DA token</h3>
+        <p class="step-note">Five minutes · you'll redo this every day or so</p>
+        <p>
+          DA doesn't hand out long-lived keys. You copy a token out of your own browser session,
+          and it lasts about a day. Sign in to <a href="https://da.live">da.live</a>, open DevTools
+          (<b>⌥⌘I</b>) → <b>Network</b>, filter for <code>admin.da.live</code>, reload the page,
+          click any request, and copy the value after <code>Bearer</code> in the
+          <b>authorization</b> request header.
+        </p>
+        <p>Then, with that on your clipboard:</p>
+        <div class="cmd">
+          <div class="cmd-label"><span>Terminal · reads straight from the clipboard, nothing to paste</span></div>
+          <pre>security add-generic-password -a "$USER" -s da-token -w "$(pbpaste)"</pre>
+        </div>
+        <p>And in <code>~/.zshrc</code>, next to the Xray lines:</p>
+        <div class="cmd">
+          <div class="cmd-label"><span>~/.zshrc</span></div>
+          <pre>export DA_TOKEN="$(security find-generic-password -a "$USER" -s da-token -w 2>/dev/null)"</pre>
+        </div>
+        <p>
+          When it expires you'll get a clear message telling you so, rather than a confusing error.
+          Just repeat the copy, run <code>security delete-generic-password -s da-token</code>, and
+          add it again.
+        </p>
+      </div>
+
+      <div class="step" data-n="5">
         <h3>Check the key works</h3>
         <p class="step-note">One minute</p>
         <div class="cmd">
@@ -697,7 +732,7 @@ export XRAY_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s xray-c
         </div>
       </div>
 
-      <div class="step" data-n="5">
+      <div class="step" data-n="6">
         <h3>Connect Claude Code to Jira</h3>
         <p class="step-note">Three minutes</p>
         <p>
@@ -719,7 +754,7 @@ export XRAY_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s xray-c
         </div>
       </div>
 
-      <div class="step" data-n="6">
+      <div class="step" data-n="7">
         <h3>Do a dry run on something that already exists</h3>
         <p class="step-note">Two minutes · this proves the whole chain works</p>
         <p>
@@ -785,20 +820,59 @@ export XRAY_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s xray-c
         file — open it, edit anything that's wrong, ask the agent to change things. This is the
         cheap moment to fix mistakes. Nothing exists in Jira yet.
       </p>
+      <p>
+        You should see <b>six tests</b>, one for each thing we always check: authoring,
+        functionality, visual, compatibility, accessibility and internationalization. Seven if
+        compatibility split into desktop and mobile, which only happens when the two are genuinely
+        different designs rather than the same design at two sizes.
+      </p>
+      <p>
+        Two things worth checking yourself: every acceptance criterion from the ticket should turn
+        up in at least one <em>step</em> somewhere, and each test should list the fixture pages it
+        needs. If a test cites a fixture that isn't in the plan, the push will refuse it — but it's
+        nicer to notice now.
+      </p>
 
-      <h3>Preview, then push</h3>
+      <h3>Build the test pages first</h3>
+      <p>
+        Your steps link to ready-made pages, so build those before the tests exist — otherwise
+        anyone following a link gets a 404. Dry run first; it writes nothing.
+      </p>
+      <div class="cmd">
+        <div class="cmd-label"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
+        <pre><span class="c"># see what pages would be built — writes nothing</span>
+node .claude/scripts/da-fixture.mjs .claude/qa/plans/MEGAMENU.json --dry-run
+
+<span class="c"># build them for real</span>
+DA_FIXTURE_APPROVED=1 node .claude/scripts/da-fixture.mjs .claude/qa/plans/MEGAMENU.json</pre>
+      </div>
+      <p>
+        Then open one in a browser and check it looks right. This is worth thirty seconds — it's
+        where you catch a fixture that's subtly wrong, which would otherwise look like a bug in the
+        block.
+      </p>
+
+      <h3>Preview, then push the tests</h3>
       <div class="cmd">
         <div class="cmd-label"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
         <pre><span class="c"># see exactly what would happen — writes nothing</span>
 node .claude/scripts/xray-push.mjs .claude/qa/plans/MEGAMENU.json --dry-run
 
 <span class="c"># do it for real</span>
-node .claude/scripts/xray-push.mjs .claude/qa/plans/MEGAMENU.json</pre>
+XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/MEGAMENU.json
+
+<span class="c"># and check Xray actually counted it — linked is not the same as covered</span>
+node .claude/scripts/qa-coverage.mjs --plan .claude/qa/plans/MEGAMENU.json</pre>
       </div>
       <p>
         The script prints the Jira key of every test it creates. It then writes a to-do list of
         things only Jira can do — issue links, labels — which the agent applies for you. Ask it to
         finish the job and it will.
+      </p>
+      <p>
+        That <code>_APPROVED=1</code> bit isn't red tape. Anything that writes to Jira or to the
+        client's content is blocked until a person types their approval into the command, so the
+        agent can never do it on its own initiative.
       </p>
 
       <h3>Commit</h3>

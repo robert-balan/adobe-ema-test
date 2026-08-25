@@ -147,8 +147,29 @@ export function diffTest({ plan, t, cur }) {
   if (!sameSteps(stepsOf(t), cur.steps || [])) diffs.push('steps');
   if (cur.jira?.summary !== t.summary) diffs.push('summary');
   if (JSON.stringify([...(cur.jira?.labels || [])].sort()) !== JSON.stringify(labelsFor(plan, t))) diffs.push('labels');
-  if ((cur.jira?.description || '') !== describeTest(plan, t)) diffs.push('description');
+  if (sameText(cur.jira?.description, describeTest(plan, t)) === false) diffs.push('description');
   return diffs;
+}
+
+/**
+ * Compare two descriptions for meaning rather than for characters.
+ *
+ * Jira does not store text — it stores a document tree — so what comes back is a re-rendering of
+ * what went in, not a copy of it. `*Covers:*` is written, stored as an emphasis node, and read
+ * back as `_Covers:_`. Identical to a reader, different to `===`. Comparing literally meant every
+ * run reported the same seven descriptions as changed forever, which is worse than useless: a real
+ * change would have been indistinguishable from the permanent noise.
+ *
+ * Only the round-tripping differences are normalised — emphasis markers and trailing whitespace.
+ * Anything a person would notice still registers as a change.
+ */
+export function sameText(a, b) {
+  const norm = (s) => String(s || '')
+    .replace(/[*_]/g, '')          // * and _ are the same emphasis node once stored
+    .replace(/[ \t]+$/gm, '')      // Jira appends trailing spaces as soft line breaks
+    .replace(/\r\n/g, '\n')
+    .trim();
+  return norm(a) === norm(b);
 }
 
 /* ---------------------------------------------------------------------- links */

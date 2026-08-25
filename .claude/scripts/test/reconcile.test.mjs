@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
   stepsOf, sameSteps, labelsFor, describeTest,
-  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems,
+  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems, sameText,
 } from '../lib/reconcile.mjs';
 
 const sha = (s) => `sha256:${createHash('sha256').update(s).digest('hex').slice(0, 16)}`;
@@ -360,4 +360,23 @@ test('planProblems: a fixture outside /drafts/ is refused', () => {
     fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/drafts/qa/ok', nav: { path: '/nav', from: '/nav' } }],
   });
   assert.match(planProblems(nav).join(), /nav "\/nav" is outside \/drafts\//);
+});
+
+// Jira stores a document tree, not text, so what it hands back is a re-rendering of what went in.
+// Comparing literally reported the same seven descriptions as changed on every single run.
+test('sameText: emphasis markers survive the round trip as the same meaning', () => {
+  assert.ok(sameText('*Covers:* AC-1', '_Covers:_ AC-1'));
+  assert.ok(sameText('*Scope:* a thing  \n*Source:* EC-14', '_Scope:_ a thing\n_Source:_ EC-14'));
+});
+
+test('sameText: a change a person would notice still registers', () => {
+  assert.equal(sameText('*Covers:* AC-1', '*Covers:* AC-1, AC-2'), false);
+  assert.equal(sameText('', 'anything'), false);
+});
+
+test('diffTest: a description that only differs by round-tripping is not a change', () => {
+  const t = aTest();
+  const cur = liveOf(PLAN, t);
+  cur.jira.description = describeTest(PLAN, t).replace(/\*/g, '_');
+  assert.deepEqual(diffTest({ plan: PLAN, t, cur }), []);
 });
