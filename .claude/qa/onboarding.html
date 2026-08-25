@@ -701,7 +701,7 @@ export XRAY_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s xray-c
         <p>Then, with that on your clipboard:</p>
         <div class="cmd">
           <div class="cmd-label"><span>Terminal · reads straight from the clipboard, nothing to paste</span></div>
-          <pre>security add-generic-password -a "$USER" -s da-token -w "$(pbpaste)"</pre>
+          <pre>security add-generic-password -a "$USER" -s da-token -w "$(pbpaste | tr -d '[:space:]')"</pre>
         </div>
         <p>And in <code>~/.zshrc</code>, next to the Xray lines:</p>
         <div class="cmd">

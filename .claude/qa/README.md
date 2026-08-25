@@ -84,7 +84,40 @@ a `*all` field expansion returns no step, test-type, or Test Set field of any ki
 detail is that Xray exposes `addTestStep` as a GraphQL mutation at all; if steps were a Jira
 field, that mutation would not need to exist.
 
-### 2. Test Set issue type enabled in EC — done
+### 2. Jira API token — for the two jobs MCP cannot do
+
+Most Jira work goes through the MCP server. Two things do not, because the server cannot do them:
+deleting an issue link (`jira-unlink.mjs`) and fetching a spec ticket to compare against a recorded
+digest (`spec-drift.mjs`). Both need a Jira API token.
+
+Unlike the Xray key, you can create this one yourself — no admin needed. Go to
+[id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens),
+**Create API token** (the plain one, not "with scopes" — scoped tokens do not work with the basic
+email-plus-token auth these scripts use), name it, and copy it. It is shown once. Atlassian now
+requires an expiry date, so put a reminder in your calendar or it will stop working one morning
+with no warning.
+
+```sh
+security add-generic-password -a "$USER" -s jira-api-token -w "$(pbpaste | tr -d '[:space:]')"
+```
+
+```sh
+export JIRA_EMAIL="you@unilever.com"
+export JIRA_API_TOKEN="$(security find-generic-password -a "$USER" -s jira-api-token -w 2>/dev/null)"
+```
+
+Both are needed — Jira's basic auth is the email and the token together. Check it:
+
+```sh
+curl -s -o /dev/null -w "%{http_code}\n" -u "$JIRA_EMAIL:$JIRA_API_TOKEN" \
+  https://unileverfoodsolutions.atlassian.net/rest/api/3/myself
+```
+
+`200` is good. **`401` usually means whitespace, not a bad token** — a copied token often carries a
+leading space, which makes the auth string malformed while the token itself is perfectly valid.
+That is why the `pbpaste` line above pipes through `tr -d '[:space:]'`.
+
+### 3. Test Set issue type enabled in EC — done
 
 Enabled on 2026-08-18. EC now exposes `Test` (12531), `Test Set` (12669), `Test Plan`
 (12597), `Test execution` (12598) and `XRay Precondition` (12668), all reachable over the Jira
