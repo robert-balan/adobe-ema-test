@@ -441,6 +441,31 @@ The issue type is `Test`, not `Xray Test` — see the environment facts above. T
 the plan rather than typing it: this JQL is pasted into a ticket and run by someone who will not
 debug it, so a wrong type or a mistyped label reads as "no tests exist".
 
+**Tag the REs on anything the spec leaves unclear.** Whenever the comment carries open questions,
+contradictions or clarifications — anything addressed to the requirements engineers — @-mention
+both of them in that section so it reaches someone rather than sitting in a ticket nobody rereads:
+
+| Person | accountId |
+|---|---|
+| Volpe, Gianluca | `712020:8b7e0918-ec81-484d-827f-f54e6a0920eb` |
+| Lee, Mathijs | `712020:627f07a3-4ad6-488b-9d5e-91bc9effa90c` |
+
+Only tag them when there is something to answer. A comment with no open questions does not need
+them, and tagging on every push trains people to ignore the notification.
+
+**A mention only works in ADF.** Post the comment with `contentFormat: "adf"` and a real mention
+node:
+
+```json
+{ "type": "mention", "attrs": { "id": "712020:8b7e...", "text": "@Volpe, Gianluca" } }
+```
+
+Markdown does not work for this. Writing `@Name`, or Jira's `[~accountid:...]` wiki syntax, through
+`contentFormat: "markdown"` produces **plain text**: nobody is notified and everyone sees the raw
+syntax. Verified against this instance on 2026-08-26 — the markdown attempt round-tripped as a
+literal `[~accountid:712020:8b7e...]` text node. Markdown also flattens tables to plain text and
+turns `*bold*` into italics, so ADF is the better format for this comment regardless.
+
 Include the comment text in the approval preview; it is a write to a live ticket like any other.
 
 ## Conventions
