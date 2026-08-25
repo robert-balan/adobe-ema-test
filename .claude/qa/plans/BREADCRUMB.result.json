@@ -1,0 +1,97 @@
+{
+  "tests": {
+    "BREADCRUMB-TC-01": {
+      "issueId": "302457",
+      "key": "EC-150",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-8",
+        "AC-9",
+        "AC-10"
+      ]
+    },
+    "BREADCRUMB-TC-02": {
+      "issueId": "302458",
+      "key": "EC-151",
+      "suites": [
+        "sanity",
+        "regression",
+        "e2e"
+      ],
+      "ac": [
+        "AC-5",
+        "AC-6",
+        "AC-7"
+      ]
+    },
+    "BREADCRUMB-TC-03": {
+      "issueId": "302459",
+      "key": "EC-152",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-4",
+        "AC-17"
+      ]
+    },
+    "BREADCRUMB-TC-04": {
+      "issueId": "302460",
+      "key": "EC-153",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-2",
+        "AC-3",
+        "AC-18"
+      ]
+    },
+    "BREADCRUMB-TC-05": {
+      "issueId": "302461",
+      "key": "EC-154",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16"
+      ]
+    },
+    "BREADCRUMB-TC-06": {
+      "issueId": "302462",
+      "key": "EC-155",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-11",
+        "AC-12"
+      ]
+    }
+  },
+  "testSets": {
+    "sanity": {
+      "issueId": "301670",
+      "key": "EC-104",
+      "suite": "sanity"
+    },
+    "regression": {
+      "issueId": "301671",
+      "key": "EC-105",
+      "suite": "regression"
+    },
+    "e2e": {
+      "issueId": "301672",
+      "key": "EC-106",
+      "suite": "e2e"
+    }
+  }
+}

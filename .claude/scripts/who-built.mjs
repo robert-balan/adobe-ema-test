@@ -72,7 +72,13 @@ for (const key of keys) {
     if (everInProgress && e.field === 'assignee' && e.to) heldWhileBuilding.add(e.to);
   }
 
-  const devs = [...heldWhileBuilding].filter((n) => frontend.some((p) => p.name === n));
+  let devs = [...heldWhileBuilding].filter((n) => frontend.some((p) => p.name === n));
+
+  // Recorded ownership beats the changelog. The header was built in one pass rather than
+  // ticket by ticket, so its changelog attributes nothing — see environment.json `ownership`.
+  const owned = Object.values(env.people?.ownership || {})
+    .find((o) => o.tickets?.includes(key));
+  if (owned) devs = [owned.developer];
   const current = issue.fields.assignee?.displayName || '(unassigned)';
 
   console.log(`\n${key}  ${issue.fields.summary}`);

@@ -30,7 +30,7 @@
   },
   "verifiedOn": "2026-08-24",
   "people": {
-    "_comment": "Who to tag on a QA-scope comment. Requirements engineers answer contradictions inside a spec; a front-end developer is needed as well when the spec describes something the code does not do.",
+    "_comment": "Who to tag on a QA-scope comment. Requirements engineers answer contradictions inside a spec; a front-end developer is needed as well when the spec describes something the code does not do. Only REs and developers are tagged — the rest are here so roles are clear when reading a changelog.",
     "requirements": [
       {
         "name": "Volpe, Gianluca",
@@ -55,6 +55,38 @@
         "name": "Lubbe, Sybrand",
         "accountId": "712020:54484866-f4d8-477e-981f-ddb6f49a7a46"
       }
-    ]
+    ],
+    "team": [
+      {
+        "name": "Eche, Alexia",
+        "role": "Product manager"
+      },
+      {
+        "name": "Kalusinski, Valerie",
+        "role": "QA manager"
+      },
+      {
+        "name": "Garg, Nitansh",
+        "role": "Manual QA"
+      },
+      {
+        "name": "Rusu, Vladimir",
+        "role": "Automation QA"
+      }
+    ],
+    "ownership": {
+      "_comment": "The whole header was built in one go, with AI, by Sybrand Lubbe — so the changelog does not attribute these tickets individually and who-built.mjs falls back to the lead for most of them. For anything in the header family, tag Sybrand rather than the fallback. Recorded 2026-08-26; later sprints are expected to follow a clearer per-ticket process, at which point this note should go.",
+      "header": {
+        "tickets": [
+          "EC-7",
+          "EC-8",
+          "EC-12",
+          "EC-14",
+          "EC-18"
+        ],
+        "developer": "Lubbe, Sybrand",
+        "accountId": "712020:54484866-f4d8-477e-981f-ddb6f49a7a46"
+      }
+    }
   }
 }
