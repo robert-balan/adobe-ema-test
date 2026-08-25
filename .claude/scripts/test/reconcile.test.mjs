@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
   stepsOf, sameSteps, labelsFor, describeTest,
-  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems, sameText,
+  resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems, sameText, parseUnclaim,
 } from '../lib/reconcile.mjs';
 
 const sha = (s) => `sha256:${createHash('sha256').update(s).digest('hex').slice(0, 16)}`;
@@ -379,4 +379,32 @@ test('diffTest: a description that only differs by round-tripping is not a chang
   const cur = liveOf(PLAN, t);
   cur.jira.description = describeTest(PLAN, t).replace(/\*/g, '_');
   assert.deepEqual(diffTest({ plan: PLAN, t, cur }), []);
+});
+
+/* ---------------------------------------------------------------- unclaim */
+
+test('parseUnclaim: accepts a well-formed request the plan no longer claims', () => {
+  const plan = { tests: [aTest({ suites: ['regression'] })] };
+  const { pairs, problems } = parseUnclaim(['BRANDS-TC-01:e2e'], plan);
+  assert.deepEqual(problems, []);
+  assert.deepEqual(pairs, [{ id: 'BRANDS-TC-01', suite: 'e2e' }]);
+});
+
+// The important refusal: removing a suite the plan still claims would be undone next push.
+test('parseUnclaim: refuses a suite the plan still claims', () => {
+  const plan = { tests: [aTest({ suites: ['regression', 'e2e'] })] };
+  const { pairs, problems } = parseUnclaim(['BRANDS-TC-01:e2e'], plan);
+  assert.equal(pairs.length, 0);
+  assert.match(problems.join(), /the plan still claims e2e/);
+});
+
+test('parseUnclaim: rejects a malformed request or an unknown suite', () => {
+  assert.match(parseUnclaim(['BRANDS-TC-01'], { tests: [] }).problems.join(), /expected the form TESTID:suite/);
+  assert.match(parseUnclaim(['BRANDS-TC-01:smoke'], { tests: [] }).problems.join(), /unknown suite "smoke"/);
+});
+
+test('parseUnclaim: a test absent from the plan can still be unclaimed', () => {
+  const { pairs, problems } = parseUnclaim(['BRANDS-TC-99:e2e'], { tests: [] });
+  assert.deepEqual(problems, []);
+  assert.equal(pairs[0].id, 'BRANDS-TC-99');
 });

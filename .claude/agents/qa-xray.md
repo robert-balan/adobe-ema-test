@@ -333,6 +333,13 @@ sorts every test into one of four outcomes:
 So a revised spec edits the existing tickets. Never renumber a plan id — it is the identity that
 makes this work.
 
+`--unclaim ID:suite` acts on the other kind of suite drift: a test still sitting in a suite the
+plan no longer claims. That is reported on every run and never removed automatically, because
+silently dropping a test from a suite is how a test quietly stops being run — but once the user
+has decided, this carries it out through the same dry run and approval as everything else, rather
+than leaving a hand-written API call as the only route. It refuses if the plan still claims that
+suite, since the next push would undo it; edit the plan instead.
+
 Flags: `--only ID,ID` for a subset, `--force` to rewrite unchanged tests, `--deprecate ID,ID` to
 retire a test (removed from every Test Set **and every Xray Test Plan**, and flagged for a
 `deprecated` label; the issue survives, so its execution history survives), `--test-plan KEY` to

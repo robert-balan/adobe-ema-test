@@ -11,6 +11,8 @@
  *     --adopt              rebuild <plan>.result.json from the Jira labels and exit; writes
  *                          nothing to Xray. Use on a fresh clone, or to repair a lost cache.
  *     --test-plan KEY      also add this plan's tests to an existing Xray Test Plan (e.g. EC-59)
+ *     --unclaim ID:suite   remove a test from a suite the plan no longer claims. Reported as
+ *                          drift on every run; this is how a person acts on that report.
  *
  * Suites (Test Sets) and sprint scope (Xray Test Plans) are separate axes, so adding to a Test
  * Plan is opt-in rather than automatic: which tests a sprint intends to run includes regression
@@ -43,7 +45,7 @@ import { createClient } from './lib/gql.mjs';
 import { validate } from './lib/schema.mjs';
 import {
   SUITES, LINK_TYPE, stepsOf, labelsFor, describeTest,
-  resolveIdentity, diffTest, linkState, driftFor, planProblems,
+  resolveIdentity, diffTest, linkState, driftFor, planProblems, parseUnclaim,
 } from './lib/reconcile.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -71,9 +73,10 @@ const deprecate = listArg('--deprecate') || [];
 const adopt = flag('--adopt');
 const oneArg = (name) => listArg(name)?.[0] || null;
 const testPlanKey = oneArg('--test-plan');
+const unclaimSpecs = listArg('--unclaim') || [];
 
 const fail = (msg) => { console.error(`xray-push: ${msg}`); process.exit(1); };
-if (!planPath) fail('usage: xray-push.mjs <plan.json> [--dry-run] [--only IDs] [--force] [--deprecate IDs] [--adopt] [--test-plan KEY]');
+if (!planPath) fail('usage: xray-push.mjs <plan.json> [--dry-run] [--only IDs] [--force] [--deprecate IDs] [--adopt] [--test-plan KEY] [--unclaim ID:suite]');
 if (testPlanKey && !/^[A-Z][A-Z0-9]*-\d+$/.test(testPlanKey)) fail(`--test-plan expects an issue key like EC-59, got "${testPlanKey}"`);
 if (!existsSync(planPath)) fail(`no such plan: ${planPath}`);
 
@@ -93,6 +96,8 @@ const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'));
 const problems = validate(plan, schema);
 
 problems.push(...planProblems(plan));
+const { pairs: unclaims, problems: unclaimProblems } = parseUnclaim(unclaimSpecs, plan);
+problems.push(...unclaimProblems);
 
 if (problems.length) fail(`plan is invalid (checked against ${SCHEMA_PATH}):\n  - ${problems.join('\n  - ')}`);
 
@@ -367,6 +372,7 @@ function report() {
   if (ADOPTED.length) console.log(`  ${w(ADOPTED.length)} adopted from Jira by label — absent from ${resultPath}`);
   if (ORPHANS.length) console.log(`  ${w(ORPHANS.length)} no longer in the plan — review manually, never auto-deleted`);
   if (deprecate.length) console.log(`  ${w(deprecate.length)} to deprecate`);
+  if (unclaims.length) console.log(`  ${w(unclaims.length)} to remove from a suite`);
   if (conflicted.size) console.log(`  ${w(conflicted.size)} with a contested identity — nothing will be written`);
   if (testPlan) {
     const n = scoped.filter((t) => !conflicted.has(t.id)).length;
@@ -409,6 +415,11 @@ function report() {
       : `  DEPRECATE ${id} — no record; nothing to do`);
   }
 
+  for (const { id, suite } of unclaims) {
+    const rec = recordFor(id);
+    console.log(rec ? `  UNCLAIM   ${rec.key}  ${id} — remove from the ${suite} suite`
+      : `  UNCLAIM   ${id} — no record; nothing to remove`);
+  }
   console.log('');
   console.log('  Test Sets:');
   for (const s of SUITES) {
@@ -619,6 +630,19 @@ try {
       const n = Array.isArray(addedTests) ? addedTests.length : addedTests;
       console.log(`testplan +${n} → ${testPlan.key} "${testPlan.summary}"${warning ? `  ⚠ ${warning}` : ''}`);
     }
+  }
+
+  /* -------------------------------------------------------------- unclaim */
+
+  // Acting on drift a person has reviewed. Only the named suite is touched, and the test itself
+  // is left completely alone — this is not deprecation.
+  for (const { id, suite } of unclaims) {
+    const rec = recordFor(id);
+    if (!rec?.issueId) { console.log(`skip     ${id} — no record to unclaim`); continue; }
+    const set = registry[setNameFor(suite)];
+    if (!set?.issueId) { console.log(`skip     ${id} — no ${suite} Test Set exists`); continue; }
+    await gqlOrThrow(Q.removeFromSet, { issueId: set.issueId, testIssueIds: [rec.issueId] });
+    console.log(`unclaimed ${id} → ${rec.key}  (removed from ${suite}, test itself untouched)`);
   }
 
   /* ----------------------------------------------------------- deprecation */

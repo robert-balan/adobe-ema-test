@@ -223,6 +223,15 @@ issues claim the same one — the push refuses and reports it rather than guessi
 edits the steps of a Test that somebody's execution history hangs off. Fix the labels in Jira,
 or re-run with `--adopt`.
 
+If the report says a test is **unclaimed** — it sits in a suite the plan no longer claims — nothing
+is removed for you. Review it, then act on it through the tooling rather than by hand:
+
+```sh
+XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --unclaim BRANDS-TC-07:e2e
+```
+
+It refuses if the plan still claims that suite, because the next push would simply put it back.
+
 Still commit `result.json` after a push. Adoption is the safety net, not the plan.
 
 ### Revising tests when a spec changes

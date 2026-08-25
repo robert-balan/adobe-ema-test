@@ -98,6 +98,41 @@ export function planProblems(plan) {
   return problems;
 }
 
+/**
+ * Parse `--unclaim ID:suite` requests: remove a test from a suite it is still sitting in but the
+ * plan no longer claims.
+ *
+ * Drift in that direction is reported and never acted on automatically, because silently dropping
+ * a test from a suite is how a test quietly stops being run. But once a person has decided, they
+ * need a way to carry it out that goes through the same dry run and approval as everything else —
+ * otherwise the only route is a hand-written API call, which is the one path with no safety on it.
+ *
+ * A request is refused when the plan still claims that suite: removing it would be undone by the
+ * next push, so the honest fix is to edit the plan.
+ */
+export function parseUnclaim(specs, plan) {
+  const pairs = []; const problems = [];
+  for (const spec of specs || []) {
+    const [id, suite] = String(spec).split(':');
+    if (!id || !suite) {
+      problems.push(`--unclaim "${spec}": expected the form TESTID:suite, e.g. BRANDS-TC-07:e2e`);
+      continue;
+    }
+    if (!SUITES.includes(suite)) {
+      problems.push(`--unclaim "${spec}": unknown suite "${suite}" — expected ${SUITES.join(' | ')}`);
+      continue;
+    }
+    const test = (plan.tests || []).find((t) => t.id === id);
+    if (test && (test.suites || []).includes(suite)) {
+      problems.push(`--unclaim "${spec}": the plan still claims ${suite} for ${id}, so the next push `
+        + `would put it straight back. Remove "${suite}" from that test in the plan instead.`);
+      continue;
+    }
+    pairs.push({ id, suite });
+  }
+  return { pairs, problems };
+}
+
 /* ------------------------------------------------------------------- identity */
 
 /**
