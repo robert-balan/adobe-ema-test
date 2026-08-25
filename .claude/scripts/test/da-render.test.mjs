@@ -13,7 +13,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
-  metadataBlock, block, document_, fixturePage, findBrandStrip, editLink, transformNav,
+  metadataBlock, block, document_, fixturePage, findBrandStrip, editLink, transformNav, transformUtility,
 } from '../lib/da-render.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -132,4 +132,51 @@ test('transformNav: replaces or removes the label', () => {
 test('transformNav: refuses a source with no strip rather than producing a silent dud', () => {
   assert.throws(() => transformNav('<body><main><div><p>nothing here</p></div></main></body>'),
     /no brand strip found/);
+});
+
+/* ------------------------------------------------------- utility bar */
+
+// Scope both helpers to the utility bar. The nav menus have their own <li> and <a>, so counting
+// across the whole document measures the wrong thing — which is exactly what it did first time.
+const utilitySection = (s) => s.slice(s.indexOf('<main>'), s.indexOf('class="nav-menu"'));
+const countLi = (s) => (utilitySection(s).match(/<li>/g) || []).length;
+const langRows = (s) => {
+  const u = utilitySection(s);
+  return (u.slice(u.indexOf('class="language"')).match(/<a /g) || []).length;
+};
+
+test('transformUtility: replaces the utility links', () => {
+  const out = transformUtility(NAV, { links: ['Only Link|/only'] });
+  assert.equal(countLi(out), 1, 'one utility link');
+  assert.match(out, /<a href="\/only">Only Link<\/a>/);
+  assert.doesNotMatch(out, /About Us/);
+  assert.match(out, /Recipes/, 'the rest of the nav is untouched');
+});
+
+test('transformUtility: replaces the language options and the trigger', () => {
+  const out = transformUtility(NAV, {
+    trigger: ':globe: Morocco · AR',
+    languages: ['العربية · AR|/ar', 'Français · FR|/fr'],
+  });
+  assert.match(out, /Morocco · AR/);
+  assert.match(out, /href="\/ar"/);
+  assert.match(out, /href="\/fr"/);
+  assert.doesNotMatch(out, /Deutsch/);
+});
+
+// AC-6's case: a market with one language should not get a switcher at all.
+test('transformUtility: can produce a single-language block', () => {
+  const out = transformUtility(NAV, { languages: ['English · EN|/'] });
+  assert.equal(langRows(out), 1, 'exactly one language option');
+});
+
+test('transformUtility: refuses a nav with no utility bar rather than silently doing nothing', () => {
+  assert.throws(() => transformUtility('<body><main><div><p>nothing</p></div></main></body>', { links: ['A|/a'] }),
+    /no utility link list/);
+});
+
+test('transformNav: a spec can target the utility bar and the brand strip together', () => {
+  const out = transformNav(NAV, { utility: { links: ['Solo|/solo'] }, count: 3 });
+  assert.equal(countLi(out), 1, 'utility bar edited');
+  assert.equal((out.match(/<a\b[^>]*>\s*<picture>/g) || []).length, 3, 'brand strip edited too');
 });

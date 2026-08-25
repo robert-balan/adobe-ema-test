@@ -1,0 +1,108 @@
+{
+  "tests": {
+    "UTILITY-TC-01": {
+      "issueId": "302463",
+      "key": "EC-156",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-3",
+        "AC-6"
+      ]
+    },
+    "UTILITY-TC-02": {
+      "issueId": "302464",
+      "key": "EC-157",
+      "suites": [
+        "sanity",
+        "regression",
+        "e2e"
+      ],
+      "ac": [
+        "AC-7",
+        "AC-9",
+        "AC-11"
+      ]
+    },
+    "UTILITY-TC-03": {
+      "issueId": "302465",
+      "key": "EC-158",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-4",
+        "AC-5",
+        "AC-17"
+      ]
+    },
+    "UTILITY-TC-04": {
+      "issueId": "302466",
+      "key": "EC-159",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-10",
+        "AC-18"
+      ]
+    },
+    "UTILITY-TC-05": {
+      "issueId": "302467",
+      "key": "EC-160",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-2",
+        "AC-8",
+        "AC-18"
+      ]
+    },
+    "UTILITY-TC-06": {
+      "issueId": "302468",
+      "key": "EC-161",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-14",
+        "AC-15",
+        "AC-16"
+      ]
+    },
+    "UTILITY-TC-07": {
+      "issueId": "302469",
+      "key": "EC-162",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-12",
+        "AC-13"
+      ]
+    }
+  },
+  "testSets": {
+    "sanity": {
+      "issueId": "301670",
+      "key": "EC-104",
+      "suite": "sanity"
+    },
+    "regression": {
+      "issueId": "301671",
+      "key": "EC-105",
+      "suite": "regression"
+    },
+    "e2e": {
+      "issueId": "301672",
+      "key": "EC-106",
+      "suite": "e2e"
+    }
+  }
+}

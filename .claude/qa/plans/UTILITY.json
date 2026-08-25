@@ -1,0 +1,393 @@
+{
+  "project": "EC",
+  "feature": "UTILITY",
+  "projectId": "11590",
+  "assignee": "712020:543dd2f2-c9ed-422b-822d-d75634813a18",
+  "source": {
+    "key": "EC-18",
+    "summary": "Header: [Megamenu]: Utility Bar",
+    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-18"
+  },
+  "folder": "/Header/Utility Bar",
+  "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "fixtures": [
+    {
+      "id": "UTILITY-FX-01",
+      "title": "Reference bar — three links, three languages",
+      "purpose": "The live utility bar: three author-defined links and a multi-language switcher, which is the case everything else is compared against",
+      "page": "/drafts/qa/utility/reference",
+      "nav": {
+        "path": "/drafts/qa/utility/nav-reference",
+        "from": "/nav",
+        "utility": {
+          "links": ["About Us|/about-us", "Contact & Support|/contact-support", "Track Your Order|/track-your-order"],
+          "trigger": ":globe: United States · EN",
+          "languages": ["English · EN|/", "Deutsch · DE|/de", "Français · FR|/fr"],
+          "note": "Prices and availability vary by country.",
+          "change": "Change country|/change-country"
+        }
+      },
+      "metadata": { "Language": "en" }
+    },
+    {
+      "id": "UTILITY-FX-02",
+      "title": "One utility link only",
+      "purpose": "A single author-defined link, to prove there is no separator dangling after it",
+      "page": "/drafts/qa/utility/one-link",
+      "nav": {
+        "path": "/drafts/qa/utility/nav-one-link",
+        "from": "/nav",
+        "utility": {
+          "links": ["About Us|/about-us"],
+          "trigger": ":globe: United States · EN",
+          "languages": ["English · EN|/", "Deutsch · DE|/de"]
+        }
+      },
+      "metadata": { "Language": "en" }
+    },
+    {
+      "id": "UTILITY-FX-03",
+      "title": "Single-language market",
+      "purpose": "A market offering only one language — the spec says no switcher should appear at all, only an optional static country label",
+      "page": "/drafts/qa/utility/single-language",
+      "nav": {
+        "path": "/drafts/qa/utility/nav-single-language",
+        "from": "/nav",
+        "utility": {
+          "links": ["About Us|/about-us", "Contact & Support|/contact-support"],
+          "trigger": ":globe: United States · EN",
+          "languages": ["English · EN|/"]
+        }
+      },
+      "metadata": { "Language": "en" }
+    },
+    {
+      "id": "UTILITY-FX-04",
+      "title": "Crowded bar",
+      "purpose": "Six links including two deliberately long labels, to push the bar toward clipping or horizontal overflow",
+      "page": "/drafts/qa/utility/crowded",
+      "nav": {
+        "path": "/drafts/qa/utility/nav-crowded",
+        "from": "/nav",
+        "utility": {
+          "links": [
+            "About Us|/about-us",
+            "Contact & Support|/contact-support",
+            "Track Your Order|/track-your-order",
+            "Frequently Asked Questions About Delivery|/faq-delivery",
+            "Sustainability and Responsible Sourcing|/sustainability",
+            "Careers|/careers"
+          ],
+          "trigger": ":globe: United States · EN",
+          "languages": ["English · EN|/", "Deutsch · DE|/de", "Français · FR|/fr"]
+        }
+      },
+      "metadata": { "Language": "en" }
+    },
+    {
+      "id": "UTILITY-FX-05",
+      "title": "RTL",
+      "purpose": "The reference bar on a right-to-left page, so mirroring, the switcher's edge and the dropdown's anchoring can be checked together",
+      "page": "/drafts/qa/utility/rtl",
+      "metadata": { "nav": "/drafts/qa/utility/nav-reference", "Language": "ar-MA" }
+    },
+    {
+      "id": "UTILITY-FX-06",
+      "title": "Accessibility page",
+      "purpose": "The reference bar on a page of its own, so tab order, screen-reader output and an axe scan describe the utility bar and nothing else",
+      "page": "/drafts/qa/utility/a11y",
+      "metadata": { "nav": "/drafts/qa/utility/nav-reference", "Language": "en" }
+    }
+  ],
+  "tests": [
+    {
+      "id": "UTILITY-TC-01",
+      "summary": "Header: [Megamenu]: Utility Bar - Authoring - Links, separators and when the switcher appears",
+      "scope": "What authored content produces: at least one utility link always renders, a single link leaves no dangling separator, missing optional items leave no gap, and the language switcher appears only when the market actually offers a choice.",
+      "ac": ["AC-3", "AC-6"],
+      "suites": ["sanity", "regression"],
+      "labels": ["utility-bar", "authoring"],
+      "fixtures": ["UTILITY-FX-01", "UTILITY-FX-02", "UTILITY-FX-03", "UTILITY-FX-04"],
+      "notes": "Step 4 is expected to fail on current code. blocks/language/language.js treats the first authored row as the trigger and every remaining row as an option, then builds the trigger button unconditionally — there is no check on how many options were found. A market with one language therefore still gets a switcher. Raise it as a product defect; the test asserts AC-6 as written.",
+      "steps": [
+        {
+          "action": "Open fixture FX-01 and look at the utility bar.",
+          "result": "All three authored links render in the authored order, separated from each other, with the language switcher at the end edge."
+        },
+        {
+          "action": "Open fixture FX-02, which authors a single link.",
+          "result": "The one link renders with no separator before or after it — nothing dangles where a second link would have been."
+        },
+        {
+          "action": "In FX-02, check the space between the link and the switcher.",
+          "result": "The bar's spacing is intact: no doubled gap and no collapsed row where the missing links would have sat."
+        },
+        {
+          "action": "Open fixture FX-03, a market authored with only one language.",
+          "result": "No language switcher renders. A static country label may remain, but there is no trigger to open and nothing to choose between."
+        },
+        {
+          "action": "Open fixture FX-04, which authors six links including two long labels.",
+          "result": "Every link renders, in order, and the bar accommodates them without dropping any."
+        },
+        {
+          "action": "Compare the bar's structure across FX-01, FX-02 and FX-04.",
+          "result": "Changing how many links there are, or how long their labels are, changes only the content — the markup and the separator treatment are the same in each."
+        }
+      ]
+    },
+    {
+      "id": "UTILITY-TC-02",
+      "summary": "Header: [Megamenu]: Utility Bar - Functionality - Links, the switcher dropdown and scroll behaviour",
+      "scope": "How the bar behaves in use: links navigate and respond to hover, the switcher opens and closes by click, outside click and Escape, choosing a language performs the locale action and marks the active one, and repeated interaction causes no glitch.",
+      "ac": ["AC-7", "AC-9", "AC-11"],
+      "suites": ["sanity", "regression", "e2e"],
+      "labels": ["utility-bar", "functional"],
+      "fixtures": ["UTILITY-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 on a desktop viewport and hover a utility link.",
+          "result": "The link shows the expected colour change, and no neighbouring item moves."
+        },
+        {
+          "action": "Click a utility link.",
+          "result": "The browser navigates to that link's authored destination."
+        },
+        {
+          "action": "Return and activate the language switcher trigger.",
+          "result": "A dropdown opens listing every authored language, with a country note and a \"Change country\" link beneath them."
+        },
+        {
+          "action": "Identify the currently active language in the open dropdown.",
+          "result": "It is marked as active — visually distinct, and carrying aria-current so assistive technology reports it too."
+        },
+        {
+          "action": "Click somewhere outside the dropdown.",
+          "result": "The dropdown closes."
+        },
+        {
+          "action": "Reopen it and press Escape.",
+          "result": "The dropdown closes and focus is not left stranded."
+        },
+        {
+          "action": "Open the dropdown and choose a language other than the active one.",
+          "result": "The expected locale action is performed for that language."
+        },
+        {
+          "action": "Reopen the dropdown and use the \"Change country\" link.",
+          "result": "The expected country-change action is performed."
+        },
+        {
+          "action": "Open and close the dropdown rapidly several times, and hover across the links while doing so.",
+          "result": "No stuck-open panel, no duplicated dropdown, and nothing in the bar shifts out of alignment."
+        }
+      ]
+    },
+    {
+      "id": "UTILITY-TC-03",
+      "summary": "Header: [Megamenu]: Utility Bar - Visual - Tokens, separators and switcher styling",
+      "scope": "How the bar looks against the handover at a desktop reference viewport: the strip's height and background, text and separator colours, hover and focus treatment, the switcher's styling, and that a crowded bar never clips or pushes the page sideways.",
+      "ac": ["AC-4", "AC-5", "AC-17"],
+      "suites": ["regression"],
+      "labels": ["utility-bar", "visual", "desktop"],
+      "fixtures": ["UTILITY-FX-01", "UTILITY-FX-04"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a 1440px-wide desktop viewport and inspect the utility strip.",
+          "data": "Expected: a thin strip, 36px tall, on #f5f3f4",
+          "result": "The strip's height and background match the handover."
+        },
+        {
+          "action": "Inspect the utility link text and the separators between links.",
+          "result": "Both use the design tokens for this viewport, and the separators are visually lighter than the link text."
+        },
+        {
+          "action": "Hover a link, then move focus to it with the keyboard.",
+          "result": "The hover colour and the focus ring both match the tokens, and neither changes the strip's height."
+        },
+        {
+          "action": "Inspect the language switcher: the globe icon, the country/language label and the caret.",
+          "result": "All three match the handover for desktop, aligned to the end edge of the bar."
+        },
+        {
+          "action": "Open the switcher and inspect the dropdown panel.",
+          "result": "The panel's background, spacing, active-language treatment and \"Change country\" link match the handover."
+        },
+        {
+          "action": "Open fixture FX-04, the crowded bar, at 1440px, 1280px and 1024px.",
+          "result": "Nothing is clipped, the links do not overlap the switcher, and the document never scrolls horizontally."
+        },
+        {
+          "action": "Compare spacing, typography and colours against the approved handover design.",
+          "result": "All match for the desktop layout."
+        }
+      ]
+    },
+    {
+      "id": "UTILITY-TC-04",
+      "summary": "Header: [Megamenu]: Utility Bar - Compatibility - Desktop strip and scroll-away",
+      "scope": "The desktop half of a bar that is placed differently per viewport: a thin strip at the top of the header, the switcher shown as label plus caret, and the bar sliding away on scroll while the main nav row stays put.",
+      "ac": ["AC-1", "AC-10", "AC-18"],
+      "suites": ["sanity", "regression"],
+      "labels": ["utility-bar", "desktop", "responsive"],
+      "fixtures": ["UTILITY-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a desktop viewport above 900px.",
+          "result": "The utility bar sits at the top of the header, above the main navigation row, as a thin strip."
+        },
+        {
+          "action": "Inspect the switcher's presentation at this viewport.",
+          "result": "It shows a globe icon, the current country and language as text, and a caret."
+        },
+        {
+          "action": "Scroll the page down slowly.",
+          "result": "The utility bar slides up out of view in step with the scroll, while the main nav row stays pinned in place."
+        },
+        {
+          "action": "Scroll back up.",
+          "result": "The utility bar returns smoothly, with no jump or overshoot as it reappears."
+        },
+        {
+          "action": "Scroll up and down rapidly several times.",
+          "result": "The bar tracks the scroll without flickering, sticking part-way, or leaving a gap under the header."
+        },
+        {
+          "action": "Resize the viewport down across 900px.",
+          "result": "The bar moves to the mobile position with every authored link and the switcher's languages preserved — none lost, none duplicated."
+        },
+        {
+          "action": "Resize back up across 900px.",
+          "result": "The desktop strip returns at the top of the header, and scroll-away works again."
+        }
+      ]
+    },
+    {
+      "id": "UTILITY-TC-05",
+      "summary": "Header: [Megamenu]: Utility Bar - Compatibility - Mobile placement and the MORE label",
+      "scope": "The mobile half, which is a different arrangement rather than a smaller one: the bar moves below the main nav, gains a MORE label above it, the switcher becomes an icon-only trigger, and there is deliberately no scroll-away.",
+      "ac": ["AC-2", "AC-8", "AC-18"],
+      "suites": ["sanity", "regression"],
+      "labels": ["utility-bar", "mobile", "responsive"],
+      "fixtures": ["UTILITY-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 on a mobile viewport below 900px and open the header.",
+          "result": "The utility bar sits at the bottom of the header area, below the main navigation rather than above it."
+        },
+        {
+          "action": "Look immediately above the bar.",
+          "result": "A \"MORE\" label introduces it, positioned on top of the bar."
+        },
+        {
+          "action": "Inspect the language switcher at this viewport.",
+          "result": "It is presented as a globe icon trigger alone — no country/language text and no caret."
+        },
+        {
+          "action": "Tap the globe icon.",
+          "result": "The same language dropdown opens, listing every authored language."
+        },
+        {
+          "action": "Select a language from it.",
+          "result": "The active locale updates as expected."
+        },
+        {
+          "action": "Scroll the page down.",
+          "result": "The utility bar does not slide away — scroll-away is desktop-only by design."
+        },
+        {
+          "action": "Resize up across 900px and back down.",
+          "result": "Placement, the MORE label and the switcher's presentation switch between the two layouts each time, with no link or language lost or duplicated."
+        }
+      ]
+    },
+    {
+      "id": "UTILITY-TC-06",
+      "summary": "Header: [Megamenu]: Utility Bar - Accessibility - Keyboard, switcher semantics and contrast",
+      "scope": "WCAG 2.1 AA for the bar: every link and the switcher reachable and operable by keyboard on both viewports, the switcher exposing its popup relationship and open state, the globe icon named, the dropdown dismissible by Escape, and the colours meeting contrast.",
+      "ac": ["AC-14", "AC-15", "AC-16"],
+      "suites": ["regression"],
+      "labels": ["utility-bar", "a11y"],
+      "fixtures": ["UTILITY-FX-06"],
+      "steps": [
+        {
+          "action": "Open fixture FX-06 on a desktop viewport and Tab from the top of the page.",
+          "result": "Every utility link is reachable in reading order, followed by the switcher trigger."
+        },
+        {
+          "action": "Observe the focus indicator on each stop.",
+          "data": "Expected: a visible ring in --color-accessible-orange",
+          "result": "A visible focus ring shows against the bar's background at every stop."
+        },
+        {
+          "action": "With the switcher trigger focused, inspect its markup.",
+          "result": "It carries aria-haspopup, aria-expanded reading false while closed, and aria-controls pointing at the dropdown panel's id."
+        },
+        {
+          "action": "Activate the trigger with Enter, then check the markup again.",
+          "result": "The dropdown opens and aria-expanded flips to true."
+        },
+        {
+          "action": "Inspect the accessible name of the globe icon.",
+          "result": "The icon has an accessible name rather than being announced as an unlabelled graphic."
+        },
+        {
+          "action": "Tab through the open dropdown, then press Escape.",
+          "result": "Every language and the \"Change country\" link are reachable, and Escape closes the panel without trapping focus."
+        },
+        {
+          "action": "Continue tabbing past the bar, then Shift-Tab back through it.",
+          "result": "Focus leaves the bar in both directions using the keyboard alone."
+        },
+        {
+          "action": "Repeat the tab-through on a mobile viewport.",
+          "result": "The links and the icon trigger are reachable in a logical order there too."
+        },
+        {
+          "action": "Measure the contrast of the link text, the separators, and the hover and focus states against the bar's background.",
+          "data": "AA requires 4.5:1 for normal text and 3:1 for non-text indicators",
+          "result": "All meet their thresholds."
+        },
+        {
+          "action": "Run axe-core against the page with the dropdown open, then a Lighthouse accessibility audit.",
+          "result": "axe reports no new violations attributable to the utility bar, and the accessibility score is 100 barring pre-existing issues elsewhere."
+        }
+      ]
+    },
+    {
+      "id": "UTILITY-TC-07",
+      "summary": "Header: [Megamenu]: Utility Bar - Internationalization - Mirroring and dropdown anchoring",
+      "scope": "That the bar works in a right-to-left locale: links and separators read right to left, the switcher moves to the mirrored edge, the mobile MORE label aligns correctly, and the dropdown anchors to the start edge without spilling off screen.",
+      "ac": ["AC-12", "AC-13"],
+      "suites": ["regression"],
+      "labels": ["utility-bar", "i18n", "rtl"],
+      "fixtures": ["UTILITY-FX-05"],
+      "steps": [
+        {
+          "action": "Open fixture FX-05 on a desktop viewport and confirm the document direction.",
+          "result": "The page carries dir=\"rtl\" and the Arabic locale in its lang attribute."
+        },
+        {
+          "action": "Read the utility links from the start edge.",
+          "result": "The links begin at the right-hand edge and read right to left, with the separators following the same order."
+        },
+        {
+          "action": "Locate the language switcher.",
+          "result": "It sits at the mirrored end edge — the left-hand side — rather than staying on the right."
+        },
+        {
+          "action": "Open the dropdown and observe where the panel is anchored.",
+          "result": "The panel anchors to the start edge of its trigger and stays fully on screen, with nothing clipped at either edge."
+        },
+        {
+          "action": "Check the document for horizontal overflow with the dropdown both closed and open.",
+          "result": "The page never scrolls horizontally in either state."
+        },
+        {
+          "action": "Switch to a mobile viewport and look at the MORE label.",
+          "result": "The label aligns to the mirrored start edge, above the bar, matching the rest of the right-to-left layout."
+        }
+      ]
+    }
+  ]
+}

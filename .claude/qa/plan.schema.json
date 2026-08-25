@@ -96,7 +96,7 @@
           },
           "nav": {
             "type": "object",
-            "description": "A nav document generated for this fixture by transforming a live one. Header-family blocks live in the site-wide nav, so a variant means a whole nav rather than a section; the page's `nav` metadata row is derived from `path` automatically.",
+            "description": "A nav document generated for this fixture by transforming a live one. Header-family blocks live in the site-wide nav, so a variant means a whole nav rather than a section; the page's `nav` metadata row is derived from `path` automatically. A spec may edit more than one region: `utility` for the top bar, and the count/label/links keys for the brand strip inside the Products megamenu.",
             "additionalProperties": false,
             "required": [
               "path",
@@ -128,6 +128,39 @@
                 "description": "Per-link overrides, positional: { alt, src, caption }.",
                 "items": {
                   "type": "object"
+                }
+              },
+              "utility": {
+                "type": "object",
+                "description": "Edits to the nav's utility bar — its first section, holding the author-defined links and the language block.",
+                "additionalProperties": false,
+                "properties": {
+                  "links": {
+                    "type": "array",
+                    "description": "Utility links as \"Label|/href\", replacing the authored list.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "description": "The language switcher's trigger label, e.g. \":globe: United States · EN\"."
+                  },
+                  "languages": {
+                    "type": "array",
+                    "description": "Language options as \"Label · CODE|/href\". One entry is the single-language market case.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "note": {
+                    "type": "string",
+                    "description": "The country note shown under the language list."
+                  },
+                  "change": {
+                    "type": "string",
+                    "description": "The \"Change country\" link, as \"Label|/href\"."
+                  }
                 }
               }
             }

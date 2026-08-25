@@ -123,7 +123,69 @@ export function editLink(link, { alt, src, caption } = {}) {
  * @param {string} navHtml  the live nav document source
  * @param {object} spec     { count, label, links: [{alt, src, caption}], removeLabel }
  */
+/**
+ * Replace the utility bar's links and language options.
+ *
+ * The utility bar is the nav's first section: a `<ul>` of author-defined links, followed by a
+ * `div.language` block whose first row is the trigger label and whose remaining rows are the
+ * language options. Varying those two lists is what the utility-bar tests need — one link to prove
+ * there is no dangling separator, one language to check the switcher hides itself, many long links
+ * to push the bar toward overflowing.
+ *
+ * @param {string} navHtml
+ * @param {object} spec  { links: ["About Us|/about-us", …], languages: ["English · EN|/", …],
+ *                         trigger: ":globe: United States · EN", note, change }
+ */
+export function transformUtility(navHtml, spec = {}) {
+  let out = navHtml;
+
+  if (spec.links) {
+    const ulStart = out.indexOf('<ul>');
+    const ulEnd = out.indexOf('</ul>', ulStart);
+    if (ulStart === -1 || ulEnd === -1) throw new Error('no utility link list found in the source nav');
+    const items = spec.links.map((l) => {
+      const [label, href] = String(l).split('|');
+      return href ? `<li><a href="${esc(href)}">${esc(label)}</a></li>` : `<li>${esc(label)}</li>`;
+    }).join('\n');
+    out = `${out.slice(0, ulStart)}<ul>\n${items}\n</ul>${out.slice(ulEnd + 5)}`;
+  }
+
+  if (spec.languages || spec.trigger) {
+    const i = out.indexOf('class="language"');
+    if (i === -1) throw new Error('no language block found in the source nav');
+    const open = out.lastIndexOf('<div', i);
+    let d = 0; let m; let end = open;
+    const re = /<div\b[^>]*>|<\/div>/g;
+    re.lastIndex = open;
+    while ((m = re.exec(out))) {
+      if (m[0] !== '</div>') d += 1;
+      else { d -= 1; if (d === 0) { end = re.lastIndex; break; } }
+    }
+    const row = (inner) => `<div><div>${inner}</div></div>`;
+    const rows = [row(`<p>${esc(spec.trigger || ':globe: United States · EN')}</p>`)];
+    for (const l of spec.languages || []) {
+      const [label, href] = String(l).split('|');
+      rows.push(row(`<p><a href="${esc(href || '/')}">${esc(label)}</a></p>`));
+    }
+    if (spec.note) rows.push(row(`<p>${esc(spec.note)}</p>`));
+    if (spec.change) {
+      const [label, href] = String(spec.change).split('|');
+      rows.push(row(`<p><a href="${esc(href || '/')}">${esc(label)}</a></p>`));
+    }
+    out = `${out.slice(0, open)}<div class="language">\n${rows.join('\n')}\n</div>${out.slice(end)}`;
+  }
+  return out;
+}
+
 export function transformNav(navHtml, spec = {}) {
+  // A spec may target more than one region of the same nav. Utility first, so a later brand-strip
+  // search runs against the already-edited document rather than a stale copy of it.
+  if (spec.utility) {
+    const after = transformUtility(navHtml, spec.utility);
+    const rest = { ...spec };
+    delete rest.utility;
+    return Object.keys(rest).length ? transformNav(after, rest) : after;
+  }
   const strip = findBrandStrip(navHtml);
   if (!strip) throw new Error('no brand strip found in the source nav — it needs 2+ consecutive image-only links');
 
