@@ -177,7 +177,7 @@
         },
         {
           "action": "Open fixture FX-05, which omits the label, and open the Products megamenu.",
-          "result": "The carousel renders cleanly with no gap or reserved empty space where the label would have been."
+          "result": "No labelless carousel renders. The label is a required slot, so the block does not present the strip as though the authored content were complete."
         },
         {
           "action": "In FX-05, find the tile whose image source is deliberately broken.",
@@ -191,7 +191,8 @@
           "action": "In FX-05, find the tile with very long alt text, and scroll the strip to its end.",
           "result": "The long alt text does not widen the tile or break the row, and 24 logos scroll horizontally without breaking the panel or introducing page-level horizontal scrolling."
         }
-      ]
+      ],
+      "notes": "Step 6 is expected to fail. Gianluca Volpe clarified on 26 Aug 2026 that the label is required and that the code treating it as optional is a code issue; on develop FX-05 renders a carousel with no label at all. Two things still need writing down: AC-4 and AC-13 say the label can be left out, which now contradicts the answer, and nothing defines what should happen when an author omits a required slot. The step therefore asserts only that a labelless carousel is not presented as valid."
     },
     {
       "id": "BRANDS-TC-02",
@@ -257,9 +258,10 @@
         },
         {
           "action": "Compare the behaviour observed on FX-01 and FX-02.",
-          "result": "Changing the number of logos changes only what is scrollable — the structure, controls and interaction model are identical."
+          "result": "The structure, controls and interaction model are identical in both. The one thing the number of logos changes is arrow visibility, which follows overflow as AC-8 requires."
         }
-      ]
+      ],
+      "notes": "AC-12 and AC-8 read as contradicting each other: AC-12 says changing the number of logos changes no behaviour, AC-8 says the arrows appear and disappear with overflow. Gianluca Volpe settled it on 26 Aug 2026 — keep AC-8. Step 10 asserts AC-12 as narrowed by that answer, and AC-12's own wording needs correcting to match."
     },
     {
       "id": "BRANDS-TC-03",
@@ -399,7 +401,7 @@
       "fixtures": [
         "BRANDS-FX-01"
       ],
-      "notes": "Step 6 shares the breakpoint defect described on BRANDS-TC-04 — on develop the switch happens at 1200px rather than the specified 900px.",
+      "notes": "Step 6 shares the breakpoint defect described on BRANDS-TC-04 — on develop the switch happens at 1200px rather than the specified 900px. Step 2 asserts the separator below the strip rather than above it as AC-3 says: Gianluca Volpe's answer of 26 Aug 2026 is to follow the designs, and the handover prototype draws it below. AC-3 needs correcting to match.",
       "steps": [
         {
           "action": "Open fixture FX-01 on a mobile viewport, open the navigation drawer and expand the Products section.",
@@ -407,7 +409,7 @@
         },
         {
           "action": "Inspect the label and the separator.",
-          "result": "The \"Our brands:\" label sits on top of the logo row, with a hairline separator above it and a transparent background — no tinted band."
+          "result": "The \"Our brands:\" label sits on top of the logo row, with a hairline separator below the strip and a transparent background — no tinted band."
         },
         {
           "action": "Look for arrow controls.",

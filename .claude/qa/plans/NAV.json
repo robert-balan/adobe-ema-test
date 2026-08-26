@@ -446,7 +446,7 @@
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "Several steps are expected to fail on current code, all of them named in the ticket's own section 8 as work still to do. (a) The nav row measures 70px, not 68px — styles.css sets --nav-h: 70px where the design system sets 68px. (b) The dark and glass contexts do not exist: header.css defines the light treatment only, there is no modifier for the other two and no way for an author to select one, so steps 4, 5 and 7 have nothing to check. (c) The hover/active label colour is #B23E00, from a header-local --hdr-cta-orange, where the design system says --color-orange-700 = #D14900. The repo's own styles.css already defines that token. #B23E00 is the higher-contrast of the two, so raise it as a fidelity question rather than letting anyone 'fix' it back to something that fails AA. (d) Step 8 is expected to fail. On FX-03 at 1440px the fourth label is cut off by the search field and the last three items render behind the tools, off the right edge of the window. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable.",
+      "notes": "Several steps are expected to fail on current code, all of them named in the ticket's own section 8 as work still to do. (a) The nav row measures 70px, not 68px — styles.css sets --nav-h: 70px where the design system sets 68px. (b) The dark and glass contexts do not exist: header.css defines the light treatment only, there is no modifier for the other two and no way for an author to select one, so steps 4, 5 and 7 have nothing to check. (c) The hover/active label colour is #B23E00, from a header-local --hdr-cta-orange, where the design system says --color-orange-700 = #D14900. The repo's own styles.css already defines that token. #B23E00 is the higher-contrast of the two, so raise it as a fidelity question rather than letting anyone 'fix' it back to something that fails AA. (d) Step 8 is expected to fail. On FX-03 at 1440px the fourth label is cut off by the search field and the last three items render behind the tools, off the right edge of the window. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Answered 26 Aug by Gianluca Volpe: follow the designs unless doing so breaks an accessibility rule. So 68px and #D14900 stand as the expected values — but #B23E00 is the higher-contrast of the two, so check the design value still meets AA at the label's size before anyone changes the code to it.",
       "steps": [
         {
           "action": "On FX-01 at 1440px wide, measure the nav row.",
@@ -484,8 +484,8 @@
     },
     {
       "id": "NAV-TC-04",
-      "summary": "Header: Navigation - Compatibility, desktop - The full bar from 1024px up",
-      "scope": "The desktop arrangement across the widths it is supposed to cover, including 1024px itself, which the spec makes the lowest desktop width.",
+      "summary": "Header: Navigation - Compatibility, desktop - The full bar from 900px up",
+      "scope": "The desktop arrangement across the widths it is supposed to cover, including 900px itself, which the 26 Aug clarification makes the lowest desktop width.",
       "ac": [
         "AC-1",
         "AC-6",
@@ -504,7 +504,7 @@
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "Steps 3, 4, 5 and 6 are expected to fail between 1024px and 1199px. The spec puts the desktop/mobile switch at 1024px; header.css switches at 1200px. Confirmed in a browser: at 1199px, 1100px and 1024px the hamburger bar is showing where the spec calls for the full desktop nav.",
+      "notes": "The desktop/mobile switch is 900px. Gianluca Volpe answered this on EC-7 on 26 Aug 2026, against the three values that were in play; AC-7 and AC-15 still say 1024px and need correcting to match. header.css switches at 1200px, so steps 3 to 8 are expected to fail from 1199px down to 900px: the hamburger bar shows where the spec calls for the full desktop nav.",
       "steps": [
         {
           "action": "Open FX-01 at 1440px.",
@@ -519,26 +519,30 @@
           "result": "Still the desktop bar — the horizontal links are there and no hamburger has appeared."
         },
         {
-          "action": "Resize to 1024px, the lowest width the spec calls desktop.",
+          "action": "Resize to 1024px.",
           "result": "Still the desktop bar, with every link readable and no horizontal page scrolling."
         },
         {
-          "action": "At 1024px, scroll down two screens.",
+          "action": "Resize to 900px, the lowest width the spec calls desktop.",
+          "result": "Still the desktop bar — the horizontal links are all there, every label is readable, and no hamburger has appeared."
+        },
+        {
+          "action": "At 900px, scroll down two screens.",
           "result": "The bar stays pinned at the top, exactly as it does at 1440px."
         },
         {
-          "action": "Open FX-03 and step through 1440, 1280, 1100 and 1024.",
+          "action": "Open FX-03 and step through 1440, 1280, 1100, 1024 and 900.",
           "result": "The crowded bar keeps all eight items on one row at each width, with no clipping and no sideways page scroll."
         },
         {
-          "action": "Resize slowly from 1440px down to 1024px and back up.",
+          "action": "Resize slowly from 1440px down to 900px and back up.",
           "result": "The bar reflows smoothly. No link disappears, nothing is drawn twice, and the layout never breaks mid-resize."
         }
       ]
     },
     {
       "id": "NAV-TC-05",
-      "summary": "Header: Navigation - Compatibility, mobile - The hamburger bar below 1024px",
+      "summary": "Header: Navigation - Compatibility, mobile - The hamburger bar below 900px",
       "scope": "The mobile arrangement, which is a different bar rather than the same one squeezed: the links go away and a hamburger and logo take their place. Also the switch between the two.",
       "ac": [
         "AC-7",
@@ -557,10 +561,10 @@
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not 1024px. Steps 1 to 5 pass — the mobile bar itself is correct, it just starts 176px too early.",
+      "notes": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not the 900px Gianluca Volpe confirmed on EC-7 on 26 Aug 2026 — so the mobile bar starts 300px too early. Steps 1 to 5 pass; the mobile bar itself is correct. AC-7 and AC-15 still say 1024px and need correcting to match.",
       "steps": [
         {
-          "action": "Open FX-01 at 1023px, one pixel below the spec's breakpoint.",
+          "action": "Open FX-01 at 899px, one pixel below the breakpoint.",
           "result": "The horizontal links are gone and the mobile bar has taken over: a hamburger at the start edge and the logo beside it."
         },
         {
@@ -580,11 +584,11 @@
           "result": "The navigation drawer opens. What is inside it belongs to another ticket; here it only matters that the hamburger opens something."
         },
         {
-          "action": "Resize slowly upward from 1023px through 1024px.",
-          "result": "At 1024px the mobile bar is replaced by the desktop bar in one clean switch — the hamburger goes away, the links appear, and neither is shown twice."
+          "action": "Resize slowly upward from 899px through 900px.",
+          "result": "At 900px the mobile bar is replaced by the desktop bar in one clean switch — the hamburger goes away, the links appear, and neither is shown twice."
         },
         {
-          "action": "Resize back down through 1024px to 1023px.",
+          "action": "Resize back down through 900px to 899px.",
           "result": "The reverse switch is just as clean, with no leftover links and no broken layout."
         },
         {
@@ -701,7 +705,7 @@
           "result": "It opens the same way, the trigger gets the same 2px line and hover colour, and the panel is anchored to the mirrored bar rather than hanging off the wrong edge."
         },
         {
-          "action": "Check the bar at 1440px and 1024px in right-to-left.",
+          "action": "Check the bar at 1440px and 900px in right-to-left.",
           "result": "No label is clipped, nothing overlaps the tools, and the page never scrolls sideways."
         },
         {

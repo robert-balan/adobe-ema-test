@@ -9,7 +9,7 @@
   "intro": " — please see below the discrepancies we found while creating the test cases for this ticket. We write our tests from the acceptance criteria here, so anywhere the build differs the step fails on purpose. Most of these trace back to section 8, the design-system decisions table, which is still open.",
   "items": [
     {
-      "text": "Desktop/mobile switch is at the wrong width. AC-7 and AC-15 say 1024px; header.css switches at 1200px. At 1199px, 1100px and 1024px you get the hamburger bar where the full desktop nav should be. Three numbers are in play — spec 1024, header.css 1200, styles.css 900 — and they should agree."
+      "text": "Desktop/mobile switch is at the wrong width. AC-7 and AC-15 say 1024px; header.css on develop switches at 1200px. At 1199px, 1100px and 1024px you get the hamburger bar where the full desktop nav should be. Three numbers are in play — spec 1024, header.css 1200, styles.css 900 — and they should agree."
     },
     {
       "text": "The dark and glass contexts don't exist. AC-2 asks for all three; header.css only defines the light treatment, with no modifier and no way for an author to pick one. Those steps have nothing to check, and it takes out the context halves of AC-3 and AC-11 too."
