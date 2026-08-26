@@ -6,7 +6,9 @@
   "source": {
     "key": "EC-22",
     "summary": "Block: Breadcrumb",
-    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-22"
+    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-22",
+    "acDigest": "sha256:9e5743114e51897b",
+    "acCheckedOn": "2026-08-25"
   },
   "folder": "/Blocks/Breadcrumb",
   "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
@@ -16,29 +18,46 @@
       "title": "Auto trail from the URL",
       "purpose": "Breadcrumb: auto on a deeply nested page, so the trail has enough levels to collapse on mobile",
       "page": "/drafts/qa/breadcrumb/products/sauces-and-condiments/ketchup",
-      "metadata": { "Breadcrumb": "auto", "Language": "en" }
+      "metadata": {
+        "Breadcrumb": "auto",
+        "Language": "en"
+      }
     },
     {
       "id": "BREADCRUMB-FX-02",
       "title": "Authored label trail",
       "purpose": "A pipe-delimited override, including an ampersand and a label that looks like markup, to check labels render as plain text",
       "page": "/drafts/qa/breadcrumb/labels",
-      "metadata": { "Breadcrumb": "Products | Sauces & Condiments | <b>Ketchup</b>", "Language": "en" }
+      "metadata": {
+        "Breadcrumb": "Products | Sauces & Condiments | <b>Ketchup</b>",
+        "Language": "en"
+      }
     },
     {
       "id": "BREADCRUMB-FX-03",
       "title": "Manual block beats the metadata",
       "purpose": "A hand-authored breadcrumb block AND Breadcrumb: auto on the same page — only the manual trail should render, never both",
       "page": "/drafts/qa/breadcrumb/manual",
-      "metadata": { "Breadcrumb": "auto", "Language": "en" },
+      "metadata": {
+        "Breadcrumb": "auto",
+        "Language": "en"
+      },
       "sections": [
         {
           "name": "breadcrumb",
           "rows": [
-            ["<p><a href=\"/\">Home</a></p>"],
-            ["<p><a href=\"/training\">Training</a></p>"],
-            ["<p><a href=\"/training/courses\">Courses</a></p>"],
-            ["<p>Professional Development</p>"]
+            [
+              "<p><a href=\"/\">Home</a></p>"
+            ],
+            [
+              "<p><a href=\"/training\">Training</a></p>"
+            ],
+            [
+              "<p><a href=\"/training/courses\">Courses</a></p>"
+            ],
+            [
+              "<p>Professional Development</p>"
+            ]
           ]
         }
       ]
@@ -48,35 +67,49 @@
       "title": "Explicit opt-out",
       "purpose": "Breadcrumb: false on a nested page — no breadcrumb at all, even though the URL would produce one",
       "page": "/drafts/qa/breadcrumb/optout/deeper",
-      "metadata": { "Breadcrumb": "false", "Language": "en" }
+      "metadata": {
+        "Breadcrumb": "false",
+        "Language": "en"
+      }
     },
     {
       "id": "BREADCRUMB-FX-05",
       "title": "No Breadcrumb row at all",
       "purpose": "A nested page with no Breadcrumb metadata — the block is opt-in, so nothing should render",
       "page": "/drafts/qa/breadcrumb/absent/deeper",
-      "metadata": { "Language": "en" }
+      "metadata": {
+        "Language": "en"
+      }
     },
     {
       "id": "BREADCRUMB-FX-06",
       "title": "Shortest possible trail",
       "purpose": "Home plus the current page only, which is the case where mobile should show no collapse control",
       "page": "/drafts/qa/breadcrumb/short",
-      "metadata": { "Breadcrumb": "Ketchup", "Language": "en" }
+      "metadata": {
+        "Breadcrumb": "Ketchup",
+        "Language": "en"
+      }
     },
     {
       "id": "BREADCRUMB-FX-07",
       "title": "RTL",
       "purpose": "The FX-02 trail on a right-to-left page, so direction, mirroring and the mobile behaviour can be checked together",
       "page": "/drafts/qa/breadcrumb/rtl",
-      "metadata": { "Breadcrumb": "Products | Sauces & Condiments | Ketchup", "Language": "ar-MA" }
+      "metadata": {
+        "Breadcrumb": "Products | Sauces & Condiments | Ketchup",
+        "Language": "ar-MA"
+      }
     },
     {
       "id": "BREADCRUMB-FX-08",
       "title": "Accessibility page",
       "purpose": "A multi-level trail on a page of its own, so tab order, screen-reader output and an axe scan describe this block and nothing else",
       "page": "/drafts/qa/breadcrumb/a11y",
-      "metadata": { "Breadcrumb": "Products | Sauces & Condiments | Hot Sauces | Ketchup", "Language": "en" }
+      "metadata": {
+        "Breadcrumb": "Products | Sauces & Condiments | Hot Sauces | Ketchup",
+        "Language": "en"
+      }
     }
   ],
   "tests": [
@@ -84,10 +117,27 @@
       "id": "BREADCRUMB-TC-01",
       "summary": "Block: Breadcrumb - Authoring - Trail sources, opt-out and label handling",
       "scope": "Where a breadcrumb comes from and when it should not appear at all: the URL-derived auto trail, an authored pipe-delimited label trail, a hand-authored block that must win over the metadata, the explicit opt-out values, and an absent row. Also that labels are rendered as text and never interpreted as markup.",
-      "ac": ["AC-8", "AC-9", "AC-10"],
-      "suites": ["sanity", "regression"],
-      "labels": ["breadcrumb", "authoring"],
-      "fixtures": ["BREADCRUMB-FX-01", "BREADCRUMB-FX-02", "BREADCRUMB-FX-03", "BREADCRUMB-FX-04", "BREADCRUMB-FX-05", "BREADCRUMB-FX-06"],
+      "ac": [
+        "AC-8",
+        "AC-9",
+        "AC-10"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "breadcrumb",
+        "authoring"
+      ],
+      "fixtures": [
+        "BREADCRUMB-FX-01",
+        "BREADCRUMB-FX-02",
+        "BREADCRUMB-FX-03",
+        "BREADCRUMB-FX-04",
+        "BREADCRUMB-FX-05",
+        "BREADCRUMB-FX-06"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01, which sets Breadcrumb to auto on a nested page.",
@@ -133,10 +183,24 @@
       "id": "BREADCRUMB-TC-02",
       "summary": "Block: Breadcrumb - Functionality - Navigation, the current crumb, and the mobile control",
       "scope": "What happens when someone uses it: ancestor crumbs navigate, the current page does not, hovering a link responds, and on mobile the collapse control reveals the hidden ancestors without glitching when used repeatedly.",
-      "ac": ["AC-5", "AC-6", "AC-7"],
-      "suites": ["sanity", "regression", "e2e"],
-      "labels": ["breadcrumb", "functional"],
-      "fixtures": ["BREADCRUMB-FX-01", "BREADCRUMB-FX-06"],
+      "ac": [
+        "AC-5",
+        "AC-6",
+        "AC-7"
+      ],
+      "suites": [
+        "sanity",
+        "regression",
+        "e2e"
+      ],
+      "labels": [
+        "breadcrumb",
+        "functional"
+      ],
+      "fixtures": [
+        "BREADCRUMB-FX-01",
+        "BREADCRUMB-FX-06"
+      ],
       "notes": "Steps 4 to 6 are expected to fail on current code. The mobile collapse control the spec describes is not implemented on any branch — see the note on BREADCRUMB-TC-04, which carries the evidence. They are written against the spec because the ticket is Ready for Testing; raise them as product defects.",
       "steps": [
         {
@@ -174,10 +238,23 @@
       "id": "BREADCRUMB-TC-03",
       "summary": "Block: Breadcrumb - Visual - Placement, tokens, separators and spacing",
       "scope": "How it looks against the handover design at a desktop reference viewport: where it sits on the page, the colours of links, the current crumb and the separators, the chevron treatment, the padding, and that it never pushes the page sideways.",
-      "ac": ["AC-1", "AC-4", "AC-17"],
-      "suites": ["regression"],
-      "labels": ["breadcrumb", "visual", "desktop"],
-      "fixtures": ["BREADCRUMB-FX-01", "BREADCRUMB-FX-08"],
+      "ac": [
+        "AC-1",
+        "AC-4",
+        "AC-17"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "breadcrumb",
+        "visual",
+        "desktop"
+      ],
+      "fixtures": [
+        "BREADCRUMB-FX-01",
+        "BREADCRUMB-FX-08"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 at a 1440px-wide desktop viewport.",
@@ -215,10 +292,22 @@
       "id": "BREADCRUMB-TC-04",
       "summary": "Block: Breadcrumb - Compatibility - Full trail on desktop, collapsed on mobile",
       "scope": "The same trail at both ends of the range: every crumb shown on desktop, the shortened Home-ellipsis-current form on mobile, the mobile padding, and that resizing across the breakpoint switches between the two without losing or duplicating a crumb.",
-      "ac": ["AC-2", "AC-3", "AC-18"],
-      "suites": ["sanity", "regression"],
-      "labels": ["breadcrumb", "responsive"],
-      "fixtures": ["BREADCRUMB-FX-01"],
+      "ac": [
+        "AC-2",
+        "AC-3",
+        "AC-18"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "breadcrumb",
+        "responsive"
+      ],
+      "fixtures": [
+        "BREADCRUMB-FX-01"
+      ],
       "notes": "Steps 3 to 6 are expected to fail on current code, and this is the most significant finding on this ticket.\n\nThe mobile collapse the spec describes — Home, an ellipsis control, current page — does not exist in the implementation. Verified on develop, main and stage: blocks/breadcrumb/breadcrumb.js builds one flat ordered list containing every crumb, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep. There is no button, no aria-expanded and no ellipsis anywhere in the block or in the auto-block builder in scripts.js.\n\nWhat mobile does instead is make the trail horizontally scrollable at 600px and below, with the scrollbar hidden. That is a different design decision, not a partial implementation of this one.\n\nA second, smaller mismatch: the spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the scroll treatment starts at 600px — so between 601px and 899px the block behaves like neither.\n\nThese steps are written against the spec because the ticket is Ready for Testing. Raise them as product defects rather than re-running for a pass.",
       "steps": [
         {
@@ -253,10 +342,22 @@
       "id": "BREADCRUMB-TC-05",
       "summary": "Block: Breadcrumb - Accessibility - Landmark, semantics, keyboard and contrast",
       "scope": "WCAG 2.1 AA for the trail: that it is a labelled navigation landmark containing an ordered list, that the current page is marked, that decorative separators are hidden from assistive technology, that every control is reachable and operable by keyboard, and that the colours meet contrast.",
-      "ac": ["AC-13", "AC-14", "AC-15", "AC-16"],
-      "suites": ["regression"],
-      "labels": ["breadcrumb", "a11y"],
-      "fixtures": ["BREADCRUMB-FX-08"],
+      "ac": [
+        "AC-13",
+        "AC-14",
+        "AC-15",
+        "AC-16"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "breadcrumb",
+        "a11y"
+      ],
+      "fixtures": [
+        "BREADCRUMB-FX-08"
+      ],
       "notes": "Steps 6 and 7 concern the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04 for the evidence. They are expected to fail and should be raised with that defect rather than separately.",
       "steps": [
         {
@@ -303,10 +404,21 @@
       "id": "BREADCRUMB-TC-06",
       "summary": "Block: Breadcrumb - Internationalization - RTL direction, mirroring and collapse",
       "scope": "That the trail works in a right-to-left locale: it reads right to left from the start edge, the chevrons point the other way, and the mobile shortening behaves the same way without clipping or pushing the page sideways.",
-      "ac": ["AC-11", "AC-12"],
-      "suites": ["regression"],
-      "labels": ["breadcrumb", "i18n", "rtl"],
-      "fixtures": ["BREADCRUMB-FX-07"],
+      "ac": [
+        "AC-11",
+        "AC-12"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "breadcrumb",
+        "i18n",
+        "rtl"
+      ],
+      "fixtures": [
+        "BREADCRUMB-FX-07"
+      ],
       "notes": "Step 5 concerns the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04. Expected to fail, and part of that same defect.",
       "steps": [
         {

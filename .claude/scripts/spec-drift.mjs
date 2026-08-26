@@ -8,7 +8,7 @@
  *                                                        print its acceptance-criteria digest
  *     node .claude/scripts/spec-drift.mjs BRANDS --record
  *                                                        record the current digest in the plan,
- *                                                        from stdin if piped, else from Jira
+ *                                                        from Jira, or from stdin with --stdin
  *
  * Two kinds of drift, and they fail differently.
  *
@@ -118,13 +118,23 @@ if (record) {
     process.exit(2);
   }
   const p = plans[0];
+  // Where the description comes from has to be decided WITHOUT reading stdin first. An absent TTY
+  // does not mean anything was piped — an agent or a CI job leaves stdin open and idle, so reading
+  // it speculatively either blocks forever or, if it closes, records the digest of the empty
+  // string, which matches no spec and quietly disarms the next drift check. So: Jira when we can
+  // authenticate, stdin only when asked for it or when there is nothing else.
+  const wantsStdin = argv.includes('--stdin') || !auth;
   let description;
-  if (!process.stdin.isTTY) description = await readStdin();
+  if (wantsStdin && !process.stdin.isTTY) description = await readStdin();
   else if (auth) description = (await live(p.key)).description;
   else {
     console.error('--record needs either JIRA_EMAIL / JIRA_API_TOKEN, or the spec description on stdin.');
     console.error(`Fetch ${p.key} over MCP and pipe its description in:`);
-    console.error(`  ... | node .claude/scripts/spec-drift.mjs ${only} --record`);
+    console.error(`  ... | node .claude/scripts/spec-drift.mjs ${only} --record --stdin`);
+    process.exit(2);
+  }
+  if (!String(description).trim()) {
+    console.error(`${p.key} has an empty description — refusing to record a digest that would match nothing.`);
     process.exit(2);
   }
   const { digest, scoped } = digestOf(description);

@@ -6,14 +6,16 @@
   "source": {
     "key": "EC-7",
     "summary": "Header: Navigation",
-    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-7"
+    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-7",
+    "acDigest": "sha256:445a65cc680b13bb",
+    "acCheckedOn": "2026-08-25"
   },
   "folder": "/Header/Navigation",
   "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
   "fixtures": [
     {
       "id": "NAV-FX-01",
-      "title": "Reference bar \u2014 the five live top-level items",
+      "title": "Reference bar — the five live top-level items",
       "purpose": "The nav exactly as production authors it: four items with megamenus and one plain link, the image logo, and a page long enough to scroll so the sticky behaviour has something to prove",
       "page": "/drafts/qa/nav/reference",
       "nav": {
@@ -93,7 +95,7 @@
     },
     {
       "id": "NAV-FX-02",
-      "title": "One link \u2014 the minimum the content model allows",
+      "title": "One link — the minimum the content model allows",
       "purpose": "The Content Slots table makes nav-link required with at least one; this is that one, to prove the bar still lays out with the logo at the start and nothing left dangling",
       "page": "/drafts/qa/nav/one-link",
       "nav": {
@@ -114,7 +116,7 @@
     },
     {
       "id": "NAV-FX-03",
-      "title": "Crowded bar \u2014 eight items, several very long labels",
+      "title": "Crowded bar — eight items, several very long labels",
       "purpose": "Pushes the bar toward overflowing: eight top-level items including German-length labels, to test that nothing clips, overlaps the tools, or makes the page scroll sideways",
       "page": "/drafts/qa/nav/crowded",
       "nav": {
@@ -166,7 +168,7 @@
     },
     {
       "id": "NAV-FX-04",
-      "title": "Text logo \u2014 the no-image fallback",
+      "title": "Text logo — the no-image fallback",
       "purpose": "The Content Slots table gives the logo one fallback, 'text brand if no image'; this authors the brand name where the image would be",
       "page": "/drafts/qa/nav/text-logo",
       "nav": {
@@ -207,7 +209,7 @@
     },
     {
       "id": "NAV-FX-05",
-      "title": "Plain links only \u2014 no item has a megamenu",
+      "title": "Plain links only — no item has a megamenu",
       "purpose": "Every top-level item authored with nothing under it, so clicking any of them must navigate and no chevron may appear anywhere on the bar",
       "page": "/drafts/qa/nav/plain-links",
       "nav": {
@@ -250,7 +252,7 @@
     {
       "id": "NAV-FX-06",
       "title": "Right-to-left",
-      "purpose": "The reference bar with the page language set to Arabic, so the whole nav mirrors \u2014 the same content, read the other way",
+      "purpose": "The reference bar with the page language set to Arabic, so the whole nav mirrors — the same content, read the other way",
       "page": "/drafts/qa/nav/rtl",
       "metadata": {
         "nav": "/drafts/qa/nav/nav-reference",
@@ -314,7 +316,7 @@
     {
       "id": "NAV-TC-01",
       "summary": "Header: Navigation - Authoring - The logo, the links, and what makes an item a dropdown",
-      "scope": "What authored content produces on the bar: the logo and its text fallback, at least one link, and the fact that an item becomes a dropdown purely because content was authored under it \u2014 there is no switch to set.",
+      "scope": "What authored content produces on the bar: the logo and its text fallback, at least one link, and the fact that an item becomes a dropdown purely because content was authored under it — there is no switch to set.",
       "ac": [
         "AC-1",
         "AC-8"
@@ -360,7 +362,7 @@
           "result": "All eight render, in the authored order, with none dropped or merged. Each label stays on one line."
         }
       ],
-      "notes": "Step 5 is expected to fail. The text logo works \u2014 the brand name renders and is still a link \u2014 but it is 280px wide where the image is 107px, and the extra 173px pushes the last nav item underneath the search field. Confirmed in a browser on FX-04 with the production five items. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate \u2014 they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable."
+      "notes": "Step 5 is expected to fail. The text logo works — the brand name renders and is still a link — but it is 280px wide where the image is 107px, and the extra 173px pushes the last nav item underneath the search field. Confirmed in a browser on FX-04 with the production five items. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable."
     },
     {
       "id": "NAV-TC-02",
@@ -394,7 +396,7 @@
         },
         {
           "action": "Click Products.",
-          "result": "Its dropdown panel opens below the bar and the chevron turns to its open position. The page does NOT navigate \u2014 the address bar still shows the fixture page."
+          "result": "Its dropdown panel opens below the bar and the chevron turns to its open position. The page does NOT navigate — the address bar still shows the fixture page."
         },
         {
           "action": "Click Products a second time.",
@@ -414,7 +416,7 @@
         },
         {
           "action": "Back on FX-01, scroll down about three screens.",
-          "result": "The nav row stays pinned at the very top of the window the whole way down \u2014 it never scrolls out of view and never jumps or flickers. The thin utility strip above it slides away as you scroll, which is expected."
+          "result": "The nav row stays pinned at the very top of the window the whole way down — it never scrolls out of view and never jumps or flickers. The thin utility strip above it slides away as you scroll, which is expected."
         },
         {
           "action": "Keep scrolling to the bottom, then scroll back to the top.",
@@ -444,7 +446,7 @@
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "Several steps are expected to fail on current code, all of them named in the ticket's own section 8 as work still to do. (a) The nav row measures 70px, not 68px \u2014 styles.css sets --nav-h: 70px where the design system sets 68px. (b) The dark and glass contexts do not exist: header.css defines the light treatment only, there is no modifier for the other two and no way for an author to select one, so steps 4, 5 and 7 have nothing to check. (c) The hover/active label colour is #B23E00, from a header-local --hdr-cta-orange, where the design system says --color-orange-700 = #D14900. The repo's own styles.css already defines that token. #B23E00 is the higher-contrast of the two, so raise it as a fidelity question rather than letting anyone 'fix' it back to something that fails AA. (d) Step 8 is expected to fail. On FX-03 at 1440px the fourth label is cut off by the search field and the last three items render behind the tools, off the right edge of the window. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate \u2014 they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable.",
+      "notes": "Several steps are expected to fail on current code, all of them named in the ticket's own section 8 as work still to do. (a) The nav row measures 70px, not 68px — styles.css sets --nav-h: 70px where the design system sets 68px. (b) The dark and glass contexts do not exist: header.css defines the light treatment only, there is no modifier for the other two and no way for an author to select one, so steps 4, 5 and 7 have nothing to check. (c) The hover/active label colour is #B23E00, from a header-local --hdr-cta-orange, where the design system says --color-orange-700 = #D14900. The repo's own styles.css already defines that token. #B23E00 is the higher-contrast of the two, so raise it as a fidelity question rather than letting anyone 'fix' it back to something that fails AA. (d) Step 8 is expected to fail. On FX-03 at 1440px the fourth label is cut off by the search field and the last three items render behind the tools, off the right edge of the window. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable.",
       "steps": [
         {
           "action": "On FX-01 at 1440px wide, measure the nav row.",
@@ -476,7 +478,7 @@
         },
         {
           "action": "Open FX-03 and view it at 1440px, 1280px and 1024px.",
-          "result": "At every width all eight labels are fully readable \u2014 nothing is cut off, nothing overlaps the logo or the tools, and the page itself never scrolls sideways."
+          "result": "At every width all eight labels are fully readable — nothing is cut off, nothing overlaps the logo or the tools, and the page itself never scrolls sideways."
         }
       ]
     },
@@ -514,7 +516,7 @@
         },
         {
           "action": "Resize to 1100px.",
-          "result": "Still the desktop bar \u2014 the horizontal links are there and no hamburger has appeared."
+          "result": "Still the desktop bar — the horizontal links are there and no hamburger has appeared."
         },
         {
           "action": "Resize to 1024px, the lowest width the spec calls desktop.",
@@ -555,7 +557,7 @@
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not 1024px. Steps 1 to 5 pass \u2014 the mobile bar itself is correct, it just starts 176px too early.",
+      "notes": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not 1024px. Steps 1 to 5 pass — the mobile bar itself is correct, it just starts 176px too early.",
       "steps": [
         {
           "action": "Open FX-01 at 1023px, one pixel below the spec's breakpoint.",
@@ -563,7 +565,7 @@
         },
         {
           "action": "Look at the rest of the mobile bar.",
-          "result": "The persistent cart, favourites and account icons are present. Their look and behaviour belong to other tickets \u2014 here they only need to not break the row."
+          "result": "The persistent cart, favourites and account icons are present. Their look and behaviour belong to other tickets — here they only need to not break the row."
         },
         {
           "action": "Resize to 768px, then to 390px.",
@@ -571,7 +573,7 @@
         },
         {
           "action": "At 390px and again at 320px, try to scroll the page sideways.",
-          "result": "It will not scroll sideways \u2014 the bar fits the screen at both widths."
+          "result": "It will not scroll sideways — the bar fits the screen at both widths."
         },
         {
           "action": "Tap the hamburger.",
@@ -579,7 +581,7 @@
         },
         {
           "action": "Resize slowly upward from 1023px through 1024px.",
-          "result": "At 1024px the mobile bar is replaced by the desktop bar in one clean switch \u2014 the hamburger goes away, the links appear, and neither is shown twice."
+          "result": "At 1024px the mobile bar is replaced by the desktop bar in one clean switch — the hamburger goes away, the links appear, and neither is shown twice."
         },
         {
           "action": "Resize back down through 1024px to 1023px.",
@@ -587,7 +589,7 @@
         },
         {
           "action": "Open FX-03 at 390px.",
-          "result": "Eight long top-level labels make no difference on mobile \u2014 they are not on the bar, so the mobile bar looks the same as it does on FX-01."
+          "result": "Eight long top-level labels make no difference on mobile — they are not on the bar, so the mobile bar looks the same as it does on FX-01."
         }
       ]
     },
@@ -612,7 +614,7 @@
         "NAV-FX-07",
         "NAV-FX-01"
       ],
-      "notes": "Four steps are expected to fail, and all four are real barriers rather than pedantry. (a) Step 1 \u2014 tab order is logo, then the tools on the right, then the nav links, so focus jumps to the far right of the bar and back. (b) Step 2 \u2014 every dropdown item takes two Tab stops: the <li> carries tabindex=\"0\" and its <a> is focusable too, and the <li> has no role, so its accessible name is the entire flattened contents of its dropdown. (c) Steps 7 and 8 \u2014 there is no focus rule for the top-level links at all, so what you see is Chrome's default blue outline, not --color-accessible-orange. (d) Steps 9 and 10 \u2014 aria-expanded is set on the <li>, which is a listitem and does not support it, so it never reaches assistive technology; the focusable <a> has neither aria-expanded nor aria-haspopup. On top of that the whole bar sits inside .nav-drawer, which carries role=\"dialog\" aria-label=\"Main menu\" and display: contents \u2014 so at desktop widths a screen reader announces the entire primary navigation as a dialog that visually is not there. Confirmed from the browser's accessibility tree.",
+      "notes": "Four steps are expected to fail, and all four are real barriers rather than pedantry. (a) Step 1 — tab order is logo, then the tools on the right, then the nav links, so focus jumps to the far right of the bar and back. (b) Step 2 — every dropdown item takes two Tab stops: the <li> carries tabindex=\"0\" and its <a> is focusable too, and the <li> has no role, so its accessible name is the entire flattened contents of its dropdown. (c) Steps 7 and 8 — there is no focus rule for the top-level links at all, so what you see is Chrome's default blue outline, not --color-accessible-orange. (d) Steps 9 and 10 — aria-expanded is set on the <li>, which is a listitem and does not support it, so it never reaches assistive technology; the focusable <a> has neither aria-expanded nor aria-haspopup. On top of that the whole bar sits inside .nav-drawer, which carries role=\"dialog\" aria-label=\"Main menu\" and display: contents — so at desktop widths a screen reader announces the entire primary navigation as a dialog that visually is not there. Confirmed from the browser's accessibility tree.",
       "steps": [
         {
           "action": "Open FX-07, click once in the address bar, then press Tab repeatedly through the header.",
@@ -652,7 +654,7 @@
         },
         {
           "action": "Read the whole header with a screen reader.",
-          "result": "It is announced as a navigation region. Each item is announced by its own label only \u2014 never by the whole contents of its dropdown \u2014 and nothing in the bar is announced as a dialog."
+          "result": "It is announced as a navigation region. Each item is announced by its own label only — never by the whole contents of its dropdown — and nothing in the bar is announced as a dialog."
         },
         {
           "action": "Run axe-core on FX-07 and note anything reported inside the header.",
@@ -660,7 +662,7 @@
         },
         {
           "action": "Run Lighthouse on FX-07 and read the accessibility score.",
-          "result": "100, unless something outside the header is responsible \u2014 check what it names before recording a failure."
+          "result": "100, unless something outside the header is responsible — check what it names before recording a failure."
         }
       ]
     },
@@ -684,7 +686,7 @@
         "NAV-FX-06",
         "NAV-FX-03"
       ],
-      "notes": "Step 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate \u2014 they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
+      "notes": "Step 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
       "steps": [
         {
           "action": "Open fixture FX-06, which sets the page language to Arabic.",
@@ -716,7 +718,7 @@
         },
         {
           "action": "View FX-06 at 390px.",
-          "result": "The mobile bar mirrors too \u2014 the hamburger is at the right-hand start edge with the logo beside it."
+          "result": "The mobile bar mirrors too — the hamburger is at the right-hand start edge with the logo beside it."
         }
       ]
     }
