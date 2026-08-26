@@ -1,0 +1,34 @@
+{
+  "issue": "EC-7",
+  "commentId": "875166",
+  "mentions": [
+    "Lubbe, Sybrand",
+    "Volpe, Gianluca",
+    "Lee, Mathijs"
+  ],
+  "intro": " — please see below the discrepancies we found while creating the test cases for this ticket. We write our tests from the acceptance criteria here, so anywhere the build differs the step fails on purpose. Most of these trace back to section 8, the design-system decisions table, which is still open.",
+  "items": [
+    {
+      "text": "Desktop/mobile switch is at the wrong width. AC-7 and AC-15 say 1024px; header.css switches at 1200px. At 1199px, 1100px and 1024px you get the hamburger bar where the full desktop nav should be. Three numbers are in play — spec 1024, header.css 1200, styles.css 900 — and they should agree."
+    },
+    {
+      "text": "The dark and glass contexts don't exist. AC-2 asks for all three; header.css only defines the light treatment, with no modifier and no way for an author to pick one. Those steps have nothing to check, and it takes out the context halves of AC-3 and AC-11 too."
+    },
+    {
+      "text": "Long labels run under the tools. Nothing limits the width of the links, so they don't wrap, scroll or truncate — they carry on under the search field and off the right edge, with no sideways scroll to reach them. On the crowded page at 1440px the fourth label is cut in half and the last three items sit behind the tools. It isn't only an extreme case: with the text logo, which is the spec's own documented fallback, the real five items already push the last one under the search field. Affects AC-4."
+    },
+    {
+      "text": "Four accessibility problems in the bar itself.",
+      "bullets": [
+        "Tab order runs logo → tools on the right → nav links, so focus jumps to the far right and back before reaching the navigation. AC-10 asks for logical order.",
+        "Every dropdown item takes two Tab stops: the <li> has tabindex=\"0\" and its <a> is focusable too. The <li> has no role, so a screen reader reads the whole dropdown out as that item's name.",
+        "There is no focus rule on the top-level links, so you get Chrome's default blue outline. AC-11 asks for --color-accessible-orange (#D14900), and the default will be near invisible on the dark and glass backgrounds once they exist.",
+        "aria-expanded is on the <li>, a listitem, which doesn't support it, so it never reaches assistive tech. The focusable <a> has neither aria-expanded nor aria-haspopup. AC-12 asks for it on the trigger link."
+      ],
+      "after": "Separately, the whole bar sits inside .nav-drawer with role=\"dialog\" aria-label=\"Main menu\", so at desktop widths a screen reader announces the entire navigation as a dialog that isn't visually there. Confirmed from the browser's accessibility tree."
+    },
+    {
+      "text": "Two values are off. The nav row is 70px (styles.css --nav-h) where the design system and AC-1 and AC-14 all say 68px. The hover and active label colour is #B23E00 from a header-local --hdr-cta-orange, where the design system says --color-orange-700 = #D14900, a token styles.css already defines. Please settle which one — and note #B23E00 is the higher-contrast of the two, so it shouldn't be changed back without checking AA."
+    }
+  ]
+}

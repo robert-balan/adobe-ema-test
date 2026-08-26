@@ -1,0 +1,15 @@
+{
+  "issue": "EC-18",
+  "commentId": "875165",
+  "mentions": [
+    "Lubbe, Sybrand",
+    "Volpe, Gianluca",
+    "Lee, Mathijs"
+  ],
+  "intro": " — please see below the discrepancy we found while creating the test cases for this ticket. We write our tests from the acceptance criteria here, so anywhere the build differs the step fails on purpose. Only one thing came up on this one.",
+  "items": [
+    {
+      "text": "A single-language market still gets a language switcher. AC-6 says the switcher appears only when the market offers more than one language, and that a single-language market shows none. blocks/language/language.js takes the first authored row as the trigger, treats every remaining row as an option, and then builds the trigger button unconditionally — there is no check on how many options it found. Confirmed in a browser: the single-language fixture renders a working switcher with exactly one option in it. EC-156 step 4 asserts AC-6 as written, so it fails. Please treat it as a product defect — or, if a one-option switcher is actually wanted, AC-6 needs rewording and we will adjust the test."
+    }
+  ]
+}

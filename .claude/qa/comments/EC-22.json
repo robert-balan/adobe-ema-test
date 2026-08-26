@@ -1,0 +1,19 @@
+{
+  "issue": "EC-22",
+  "commentId": "875164",
+  "mentions": [
+    "Tabrizi2, Kasra",
+    "Volpe, Gianluca",
+    "Lee, Mathijs"
+  ],
+  "intro": " — please see below the discrepancies we found while creating the test cases for this ticket. We write our tests from the acceptance criteria here, so anywhere the build differs the step fails on purpose. Gianluca has already asked for bugs to be raised where the render does not match the designs — this is the list they will come from.",
+  "items": [
+    {
+      "text": "The mobile collapse is not implemented. The spec says that below the breakpoint the trail shows only Home, an ellipsis control and the current page, with the control expanding the hidden crumbs. breadcrumb.js builds one flat ordered list with every crumb in it, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep — no button, no aria-expanded, no ellipsis, and nothing in the auto-block builder either. Checked on develop, main and stage, and confirmed in a browser: at 390px the seven-crumb fixture still shows all seven crumbs. What mobile does instead is scroll the trail sideways at 600px and below with the scrollbar hidden, which is a different design decision rather than a half-finished version of this one. Affects AC-3, AC-6, AC-15 and the mobile halves of AC-12 and AC-18. If the collapse was descoped, the spec needs updating and we will adjust the tests.",
+      "after": "Worth knowing alongside it: this ticket went straight from To Do to Ready for Testing on 19 Aug and never entered an in-progress status, with no developer ever assigned. That may be the whole explanation for the gap."
+    },
+    {
+      "text": "Between 601px and 899px the block behaves like neither size. The spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the sideways-scroll treatment starts at 600px. Whichever number is right, the two should be the same one."
+    }
+  ]
+}

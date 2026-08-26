@@ -1,0 +1,34 @@
+{
+  "issue": "EC-8",
+  "commentId": "875335",
+  "mentions": [
+    "Lubbe, Sybrand",
+    "Volpe, Gianluca",
+    "Lee, Mathijs"
+  ],
+  "intro": " — please see below the discrepancies we found while creating the test cases for this ticket. We write our tests from section 7 and the acceptance criteria here, so anywhere the build differs the step fails on purpose. Several of these are already in section 8 as outstanding, so they are confirmation rather than news.",
+  "items": [
+    {
+      "text": "The breakpoint has three different values. AC-19 and AC-20 both say 1024px, section 8 records the repo as being on 900px, and the code is on neither — header.js uses matchMedia('(min-width: 1200px)') with the matching desktop block in header.css. The boundary steps fail until this is settled. Which number is correct?"
+    },
+    {
+      "text": "The class names differ from the spec. Section 7 names .mm-a, .mm-b, .mm-a2 and the rest of the .ufs-* / .mm-* taxonomy; develop ships .nav-*. The geometry underneath is already right — the 1fr 1fr 1fr 260px, 1.8fr 1fr 1fr 260px and 1fr 1fr grids are all in header.css exactly as specified — so this is names only, but every step that selects a panel by class fails on it."
+    },
+    {
+      "text": "There is no .is-open class. AC-6 and AC-7 put it on the panel and the trigger; it doesn't appear anywhere in header.js. Open state is carried by aria-expanded on the section instead, which works, but it isn't what the spec says to look for."
+    },
+    {
+      "text": "The dark and glass contexts don't exist. AC-4 asks for them and AC-18 asks for contrast checks in them; neither the --dark nor the --glass modifier is in header.css yet, so those steps have nothing to check."
+    },
+    {
+      "text": "Two accessibility gaps, found in the code rather than the spec.",
+      "bullets": [
+        "The \"View more\" button has aria-expanded but no aria-label, so its only accessible name is the literal text \"View more\" — identical for every category in the drawer, which is the ambiguity AC-17 exists to prevent.",
+        "There is no focus trap in the drawer. It registers a keydown handler for Escape only: no Tab handling and no focus return to the hamburger, so both halves of AC-16 are unimplemented."
+      ]
+    },
+    {
+      "text": "One row of the section 8 table is out of date in the opposite direction. It records the mobile pattern as a \"simple stack\", with the drawer, the single-open accordion and \"View more\" all still to build. All three are built and working on develop today, with the cut-off at four links (DRAWER_VISIBLE_LINKS = 4) and .is-extra used exactly as AC-11 names it. Worth correcting so the table stops describing finished work as outstanding."
+    }
+  ]
+}

@@ -436,25 +436,75 @@ node .claude/scripts/qa-coverage.mjs EC-14 EC-18
 script does not print, but prefer the script: a check that lives in a document gets skipped, which
 is precisely how the reversed links survived long enough to zero the project's coverage.
 
-**Make the ticket self-explanatory for QA.** After pushing, post one comment on the spec ticket
-so a tester knows what to run without reading this file:
+**Post one comment on the spec ticket, and make it about the discrepancies.** After pushing, if
+writing the cases turned up gaps — the spec against the design, or the spec against what was
+built — post a single comment addressed to the people who can settle them. That is the whole
+comment. It does **not** list the tests (they are linked to the ticket, right above), it does not
+repeat the fixture URLs (they are in each test's description) and it does not carry JQL for what to
+run. Those were in the old format and were noise; a reader skimmed past the questions to get there.
 
 ```
-*QA scope*
+Hi @Lubbe, Sybrand @Volpe, Gianluca @Lee, Mathijs — please see below the discrepancies we found
+while creating the test cases for this ticket. We write our tests from the acceptance criteria
+here, so anywhere the build differs the step fails on purpose. Most of these trace back to
+section 8, the design-system decisions table, which is still open.
 
-Tests covering this change (see linked issues):
-  EC-140  NEW     Tooltip appears on logo hover
-  EC-105  UPDATE  Logo count 5–7 → 4–8 (step 2)
+1. Desktop/mobile switch is at the wrong width. AC-7 and AC-15 say 1024px; header.css switches at
+1200px. At 1199px, 1100px and 1024px you get the hamburger bar where the full desktop nav should
+be. Three numbers are in play — spec 1024, header.css 1200, styles.css 900 — and they should agree.
 
-Full regression before sign-off — 30 tests:
-  project = EC AND issuetype = Test AND labels = brand-carousel
+2. The dark and glass contexts don't exist. AC-2 asks for all three; header.css only defines the
+light treatment, with no modifier and no way for an author to pick one. Those steps have nothing
+to check, and it takes out the context halves of AC-3 and AC-11 too.
 
-Suites updated: Regression +2
+3. Long labels run under the tools. Nothing limits the width of the links, so they don't wrap,
+scroll or truncate — they carry on under the search field and off the right edge, with no sideways
+scroll to reach them. On the crowded page at 1440px the fourth label is cut in half and the last
+three items sit behind the tools. Affects AC-4.
+
+Please review and advise.
 ```
 
-The issue type is `Test`, not `Xray Test` — see the environment facts above. Take the label from
-the plan rather than typing it: this JQL is pasted into a ticket and run by someone who will not
-debug it, so a wrong type or a mistyped label reads as "no tests exist".
+That is the EC-7 comment, trimmed — the real one ran to five numbered items, one per theme. The
+shape is fixed:
+
+- **Greeting**, naming everyone tagged, as real ADF mention nodes (see below). Then one sentence
+  of framing: the tests come from the ACs, so a mismatch fails on purpose. Say **"while creating
+  the test cases"**, never "while testing" — the comment goes up when the cases are written, before
+  anyone has executed them, and "while testing" makes it read as a failed test run.
+- **Numbered items, one theme per number**, in cause-and-effect order: what the spec or the design
+  asks for → what the build actually does → what that causes for a user. Name the AC ids and the
+  file the value came from, so nobody has to go looking. Where the design system pins a value, give
+  all three (design, spec, build) — that is usually what settles it.
+- **Plain, friendly sentences.** No severity labels, no bug-report scaffolding, no lecture about
+  process. Where two values both have a case, say so rather than declaring a winner: on EC-7 the
+  built `#B23E00` has better contrast than the specified `#D14900`, and saying that stops someone
+  "fixing" it into an AA failure.
+- **The closing line is exactly `Please review and advise.`** Nothing after it.
+
+If the cases raised nothing — no contradictions, no gaps against the build — do not post a comment
+at all.
+
+**Build it with the script, not by hand.** The comment lives as a small JSON file in
+`.claude/qa/comments/<TICKET>.json` — the people to tag by name, the framing sentence, and the
+numbered items — and `qa-comment.mjs` turns that into ADF and posts it:
+
+```bash
+node .claude/scripts/qa-comment.mjs .claude/qa/comments/EC-7.json                    # preview only
+QA_COMMENT_APPROVED=1 node .claude/scripts/qa-comment.mjs .claude/qa/comments/EC-7.json --post
+```
+
+The spec file names people (`"Lubbe, Sybrand"`), and the accountId is looked up in
+`environment.json` — a misspelt name is an error rather than a person who quietly never hears about
+it. The greeting, the numbering and the closing line are the script's, so they cannot drift.
+
+`commentId` in the file is the comment it rewrites, which is what makes this **idempotent**: fix a
+sentence, re-run, and the one comment on the ticket changes. `--new` posts the first one and writes
+the id it gets back into the file. Keep the file in git — it is the record of what was reported,
+and the starting point when the same ticket comes round again.
+
+The same PreToolUse guard as a push covers `--post`, so show the preview and get a yes before
+repeating the approval in the command.
 
 **Tag the REs on anything the spec leaves unclear.** Whenever the comment carries open questions,
 contradictions or clarifications — anything addressed to the requirements engineers — @-mention
@@ -500,6 +550,32 @@ node:
 ```json
 { "type": "mention", "attrs": { "id": "712020:8b7e...", "text": "@Volpe, Gianluca" } }
 ```
+
+The mention nodes go **inline in the greeting paragraph**, interleaved with text nodes — one
+paragraph, not a mention node sitting on its own line. The `id` is the accountId and is what
+actually notifies; `text` is only what a reader sees, so it must match the person's display name
+(`Surname, Firstname` on this instance) or the comment reads oddly for everyone else. The leading
+`@` belongs inside `text`. Build the greeting like this:
+
+```json
+{
+  "type": "paragraph",
+  "content": [
+    { "type": "text", "text": "Hi " },
+    { "type": "mention", "attrs": { "id": "712020:54484866-f4d8-477e-981f-ddb6f49a7a46", "text": "@Lubbe, Sybrand" } },
+    { "type": "text", "text": " " },
+    { "type": "mention", "attrs": { "id": "712020:8b7e0918-ec81-484d-827f-f54e6a0920eb", "text": "@Volpe, Gianluca" } },
+    { "type": "text", "text": " " },
+    { "type": "mention", "attrs": { "id": "712020:627f07a3-4ad6-488b-9d5e-91bc9effa90c", "text": "@Lee, Mathijs" } },
+    { "type": "text", "text": " — please see below the discrepancies we found while creating the test cases for this ticket. …" }
+  ]
+}
+```
+
+Two mention nodes with no text node between them render as one run-together name, so keep the
+single-space text nodes. After posting, read the comment back and confirm each name came back as a
+`mention` node rather than text — a plain-text `@Name` looks right in the ticket and notifies
+nobody, which is the failure mode this is guarding against.
 
 Markdown does not work for this. Writing `@Name`, or Jira's `[~accountid:...]` wiki syntax, through
 `contentFormat: "markdown"` produces **plain text**: nobody is notified and everyone sees the raw

@@ -1,0 +1,36 @@
+{
+  "issue": "EC-14",
+  "commentId": "873927",
+  "mentions": [
+    "Lubbe, Sybrand",
+    "Volpe, Gianluca",
+    "Lee, Mathijs"
+  ],
+  "intro": " — please see below the discrepancies we found while creating the test cases for this ticket. We write our tests from the acceptance criteria here, so anywhere the build differs the step fails on purpose. Gianluca answered four of these on 26 Aug and his answer is kept against each, so the whole picture stays in one place.",
+  "items": [
+    {
+      "text": "The layout switches at the wrong width. The spec says 900px; develop switches at 1200px. It is what makes EC-123 steps 5 and 6 and EC-124 step 6 fail — a product bug, not a test bug, so please raise it."
+    },
+    {
+      "text": "The brand label fails contrast. Measured at 4.08:1 against the 4.5:1 that WCAG AA needs, so EC-125 step 8 fails. Either the colour or the size has to move."
+    },
+    {
+      "text": "Is the label required or optional? The spec says both — section 3 says optional, the Content Slots table says required, AC-1 says it always renders, and AC-4 and AC-13 say it can be left out. The code treats it as optional. Answered by Gianluca on 26 Aug: the label is required, so this is a code issue. The ticket text still needs tidying so it only says one thing."
+    },
+    {
+      "text": "AC-12 and AC-8 contradict each other. AC-12 says changing the number of logos does not change behaviour; AC-8 says the arrows appear and disappear depending on overflow, which is exactly that. Answered by Gianluca on 26 Aug: keep the overflow behaviour as in AC-8."
+    },
+    {
+      "text": "The mobile hairline is on the wrong side. AC-3 puts the separator above the strip; the design prototype draws it below. Answered by Gianluca on 26 Aug: follow the designs — so AC-3 is the line that needs correcting."
+    },
+    {
+      "text": "AC-16 would fail correct code as written. It says the accessible name comes from the image alt text, but the code puts an aria-label on the link, and aria-label overrides alt. Read literally, a correct implementation fails the AC. Answered by Gianluca on 26 Aug: TBD — still open, and the accessibility steps stay unsettled until it is decided."
+    },
+    {
+      "text": "\"Degrade gracefully\" for a broken image is not defined anywhere. The hostile fixture includes one, but with no expected behaviour written down there is nothing to assert — please say what should happen."
+    },
+    {
+      "text": "The ticket sets no criteria for right-to-left or for text expansion. EC-126 covers both anyway, because they are a standing requirement for every block, but that means the test is asserting a project rule rather than anything this ticket states. Worth adding to the spec so the two agree."
+    }
+  ]
+}

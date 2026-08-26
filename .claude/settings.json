@@ -10,6 +10,20 @@
             "if": "Bash(*xray-push.mjs*)",
             "timeout": 10,
             "statusMessage": "Checking QA push approval"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/scripts/guard-xray-push.sh\"",
+            "if": "Bash(*da-fixture.mjs*)",
+            "timeout": 10,
+            "statusMessage": "Checking fixture write approval"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/scripts/guard-xray-push.sh\"",
+            "if": "Bash(*qa-comment.mjs*)",
+            "timeout": 10,
+            "statusMessage": "Checking Jira comment approval"
           }
         ]
       }

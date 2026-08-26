@@ -41,30 +41,40 @@ invokes() {
 
 if invokes 'xray-push\.mjs'; then
   tool=xray; approval=XRAY_PUSH_APPROVED; target="real Jira issues"
+  script=xray-push.mjs; preview='<plan.json> --dry-run'; args='<plan.json>'
 elif invokes 'da-fixture\.mjs'; then
   tool=fixture; approval=DA_FIXTURE_APPROVED; target="content in the client's authoring environment"
+  script=da-fixture.mjs; preview='<plan.json> --dry-run'; args='<plan.json>'
+elif invokes 'qa-comment\.mjs'; then
+  tool=comment; approval=QA_COMMENT_APPROVED; target="a comment on a real Jira ticket"
+  script=qa-comment.mjs; preview='<comment.json>'; args='<comment.json> --post'
 else
   allow
 fi
 
-# Read-only modes write nothing to Xray and need no approval.
+# Read-only modes write nothing and need no approval. qa-comment only writes with --post: without
+# it the script prints the comment and stops, which is the preview the user is meant to see.
 case "$command" in
   *--dry-run*|*--adopt*) allow ;;
 esac
+if [ "$tool" = comment ]; then
+  case "$command" in
+    *--post*) ;;
+    *) allow ;;
+  esac
+fi
 
 case "$command" in
   *"${approval}=1"*) allow ;;
 esac
 
-script=$([ "$tool" = xray ] && echo xray-push.mjs || echo da-fixture.mjs)
-
 deny "Blocked: this would create or modify ${target}, and the run is not marked as approved.
 
 Show the user the dry run first:
-    node .claude/scripts/${script} <plan.json> --dry-run
+    node .claude/scripts/${script} ${preview}
 
 Once they have seen it and said go, repeat their approval in the command itself:
-    ${approval}=1 node .claude/scripts/${script} <plan.json>
+    ${approval}=1 node .claude/scripts/${script} ${args}
 
 Do not set that variable on your own initiative — it stands for a person's decision, and it is
 recorded in the transcript as one."
