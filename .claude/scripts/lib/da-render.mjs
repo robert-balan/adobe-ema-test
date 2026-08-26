@@ -18,6 +18,10 @@
  * testable against a captured document instead of against a client's live content.
  */
 
+const unesc = (s) => String(s)
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;|&apos;/g, "'")
+  .replace(/&amp;/g, '&');
+
 const esc = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -277,6 +281,140 @@ export function transformMenus(navHtml, spec = {}) {
   return navHtml.slice(0, pool[0].start) + built.join('') + navHtml.slice(pool[pool.length - 1].end);
 }
 
+/* ------------------------------------------------- megamenu promo / feature */
+
+/**
+ * Classify one authored panel row the way `normalizeNavMenus` does, so a fixture edits the same
+ * thing the implementation will classify. Reading the rule off the code matters here: the row that
+ * becomes a promo is defined by what it does NOT have (a list of links in its second cell), so a
+ * fixture that guessed "the row with three paragraphs" would drift the moment an author added one.
+ *
+ * @returns {'brands'|'column'|'tile'}
+ */
+export function classifyPanelRow(rowHtml) {
+  const links = [...rowHtml.matchAll(/<a\b[^>]*>[\s\S]*?<\/a>/g)].map((m) => m[0]);
+  const imageLinks = links.filter((a) => /<picture|<img/.test(a));
+  if (imageLinks.length >= 2 && imageLinks.length === links.length) return 'brands';
+  const cells = rowsOf(rowHtml);
+  const second = cells[1] || '';
+  // The implementation's own test: a second cell holding links and no <strong> is a labelled
+  // column. A <strong> in there means the author wrote a tile's title, not a column of links.
+  if (/<a\b/.test(second) && !/<strong>/.test(second)) return 'column';
+  return 'tile';
+}
+
+/**
+ * Author one promo / feature tile as the DA row the nav actually stores.
+ *
+ * The tile has no block of its own — it is a submenu row whose first cell holds loose paragraphs:
+ * eyebrow, **title**, an optional description, and the CTA. `decorateMegamenus` then reads meaning
+ * out of that order, so the fixture has to reproduce the order rather than name the parts.
+ */
+function tileRow(spec = {}) {
+  const paras = [];
+  if (spec.eyebrow !== undefined) paras.push(`<p>${esc(spec.eyebrow)}</p>`);
+  if (spec.title !== undefined) {
+    // An author who forgets the bold is a real case: the classifier finds the title by looking for
+    // <strong>, and falls back to the second paragraph when there is none.
+    paras.push(spec.strongTitle === false ? `<p>${esc(spec.title)}</p>` : `<p><strong>${esc(spec.title)}</strong></p>`);
+  }
+  if (spec.description !== undefined) paras.push(`<p>${esc(spec.description)}</p>`);
+
+  const ctaP = (value) => {
+    const [label, href = '/'] = String(value).split('|');
+    // Icons are authored as a literal token; decorateIcons swaps it for the SVG at runtime.
+    const icon = spec.ctaIcon ? ' :arrow:' : '';
+    return `<p><a href="${esc(href)}">${esc(label)}</a>${icon}</p>`;
+  };
+  const ctas = [];
+  if (spec.cta !== undefined) ctas.push(ctaP(spec.cta));
+  // A second CTA is a "forbidden combination" the content model states but nothing enforces.
+  if (spec.extraCta !== undefined) ctas.push(ctaP(spec.extraCta));
+
+  // Putting the CTA in the SECOND cell is the mis-authoring that costs the tile its card: a second
+  // cell with links and no <strong> is a labelled column, so the whole tile is reclassified.
+  if (spec.ctaInSecondCell) return `<div><div>${paras.join('')}</div><div>${ctas.join('')}</div></div>`;
+  return `<div><div>${paras.join('')}${ctas.join('')}</div><div></div></div>`;
+}
+
+/**
+ * Replace, move, insert or remove a megamenu's promo / feature tile.
+ *
+ * Which of the two a tile becomes is not authored — `decorateMegamenus` calls the panel's FIRST
+ * child a light `.nav-feature` and every later one a dark `.nav-promo`. So `position` is the whole
+ * variant control: the same authored content is a feature at the top of the panel and a promo
+ * anywhere else, which is exactly what AC-13 asks a tester to prove.
+ *
+ * @param {string} navHtml
+ * @param {object|object[]} spec  one edit, or several against different menus:
+ *   { menu, target: 'feature'|'promo', position: 'first'|'last', remove, eyebrow, title,
+ *     strongTitle, description, cta: 'Label|/href', extraCta, ctaIcon, ctaInSecondCell }
+ */
+export function transformPromo(navHtml, spec) {
+  const edits = Array.isArray(spec) ? spec : [spec];
+  let out = navHtml;
+
+  for (const edit of edits) {
+    if (!edit) continue;
+    const MENU = /<div class="nav-menu[^"]*">/g;
+    const blocks = [];
+    let m;
+    while ((m = MENU.exec(out))) {
+      const end = closeDiv(out, m.index);
+      blocks.push({ start: m.index, end, text: out.slice(m.index, end) });
+      MENU.lastIndex = end;
+    }
+    if (!blocks.length) throw new Error('no nav-menu blocks found in the source nav');
+
+    // Menus are named by their bar label, which is the trigger row's link text — the only handle a
+    // plan author has. Without a name, edit the first menu that already carries a tile.
+    const named = edit.menu
+      ? blocks.find((b) => {
+        const first = rowsOf(b.text)[0] || '';
+        const link = first.match(/<a\b[^>]*>([\s\S]*?)<\/a>/);
+        // The stored label is escaped — "Training &amp; Inspiration" — but a plan names the menu
+        // the way it reads on the bar, so compare decoded rather than making every plan escape.
+        return link && unesc(link[1].replace(/<[^>]+>/g, '').trim()) === edit.menu;
+      })
+      : blocks.find((b) => rowsOf(b.text).slice(1).some((r) => classifyPanelRow(r) === 'tile'));
+    if (!named) throw new Error(`no nav-menu found for menu ${JSON.stringify(edit.menu ?? '(any with a tile)')}`);
+
+    const rows = rowsOf(named.text);
+    const trigger = rows[0];
+    const panel = rows.slice(1);
+    const kinds = panel.map(classifyPanelRow);
+    // A panel may hold two tiles — Recipes ships a leading feature AND a trailing promo — so an
+    // edit says which it means in the reader's own terms rather than by row number.
+    const tiles = kinds.map((k, i) => (k === 'tile' ? i : -1)).filter((i) => i >= 0);
+    const tileAt = (edit.target === 'promo' ? tiles[tiles.length - 1] : tiles[0]) ?? -1;
+
+    let next = panel.slice();
+    if (edit.remove) {
+      if (tileAt === -1) throw new Error(`menu ${edit.menu} has no promo/feature tile to remove`);
+      next.splice(tileAt, 1);
+    } else {
+      const row = tileRow(edit);
+      if (edit.position === undefined) {
+        // Default: edit the tile where it already sits, so a fixture that only changes copy does
+        // not silently change the variant as well.
+        if (tileAt === -1) next.push(row);
+        else next[tileAt] = row;
+      } else {
+        if (tileAt !== -1) next.splice(tileAt, 1);
+        // 'last' must land before the brand strip: the strip spans the panel's full width on its
+        // own row, so a tile after it is not "the last column", it is a second full-width row.
+        const brandsAt = next.findIndex((r) => classifyPanelRow(r) === 'brands');
+        const at = edit.position === 'first' ? 0 : (brandsAt === -1 ? next.length : brandsAt);
+        next.splice(at, 0, row);
+      }
+    }
+
+    const rebuilt = `<div class="nav-menu">${[trigger, ...next].join('')}</div>`;
+    out = out.slice(0, named.start) + rebuilt + out.slice(named.end);
+  }
+  return out;
+}
+
 export function transformNav(navHtml, spec = {}) {
   // A spec may target more than one region of the same nav. The other regions run first, so a
   // later brand-strip search reads the already-edited document rather than a stale copy of it.
@@ -284,11 +422,12 @@ export function transformNav(navHtml, spec = {}) {
   if (spec.utility) src = transformUtility(src, spec.utility);
   if (spec.logo) src = transformLogo(src, spec.logo);
   if (spec.menus) src = transformMenus(src, spec.menus);
+  if (spec.promo) src = transformPromo(src, spec.promo);
 
   // The brand strip is only touched when the spec actually asks for it. A fixture that edits the
   // utility bar of a nav whose Products megamenu was left alone must not go rummaging for a strip.
   const wantsStrip = ['count', 'label', 'removeLabel', 'links'].some((k) => spec[k] !== undefined);
-  if (!wantsStrip && (spec.utility || spec.logo || spec.menus)) return src;
+  if (!wantsStrip && (spec.utility || spec.logo || spec.menus || spec.promo)) return src;
 
   const navSrc = src;
   const strip = findBrandStrip(navSrc);

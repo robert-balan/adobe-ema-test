@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
   metadataBlock, block, document_, fixturePage, findBrandStrip, editLink, transformNav, transformUtility,
-  transformMenus, transformLogo,
+  transformMenus, transformLogo, transformPromo, classifyPanelRow,
 } from '../lib/da-render.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -259,4 +259,134 @@ test('transformNav: applies logo, menus and utility to the same document', () =>
   assert.match(out, /">UFS</);
   assert.match(out, /<a href="\/solo">Solo<\/a>/);
   assert.match(out, /<a href="\/only">Only<\/a>/);
+});
+
+
+/* ------------------------------------------------- megamenu promo / feature */
+
+// The tile has no class and no block of its own — which of the two variants it becomes is decided
+// by where it sits in the panel. So these pin the classification rule, not just the copy: a fixture
+// that put the tile in the wrong place would test the other variant without ever saying so.
+
+test('classifyPanelRow: a second cell of links is a column, one with a title is a tile', () => {
+  const column = '<div><div><p>By Cuisine</p></div><div><p><a href="/a">Asian</a></p></div></div>';
+  const tile = '<div><div><p>New Arrival</p><p><strong>T</strong></p><p><a href="/x">Go</a></p></div><div></div></div>';
+  const brands = '<div><div><p><a href="/a"><picture></picture></a></p><p><a href="/b"><picture></picture></a></p></div><div></div></div>';
+  assert.equal(classifyPanelRow(column), 'column');
+  assert.equal(classifyPanelRow(tile), 'tile');
+  assert.equal(classifyPanelRow(brands), 'brands');
+});
+
+test('classifyPanelRow: a lone image link is a tile CTA, not a two-logo strip', () => {
+  const one = '<div><div><p>Eyebrow</p></div><div><p><a href="/a"><picture></picture></a></p></div></div>';
+  assert.notEqual(classifyPanelRow(one), 'brands');
+});
+
+test('transformPromo: rewrites the tile in place, leaving the columns alone', () => {
+  const out = transformPromo(MENUS, {
+    menu: 'Recipes', eyebrow: 'Chef’s Pick', title: 'Two-Minute Meals', cta: 'Browse|/recipes/all',
+  });
+  assert.match(out, /<p>Chef’s Pick<\/p><p><strong>Two-Minute Meals<\/strong><\/p>/);
+  assert.match(out, /<a href="\/recipes\/all">Browse<\/a>/);
+  assert.ok(out.includes('By Cuisine'), 'the link columns survive');
+  assert.ok(!out.includes('20-Minute Weeknight Recipes'), 'the old copy is gone');
+});
+
+test('transformPromo: position is the variant control — first is a feature, later a promo', () => {
+  const first = transformPromo(MENUS, { menu: 'Recipes', position: 'first', title: 'T', cta: 'C|/c' });
+  const last = transformPromo(MENUS, { menu: 'Recipes', position: 'last', title: 'T', cta: 'C|/c' });
+  assert.ok(first.indexOf('<strong>T</strong>') < first.indexOf('By Cuisine'), 'leads the panel');
+  assert.ok(last.indexOf('<strong>T</strong>') > last.indexOf('By Cuisine'), 'follows the columns');
+});
+
+test('transformPromo: a panel with two tiles edits the one the spec names', () => {
+  const promo = transformPromo(MENUS, { menu: 'Recipes', target: 'promo', title: 'Only The Promo', cta: 'C|/c' });
+  assert.ok(promo.includes('20-Minute Weeknight Recipes'), 'the leading feature is untouched');
+  assert.ok(!promo.includes('Mastering Umami'), 'the trailing promo is the one replaced');
+});
+
+test('transformPromo: optional slots are omitted rather than emitted empty', () => {
+  const out = transformPromo(MENUS, { menu: 'Recipes', eyebrow: 'E', title: 'T' });
+  const start = out.lastIndexOf('<div>', out.indexOf('<div><p>E</p>'));
+  const row = out.slice(start, start + closeOf(out.slice(start)));
+  assert.ok(!/<p><\/p>/.test(row), 'no empty paragraph stands in for the missing CTA');
+  assert.ok(!/<a\b/.test(row), 'and no empty anchor either');
+});
+
+test('transformPromo: strongTitle:false is the author who forgot the bold', () => {
+  const out = transformPromo(MENUS, { menu: 'Recipes', eyebrow: 'E', title: 'T', strongTitle: false, cta: 'C|/c' });
+  assert.ok(!out.includes('<strong>T</strong>'));
+  assert.match(out, /<p>E<\/p><p>T<\/p>/);
+});
+
+test('transformPromo: a CTA in the second cell is the mis-authoring that costs the card', () => {
+  const out = transformPromo(MENUS, {
+    menu: 'Recipes', eyebrow: 'E', title: 'T', strongTitle: false, cta: 'C|/c', ctaInSecondCell: true,
+  });
+  // Same rule the implementation applies: links in the second cell and no <strong> means column.
+  const row = out.slice(out.indexOf('<div><div><p>E</p>'));
+  assert.equal(classifyPanelRow(row.slice(0, closeOf(row))), 'column');
+});
+
+// The row ends where its opening <div> is closed; the test needs that to hand one row to the
+// classifier rather than the rest of the document.
+function closeOf(html) {
+  const re = /<div\b[^>]*>|<\/div>/g;
+  let depth = 0;
+  let m;
+  while ((m = re.exec(html))) {
+    if (m[0] === '</div>') { depth -= 1; if (depth === 0) return re.lastIndex; } else depth += 1;
+  }
+  return html.length;
+}
+
+test('transformPromo: extraCta authors the second CTA the content model forbids', () => {
+  const out = transformPromo(MENUS, { menu: 'Recipes', title: 'T', cta: 'One|/1', extraCta: 'Two|/2' });
+  assert.match(out, /<a href="\/1">One<\/a>/);
+  assert.match(out, /<a href="\/2">Two<\/a>/);
+});
+
+test('transformPromo: ctaIcon authors the arrow token the CSS sizes', () => {
+  const out = transformPromo(MENUS, { menu: 'Recipes', title: 'T', cta: 'Go|/g', ctaIcon: true });
+  assert.match(out, /<a href="\/g">Go<\/a> :arrow:/);
+});
+
+test('transformPromo: remove drops the tile and nothing else', () => {
+  const out = transformPromo(MENUS, { menu: 'Recipes', remove: true });
+  assert.ok(!out.includes('20-Minute Weeknight Recipes'));
+  assert.ok(out.includes('By Cuisine') && out.includes('All Recipes'), 'the columns survive');
+});
+
+test('transformPromo: escapes authored text rather than emitting markup', () => {
+  const out = transformPromo(MENUS, { menu: 'Recipes', title: 'Sauces & <b>Ketchup</b>', cta: 'C|/c' });
+  assert.match(out, /Sauces &amp; &lt;b&gt;Ketchup/);
+});
+
+test('transformPromo: several edits apply in one pass, each to its own tile', () => {
+  const out = transformPromo(MENUS, [
+    { menu: 'Recipes', target: 'feature', eyebrow: 'Chef’s Pick', title: 'The Feature', cta: 'A|/a' },
+    { menu: 'Recipes', target: 'promo', eyebrow: 'Trending Now', title: 'The Promo', cta: 'B|/b' },
+  ]);
+  assert.ok(out.includes('The Feature') && out.includes('The Promo'));
+  assert.ok(out.indexOf('The Feature') < out.indexOf('By Cuisine'), 'the feature still leads');
+  assert.ok(out.indexOf('The Promo') > out.indexOf('By Cuisine'), 'the promo still follows');
+});
+
+test('transformPromo: a menu is named as it reads on the bar, entities and all', () => {
+  const amp = MENUS.replace('>Recipes<', '>Training &amp; Inspiration<');
+  const out = transformPromo(amp, { menu: 'Training & Inspiration', title: 'T', cta: 'C|/c' });
+  assert.match(out, /<strong>T<\/strong>/);
+});
+
+test('transformPromo: refuses a menu it cannot find rather than editing the wrong one', () => {
+  assert.throws(() => transformPromo(MENUS, { menu: 'Nope', title: 'T' }), /no nav-menu found for menu/);
+});
+
+test('transformNav: the promo region composes with the others', () => {
+  const out = transformNav(MENUS, {
+    logo: { text: 'UFS' },
+    promo: { menu: 'Recipes', eyebrow: 'E', title: 'T', cta: 'C|/c' },
+  });
+  assert.ok(out.includes('UFS') && !out.includes(':ufs-logo:'));
+  assert.match(out, /<p>E<\/p><p><strong>T<\/strong><\/p>/);
 });

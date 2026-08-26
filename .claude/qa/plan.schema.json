@@ -205,6 +205,57 @@
                     }
                   }
                 }
+              },
+              "promo": {
+                "type": "array",
+                "description": "Edits to a megamenu's promotional tile. The tile has no block and no class of its own: it is a submenu row whose first cell holds loose paragraphs \u2014 eyebrow, **title**, an optional description, then the CTA \u2014 and the implementation reads meaning out of that order. Which variant it becomes is decided by POSITION, not by the author: the panel's first child is the light `.nav-feature`, any later child the dark `.nav-promo`. One entry per tile edited.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "menu": {
+                      "type": "string",
+                      "description": "Which megamenu to edit, named as it reads on the bar (e.g. \"Products\"). Omit to take the first menu that already has a tile."
+                    },
+                    "target": {
+                      "type": "string",
+                      "enum": ["feature", "promo"],
+                      "description": "Which existing tile to edit when a panel holds both \u2014 Recipes ships a leading feature and a trailing promo. Defaults to the first."
+                    },
+                    "position": {
+                      "type": "string",
+                      "enum": ["first", "last"],
+                      "description": "Where the tile is authored among the panel's rows, and so which variant it becomes: \"first\" is the light feature, \"last\" a dark promo after the columns. Omit to edit the tile where it already sits, so a copy change does not silently change the variant too."
+                    },
+                    "remove": {
+                      "type": "boolean",
+                      "description": "Drop the tile entirely, for the panel-with-no-promo case."
+                    },
+                    "eyebrow": { "type": "string", "description": "The overline label, authored as the first paragraph." },
+                    "title": { "type": "string", "description": "The title, authored bold \u2014 which is how the implementation finds it." },
+                    "strongTitle": {
+                      "type": "boolean",
+                      "description": "Set false for the author who forgot the bold. The classifier then falls back to the second paragraph."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The body paragraph. The content model gives it to the feature only; authoring one on a promo is a real case and lands on .nav-promo-desc, which has no styling of its own."
+                    },
+                    "cta": { "type": "string", "description": "The call to action, as \"Label|/href\"." },
+                    "extraCta": {
+                      "type": "string",
+                      "description": "A second CTA, as \"Label|/href\". The content model forbids it and nothing enforces that, so a fixture can prove what happens."
+                    },
+                    "ctaIcon": {
+                      "type": "boolean",
+                      "description": "Author a trailing :arrow: icon token on the CTA. The stylesheet sizes an authored icon; it no longer draws an arrow of its own."
+                    },
+                    "ctaInSecondCell": {
+                      "type": "boolean",
+                      "description": "Author the CTA in the row's second cell. Links there with no bold title reclassify the whole row as a labelled column \u2014 the mis-authoring that costs the tile its card."
+                    }
+                  }
+                }
               }
             }
           },
