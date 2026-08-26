@@ -24,6 +24,21 @@ export const labelsFor = (plan, t) => [...new Set([t.id, ...(t.suites || []), ..
   .map((l) => String(l).replace(/\s+/g, '-')).sort();
 
 /**
+ * Where a test belongs in the Xray Test Repository. A test may name its own folder; otherwise it
+ * takes the plan's. Null means the plan expresses no opinion, and an existing test is then left
+ * wherever it already sits rather than being dragged to the root.
+ *
+ * Trailing slashes are trimmed so "/Header/Megamenu/" and "/Header/Megamenu" are the same folder,
+ * which they are to Xray but were not to a string comparison.
+ */
+export const folderFor = (plan, t) => {
+  const raw = t?.folder || plan?.folder || null;
+  if (!raw) return null;
+  const trimmed = String(raw).replace(/\/+$/, '');
+  return trimmed || '/';
+};
+
+/**
  * The Jira description. A tester opens this and should need nothing else — what the test covers,
  * which criteria it traces to, and the fixture URLs to open. Preconditions lead because a Manual
  * test has no structured home for them.
@@ -176,6 +191,11 @@ export function resolveIdentity({ scoped, prior, labelled }) {
  * a reader sees which acceptance criteria a test traces to. Leaving it out of the diff meant
  * re-pointing a test at different ACs changed nothing anywhere and the run reported "unchanged",
  * so traceability rotted in place while every report looked clean.
+ *
+ * `folder` is here for the same reason. It is only ever set when a test is created, so a test that
+ * moves between plans — or is reused from a retired one — keeps filing itself under the old
+ * feature forever. Nothing surfaced that, because every other field reconciled cleanly and the run
+ * reported "unchanged" while the Test Repository slowly stopped matching the plans.
  */
 export function diffTest({ plan, t, cur }) {
   const diffs = [];
@@ -183,6 +203,10 @@ export function diffTest({ plan, t, cur }) {
   if (cur.jira?.summary !== t.summary) diffs.push('summary');
   if (JSON.stringify([...(cur.jira?.labels || [])].sort()) !== JSON.stringify(labelsFor(plan, t))) diffs.push('labels');
   if (sameText(cur.jira?.description, describeTest(plan, t)) === false) diffs.push('description');
+  // A plan with no folder has no opinion, so an existing test is left where it is. Only a stated
+  // folder that disagrees with the live one is drift.
+  const want = folderFor(plan, t);
+  if (want && cur.folder?.path && cur.folder.path.replace(/\/+$/, '') !== want) diffs.push('folder');
   return diffs;
 }
 

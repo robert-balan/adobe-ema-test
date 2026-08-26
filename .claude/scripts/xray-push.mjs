@@ -44,7 +44,7 @@ import { dirname, join } from 'node:path';
 import { createClient } from './lib/gql.mjs';
 import { validate } from './lib/schema.mjs';
 import {
-  SUITES, LINK_TYPE, stepsOf, labelsFor, describeTest,
+  SUITES, LINK_TYPE, stepsOf, labelsFor, describeTest, folderFor,
   resolveIdentity, diffTest, linkState, driftFor, planProblems, parseUnclaim, requirementLinkId,
 } from './lib/reconcile.mjs';
 
@@ -126,6 +126,7 @@ const Q = {
     getTests(issueIds: $issueIds, limit: 100) {
       total
       results { issueId testType { name } steps { id action data result }
+                folder { path }
                 jira(fields: ["key","summary","labels","description","issuelinks"]) }
     } }`,
   findByLabel: `query FindByLabel($jql: String!, $start: Int, $limit: Int!) {
@@ -143,6 +144,10 @@ const Q = {
     createTest(testType: { name: "Manual" }, steps: $steps, folderPath: $folder, jira: $jira) {
       test { issueId jira(fields: ["key"]) } warnings } }`,
   removeAllSteps: `mutation RemoveAll($issueId: String!) { removeAllTestSteps(issueId: $issueId) }`,
+  // Xray only accepts a folder at creation time via createTest, so moving an existing test needs
+  // its own mutation. Returns the resulting path as a bare String, not an object.
+  updateTestFolder: `mutation UpdateTestFolder($issueId: String!, $folderPath: String!) {
+    updateTestFolder(issueId: $issueId, folderPath: $folderPath) }`,
   addStep: `mutation AddStep($issueId: String!, $step: CreateStepInput!) {
     addTestStep(issueId: $issueId, step: $step) { id } }`,
   createTestSet: `mutation CreateTestSet($testIssueIds: [String], $jira: JSON!) {
@@ -393,6 +398,10 @@ function report() {
       console.log(`      summary:  - ${cur.jira.summary}`);
       console.log(`                + ${t.summary}`);
     }
+    if (diffs.includes('folder')) {
+      console.log(`      folder:   - ${cur.folder?.path || '(none)'}`);
+      console.log(`                + ${folderFor(plan, t)}`);
+    }
     if (diffs.includes('description')) {
       const a = (cur.jira.description || '').split('\n\n').filter(Boolean);
       const b = describeTest(plan, t).split('\n\n').filter(Boolean);
@@ -550,6 +559,12 @@ try {
   for (const { t, rec, cur, diffs } of UPDATE) {
     if (diffs.includes('steps') || diffs.includes('forced')) {
       await rewriteSteps({ issueId: rec.issueId, key: rec.key, next: stepsOf(t), previous: cur.steps || [] });
+    }
+    if (diffs.includes('folder')) {
+      const want = folderFor(plan, t);
+      await gqlOrThrow(Q.updateTestFolder,
+        { issueId: String(rec.issueId), folderPath: want }, { label: `updateTestFolder ${t.id}` });
+      console.log(`moved    ${t.id} → ${rec.key}  ${cur.folder?.path || '(none)'} → ${want}`);
     }
     // Jira-owned fields are always restated; the agent applies them over MCP.
     jiraActions.edits.push({

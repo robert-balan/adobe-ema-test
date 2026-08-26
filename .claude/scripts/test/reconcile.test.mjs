@@ -12,7 +12,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
-  stepsOf, sameSteps, labelsFor, describeTest,
+  stepsOf, sameSteps, labelsFor, describeTest, folderFor,
   resolveIdentity, diffTest, linkState, driftFor, acDigest, plainText, planProblems, sameText, parseUnclaim, requirementLinkId,
 } from '../lib/reconcile.mjs';
 
@@ -158,6 +158,50 @@ test('diffTest: tolerates a live test with no description at all', () => {
   const cur = liveOf(PLAN, t);
   delete cur.jira.description;
   assert.deepEqual(diffTest({ plan: PLAN, t, cur }), ['description']);
+});
+
+/* ---------------------------------------------------------------- folder */
+
+test('folderFor: a test names its own folder and it wins over the plan', () => {
+  const plan = { ...PLAN, folder: '/Header/Megamenu' };
+  assert.equal(folderFor(plan, aTest({ folder: '/Header/Megamenu/Brands' })), '/Header/Megamenu/Brands');
+});
+
+test('folderFor: falls back to the plan folder, and to null when neither states one', () => {
+  assert.equal(folderFor({ ...PLAN, folder: '/Header/Megamenu' }, aTest()), '/Header/Megamenu');
+  assert.equal(folderFor(PLAN, aTest()), null);
+});
+
+test('folderFor: a trailing slash is not a different folder', () => {
+  assert.equal(folderFor({ ...PLAN, folder: '/Header/Megamenu/' }, aTest()), '/Header/Megamenu');
+});
+
+// The reason folder joined the diff: folderPath is only honoured by createTest, so a test reused
+// from a retired plan kept filing itself under the old feature and every run said "unchanged".
+test('diffTest: detects a test left filed under the folder of an older plan', () => {
+  const plan = { ...PLAN, folder: '/Header/Megamenu' };
+  const t = aTest();
+  const cur = liveOf(plan, t, { folder: { path: '/Header/Megamenu/Brands Carousel' } });
+  assert.deepEqual(diffTest({ plan, t, cur }), ['folder']);
+});
+
+test('diffTest: a plan with no folder has no opinion, so a live test is left where it sits', () => {
+  const t = aTest();
+  const cur = liveOf(PLAN, t, { folder: { path: '/Somewhere/Else' } });
+  assert.deepEqual(diffTest({ plan: PLAN, t, cur }), []);
+});
+
+test('diffTest: a trailing slash on either side is not folder drift', () => {
+  const plan = { ...PLAN, folder: '/Header/Megamenu/' };
+  const t = aTest();
+  const cur = liveOf(plan, t, { folder: { path: '/Header/Megamenu' } });
+  assert.deepEqual(diffTest({ plan, t, cur }), []);
+});
+
+test('diffTest: a test Xray reports no folder for is not dragged to the plan folder', () => {
+  const plan = { ...PLAN, folder: '/Header/Megamenu' };
+  const t = aTest();
+  assert.deepEqual(diffTest({ plan, t, cur: liveOf(plan, t) }), []);
 });
 
 /* ----------------------------------------------------------------- links */
