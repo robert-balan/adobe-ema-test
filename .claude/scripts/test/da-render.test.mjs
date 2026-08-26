@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
   metadataBlock, block, document_, fixturePage, findBrandStrip, editLink, transformNav, transformUtility,
-  transformMenus, transformLogo, transformPromo, classifyPanelRow,
+  transformMenus, transformLogo, transformPromo, classifyPanelRow, transformFooter,
 } from '../lib/da-render.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -22,6 +22,9 @@ const NAV = readFileSync(join(HERE, 'fixtures', 'nav-sample.html'), 'utf8');
 // A second sample, trimmed from the real /nav, because the top-level items have a shape the older
 // sample does not: one div.nav-menu per item, row 1 the bar link, rows 2+ the megamenu columns.
 const MENUS = readFileSync(join(HERE, 'fixtures', 'nav-menus-sample.html'), 'utf8');
+// The footer, captured in the same DA source shape: three sections, in the order decorate()
+// destructures them — newsletter band, link columns, bottom bar.
+const FOOTER = readFileSync(join(HERE, 'fixtures', 'footer-sample.html'), 'utf8');
 const countLinks = (s) => (s.match(/<a\b[^>]*>\s*<picture>/g) || []).length;
 
 /* -------------------------------------------------------------- primitives */
@@ -389,4 +392,180 @@ test('transformNav: the promo region composes with the others', () => {
   });
   assert.ok(out.includes('UFS') && !out.includes(':ufs-logo:'));
   assert.match(out, /<p>E<\/p><p><strong>T<\/strong><\/p>/);
+});
+
+/* ------------------------------------------------------------ footer surgery */
+
+const sectionsOf = (html) => {
+  const main = html.slice(html.indexOf('<main>') + 6, html.lastIndexOf('</main>'));
+  // Direct children only: count the divs that open at depth 0.
+  const out = [];
+  let depth = 0;
+  let start = -1;
+  for (const m of main.matchAll(/<div\b[^>]*>|<\/div>/g)) {
+    if (m[0] === '</div>') {
+      depth -= 1;
+      if (depth === 0) out.push(main.slice(start, m.index + 6));
+    } else {
+      if (depth === 0) start = m.index;
+      depth += 1;
+    }
+  }
+  return out;
+};
+
+test('transformFooter: no spec is a faithful copy — deriving must not perturb the document', () => {
+  const out = transformFooter(FOOTER, {});
+  assert.equal(sectionsOf(out).length, 3);
+  for (const s of ['Stay in the loop', ':ufs-logo:', '<strong>Company</strong>', 'Terms and Conditions',
+    '© 2027 UFS. All rights reserved.', ':tiktok:']) {
+    assert.ok(out.includes(s), `lost ${s}`);
+  }
+});
+
+test('transformFooter: the band keeps its authored heading level so the h2 promotion stays testable', () => {
+  assert.match(transformFooter(FOOTER, {}), /<h3 id="stay-in-the-loop">Stay in the loop<\/h3>/);
+  const out = transformFooter(FOOTER, { newsletter: { heading: 'Get our newsletter' } });
+  assert.match(out, /<h3>Get our newsletter<\/h3>/);
+  assert.ok(!out.includes('stay-in-the-loop'), 'a stale slug must not survive retitled copy');
+});
+
+test('transformFooter: headingLevel authors the already-correct h2 case', () => {
+  assert.match(transformFooter(FOOTER, { newsletter: { headingLevel: 2 } }), /<h2>Stay in the loop<\/h2>/);
+});
+
+test('transformFooter: body copy and the CTA are told apart by the link, as the block tells them apart', () => {
+  const noSub = transformFooter(FOOTER, { newsletter: { removeSubtext: true } });
+  assert.ok(!noSub.includes('Sign up to receive'), 'body copy gone');
+  assert.match(noSub, /<a href="\/subscribe">Subscribe<\/a>/, 'the CTA is not the body copy');
+
+  const noCta = transformFooter(FOOTER, { newsletter: { removeCta: true } });
+  assert.ok(!noCta.includes('/subscribe'), 'no link means no form is built at all');
+  assert.ok(noCta.includes('Sign up to receive'), 'body copy survives');
+});
+
+test('transformFooter: a CTA carries the href that becomes the form action', () => {
+  const out = transformFooter(FOOTER, { newsletter: { cta: 'Anmelden|/de/abonnieren' } });
+  assert.match(out, /<p><a href="\/de\/abonnieren">Anmelden<\/a><\/p>/);
+});
+
+test('transformFooter: removing the band drops the section, leaving no empty wrapper', () => {
+  const out = transformFooter(FOOTER, { newsletter: { remove: true } });
+  assert.equal(sectionsOf(out).length, 2);
+  assert.ok(!out.includes('Stay in the loop'));
+  assert.ok(out.includes('<strong>Company</strong>'), 'the columns are still section one');
+});
+
+test('transformFooter: the logo falls back to a text brand inside the same link', () => {
+  const out = transformFooter(FOOTER, { brand: { logoText: 'Unilever Food Solutions' } });
+  assert.match(out, /<p><a href="\/" title="Unilever Home">Unilever Food Solutions<\/a><\/p>/);
+  assert.ok(!out.includes(':ufs-logo:'));
+});
+
+test('transformFooter: removing the logo takes its paragraph, not just the token', () => {
+  const out = transformFooter(FOOTER, { brand: { removeLogo: true } });
+  assert.ok(!out.includes(':ufs-logo:') && !out.includes('Unilever Home'), 'no empty link left behind');
+  assert.ok(out.includes('by chefs for chefs'), 'the tagline is untouched');
+});
+
+test('transformFooter: a tagline without a | authors the no-accent case', () => {
+  const withAccent = transformFooter(FOOTER, { brand: { tagline: 'Made by chefs|for chefs' } });
+  assert.match(withAccent, /<p>Made by chefs<br>for chefs<\/p>/);
+  const flat = transformFooter(FOOTER, { brand: { tagline: 'Made by chefs for chefs' } });
+  assert.match(flat, /<p>Made by chefs for chefs<\/p>/);
+  assert.ok(!/Made by chefs for chefs<br>/.test(flat), 'no <br> means decorate() finds no accent to wrap');
+});
+
+test('transformFooter: columns are replaced wholesale, headings bold so decorate() splits them', () => {
+  const out = transformFooter(FOOTER, {
+    columns: [{ heading: 'Support', links: ['FAQ|/faq', 'Contact Us|/contact'] }],
+  });
+  assert.match(out, /<p><strong>Support<\/strong><\/p>/);
+  assert.match(out, /<li><a href="\/faq">FAQ<\/a><\/li>/);
+  assert.ok(!out.includes('<strong>Company</strong>') && !out.includes('Privacy Policy'), 'old columns gone');
+  assert.ok(out.includes(':ufs-logo:') && out.includes('by chefs for chefs'), 'the brand column survives');
+});
+
+test('transformFooter: strongHeading false is the merge bug, authored the only way an author can', () => {
+  const out = transformFooter(FOOTER, {
+    columns: [
+      { heading: 'Company', links: ['About Us|/about'] },
+      { heading: 'Legal', strongHeading: false, links: ['Privacy Policy|/privacy'] },
+    ],
+  });
+  assert.match(out, /<p><strong>Company<\/strong><\/p>/);
+  assert.match(out, /<p>Legal<\/p>/);
+  assert.ok(!out.includes('<strong>Legal</strong>'), 'without the bold nothing starts a new column');
+});
+
+test('transformFooter: an empty columns array leaves the brand column alone on the row', () => {
+  const out = transformFooter(FOOTER, { columns: [] });
+  assert.ok(!out.includes('<ul>') && !out.includes('<strong>'), 'every link column removed');
+  assert.ok(out.includes(':ufs-logo:'), 'the brand column is not a link column');
+});
+
+test('transformFooter: copyright and socials are told apart by the link, as the block tells them apart', () => {
+  const noSocial = transformFooter(FOOTER, { bottom: { removeSocials: true } });
+  assert.ok(!noSocial.includes(':instagram:'), 'social row gone');
+  assert.ok(noSocial.includes('© 2027 UFS'), 'the copyright is not the social row');
+
+  const noCopy = transformFooter(FOOTER, { bottom: { removeCopyright: true } });
+  assert.ok(!noCopy.includes('© 2027 UFS'));
+  assert.ok(noCopy.includes(':instagram:'), 'the social row survives');
+});
+
+test('transformFooter: a social entry authors a titled link and an icon token from its label', () => {
+  const out = transformFooter(FOOTER, {
+    bottom: { socials: ['Instagram|https://www.instagram.com/', 'TikTok|https://www.tiktok.com/'] },
+  });
+  assert.match(out, /<a href="https:\/\/www\.instagram\.com\/" title="Instagram">:instagram:<\/a>/);
+  // "TikTok" has to author as :tiktok:; the hostname decorate() derives its name from is the
+  // same string in lower case, which is exactly what a test compares the announced name against.
+  assert.match(out, /title="TikTok">:tiktok:<\/a>/);
+  assert.ok(!out.includes(':linkedin:'), 'the authored list replaces rather than appends');
+});
+
+test('transformFooter: an explicit icon token wins over the derived one', () => {
+  const out = transformFooter(FOOTER, { bottom: { socials: ['X (Twitter)|https://x.com/|twitter'] } });
+  assert.match(out, /title="X \(Twitter\)">:twitter:<\/a>/);
+});
+
+test('transformFooter: values are escaped rather than emitted as markup', () => {
+  const out = transformFooter(FOOTER, {
+    newsletter: { heading: 'Sauces & <b>Condiments</b>' },
+    bottom: { copyright: '© 2027 "UFS" & Co.' },
+  });
+  assert.ok(out.includes('Sauces &amp; &lt;b&gt;Condiments&lt;/b&gt;'));
+  assert.ok(out.includes('&quot;UFS&quot; &amp; Co.'));
+});
+
+test('transformFooter: regions compose in one pass', () => {
+  const out = transformFooter(FOOTER, {
+    newsletter: { removeSubtext: true },
+    brand: { logoText: 'UFS' },
+    columns: [{ heading: 'Legal', links: ['Privacy Policy|/privacy'] }],
+    bottom: { removeSocials: true, copyright: '© 2027 UFS.' },
+  });
+  assert.equal(sectionsOf(out).length, 3);
+  assert.ok(!out.includes('Sign up to receive'));
+  assert.ok(out.includes('>UFS</a>') && !out.includes(':ufs-logo:'));
+  assert.ok(!out.includes('<strong>Company</strong>') && out.includes('<strong>Legal</strong>'));
+  assert.ok(!out.includes(':instagram:') && out.includes('© 2027 UFS.'));
+});
+
+test('transformFooter: refuses a document with fewer than the three sections decorate() reads', () => {
+  const twoSections = FOOTER.replace(/<div>\s*<p>© 2027[\s\S]*?<\/div>\s*(?=<\/main>)/, '');
+  assert.throws(() => transformFooter(twoSections, {}), /decorate\(\) destructures three/);
+});
+
+test('transformFooter: sections beyond the three are carried through untouched', () => {
+  const extra = FOOTER.replace('</main>', '<div>\n<p>An extra authored section.</p>\n</div>\n</main>');
+  const out = transformFooter(extra, { bottom: { removeSocials: true } });
+  assert.equal(sectionsOf(out).length, 4);
+  assert.ok(out.includes('An extra authored section.'));
+});
+
+test('transformFooter: refuses a footer with no logo token rather than editing the wrong thing', () => {
+  const noLogo = FOOTER.replace(':ufs-logo:', 'UFS');
+  assert.throws(() => transformFooter(noLogo, { brand: { logoText: 'X' } }), /no :ufs-logo: token/);
 });

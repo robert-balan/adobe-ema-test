@@ -404,6 +404,13 @@ test('planProblems: a fixture outside /drafts/ is refused', () => {
     fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/drafts/qa/ok', nav: { path: '/nav', from: '/nav' } }],
   });
   assert.match(planProblems(nav).join(), /nav "\/nav" is outside \/drafts\//);
+
+  // A footer fixture writes a whole document too, and overwriting the live /footer would replace
+  // the real one on every page of the site.
+  const footer = planOf({
+    fixtures: [{ id: 'BRANDS-FX-01', title: 'x', page: '/drafts/qa/ok', footer: { path: '/footer', from: '/footer' } }],
+  });
+  assert.match(planProblems(footer).join(), /footer "\/footer" is outside \/drafts\//);
 });
 
 // Jira stores a document tree, not text, so what it hands back is a re-rendering of what went in.

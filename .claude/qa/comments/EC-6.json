@@ -1,0 +1,47 @@
+{
+  "issue": "EC-6",
+  "mentions": [
+    "Volpe, Gianluca",
+    "Lee, Mathijs",
+    "Tabrizi2, Kasra"
+  ],
+  "intro": " — please see below the discrepancies we found while creating the test cases for this ticket. We write our tests from the acceptance criteria here, so anywhere the build differs the step fails on purpose. Most of these trace back to section 8's reconciliation criteria, AC-29 to AC-37, which are still open — but the first item is the opposite problem, so it is worth reading first.",
+  "items": [
+    {
+      "text": "Four of the deltas the ticket records have already been built. The \"Design-vs-Repo Deltas\" table describes develop as it was, not as it is, and half of it is now finished work: the newsletter band does render accessible-orange (it was moved into a standalone `newsletter` block whose CSS sets the token), the bottom bar does have five round social buttons, the mobile grid is two-up with the brand column spanning the full width above a hairline divider, and the mobile bottom bar does reverse so the socials sit above the copyright. That closes AC-30, AC-34 and AC-35 and most of AC-32 as written. Worth correcting in the table so nobody re-fixes it."
+    },
+    {
+      "text": "The breakpoint is still on 900px, not 1024px. AC-33 asks which is intended, so here are all three numbers: the handover has a single `@media (max-width: 1024px)`, footer.css and newsletter.css both switch at 900px, and styles.css is on 900px as well. Between 1024px and 901px you get the desktop four-track grid and the single-row bottom bar where the design puts the stacked mobile layout. AC-12 and AC-29 both hang off the answer. Note header.css is on 1200px, so the project now has three different values for the same boundary."
+    },
+    {
+      "text": "The column headings still are not headings. AC-25 and AC-31. The design has `<h3 class=\"ufs-footer__col-heading\">`; the footer document authors Company, Help & Support and Legal as bold text inside a paragraph, and footer.js uses exactly that bold as the signal to start a new column — so it cannot promote them to real headings without changing how it detects a column boundary. The effect is that a screen reader user cannot jump between the three columns. The band heading is already handled well (footer.js promotes the authored h3 to an h2 so the level order after the page h1 is correct), which makes this the one structural gap left."
+    },
+    {
+      "text": "The social links are named from their web address rather than from what the author typed, and two of the five come out misspelled. AC-23 and AC-10. The footer document gives each link a title — `title=\"TikTok\"`, `title=\"YouTube\"`, `title=\"LinkedIn\"` — but footer.js ignores it and builds an aria-label from the URL's hostname instead, which produces \"Tiktok\", \"Youtube\" and \"Linkedin\". An aria-label wins over a title, so those are the names a screen reader actually announces. Preferring the authored title when there is one would fix it and would also let an author name an account the hostname does not describe."
+    },
+    {
+      "text": "The newsletter band now belongs to a different block, which puts five of this ticket's criteria outside it. The band was extracted into `blocks/newsletter`, which is EC-10's block — footer.js only tags its section now. So AC-5, AC-7, AC-24, AC-30 and AC-37 assert behaviour EC-6 no longer owns. Two gaps sit in that block today: the email input has no `dir=\"ltr\"`, which the handover flags as deliberate because an address rendered right-to-left in an Arabic locale is an address misread, and no `autocomplete=\"email\"`. Should those five criteria stay here or move to EC-10?"
+    },
+    {
+      "text": "Values that still differ from the handover, for AC-29, AC-32 and AC-36. Two of them the build arguably gets better than the design, so they are worth a decision rather than a fix.",
+      "bullets": [
+        "Copyright colour: built --color-squid-100 (#d3d2d7), design --color-mushroom-700 (#989495). Both pass AA on the dark background, but the built one is far stronger — 10.75:1 against 5.39:1 — so moving it toward the design would lose contrast.",
+        "Social buttons: built 44px with a 20px icon, design 48px with a 24px icon. 44px is the AAA target size, so the built value also has a case.",
+        "Brand logo: built `height: 56px` with the aspect ratio pinned, design `width: 98px`.",
+        "Column gap: built 40px vertical and 24px horizontal, design --space-20 (80px).",
+        "Brand tagline: design is 18px/600 in white at both sizes; the build is 24px/600 white on mobile and 14px/400 squid-100 on desktop.",
+        "The hairline above the bottom bar: AC-6 says white at 12%, the handover says 8%. The build follows AC-6, so this one is a conflict inside the ticket rather than a build gap."
+      ]
+    },
+    {
+      "text": "On mobile the last link column spans the full width, which the design does not do. AC-34. footer.css gives `.footer-col:last-child` a `grid-column: 1 / -1` below 900px, with a comment saying it keeps \"Terms and Conditions\" on one line. In the handover the two-up grid is plain, so Legal sits in the left cell and the right cell stays empty. Both are reasonable; we just need to know which one the tests should assert."
+    },
+    {
+      "text": "AC-20 asks for the wrong key on links. It says Enter and Space activate focused controls. Space activates a button, but on a link it scrolls the page, and that is browser behaviour no implementation should override. The Subscribe button correctly takes both. Suggest splitting the criterion between links and buttons, so the step does not fail the build for behaving correctly."
+    },
+    {
+      "text": "White text on the orange band is exactly on the AA line. AC-22. #ffffff on --color-accessible-orange (#d14900) measures 4.50:1 against the 4.5:1 that the band's 14px body copy needs. It passes, but with no margin at all, so any later adjustment to either value fails it. EC-7 raised the same token from the other side: the #B23E00 used there measures 5.86:1."
+    }
+  ],
+  "commentId": "875530"
+}

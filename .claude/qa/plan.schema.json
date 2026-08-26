@@ -259,6 +259,106 @@
               }
             }
           },
+          "footer": {
+            "type": "object",
+            "description": "A footer document generated for this fixture by transforming the live one. `footer.js` reads getMetadata('footer') and falls back to /footer, so the page's `footer` metadata row is derived from `path` automatically \u2014 the same mechanism as `nav`, a different key. Deriving rather than authoring keeps the fixture identical to production except on the axis under test.",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "from"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Where the generated footer document is written, under /drafts/."
+              },
+              "from": {
+                "type": "string",
+                "description": "The live document it is derived from, e.g. /footer."
+              },
+              "newsletter": {
+                "type": "object",
+                "description": "Edits to the band \u2014 section one, the standalone `newsletter` block. Its cell holds a heading, body copy, and the link that becomes the Subscribe form.",
+                "additionalProperties": false,
+                "properties": {
+                  "remove": {
+                    "type": "boolean",
+                    "description": "Drop the whole band section, for the footer-with-no-newsletter case."
+                  },
+                  "heading": { "type": "string", "description": "Replacement band title." },
+                  "headingLevel": {
+                    "type": "integer",
+                    "enum": [1, 2, 3, 4, 5, 6],
+                    "description": "The level the heading is authored at. decorate() promotes whatever it finds to an h2 so the footer does not skip a level after the page's h1; authoring an h2 directly proves the already-correct path."
+                  },
+                  "removeHeading": { "type": "boolean", "description": "Drop the heading entirely." },
+                  "subtext": { "type": "string", "description": "Replacement body copy." },
+                  "removeSubtext": { "type": "boolean", "description": "Drop the optional body copy." },
+                  "cta": {
+                    "type": "string",
+                    "description": "The call to action, as \"Label|/href\". The href becomes the form action; the label becomes the submit button."
+                  },
+                  "removeCta": {
+                    "type": "boolean",
+                    "description": "Drop the link, so no form is built at all \u2014 the required-slot-absent case."
+                  }
+                }
+              },
+              "brand": {
+                "type": "object",
+                "description": "Edits to the brand column \u2014 the leading group of paragraphs in section two, before the first bold heading.",
+                "additionalProperties": false,
+                "properties": {
+                  "logoText": {
+                    "type": "string",
+                    "description": "Replace the :ufs-logo: icon token with this text, keeping the link around it. This is how an author produces the Content Slots table's text-brand fallback."
+                  },
+                  "removeLogo": { "type": "boolean", "description": "Drop the logo paragraph entirely." },
+                  "tagline": {
+                    "type": "string",
+                    "description": "The tagline, as \"lead|accent\". decorate() wraps whatever follows the <br> in the script accent, so omitting the | authors a tagline with no accent."
+                  },
+                  "removeTagline": { "type": "boolean", "description": "Drop the tagline." }
+                }
+              },
+              "columns": {
+                "type": "array",
+                "description": "Replace the link columns. There are no column divs in the document \u2014 DA flattens them and decorate() starts a new column at every <p> holding a <strong> and no image. An empty array removes every link column.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "heading": { "type": "string", "description": "The column heading." },
+                    "strongHeading": {
+                      "type": "boolean",
+                      "description": "Set false for the author who forgot the bold. Nothing then starts a new column, so this column silently merges into the previous one."
+                    },
+                    "links": {
+                      "type": "array",
+                      "description": "The column's links as \"Label|/href\".",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              },
+              "bottom": {
+                "type": "object",
+                "description": "Edits to the bottom bar \u2014 section three: a copyright paragraph and a paragraph of social icon links.",
+                "additionalProperties": false,
+                "properties": {
+                  "remove": { "type": "boolean", "description": "Drop the whole bottom bar section." },
+                  "copyright": { "type": "string", "description": "Replacement copyright line." },
+                  "removeCopyright": { "type": "boolean", "description": "Drop the copyright." },
+                  "socials": {
+                    "type": "array",
+                    "description": "Social accounts as \"Label|https://host/\", optionally \"Label|https://host/|icon-token\". The icon token defaults to the label lowercased. decorate() names each icon-only link from its hostname, so the label and the host are what a test compares.",
+                    "items": { "type": "string" }
+                  },
+                  "removeSocials": { "type": "boolean", "description": "Drop the social row, for the bottom-bar-with-no-socials case." }
+                }
+              }
+            }
+          },
           "metadata": {
             "type": "object",
             "description": "Page metadata rows, e.g. { \"nav\": \"/drafts/qa/brands/nav-happy\", \"Theme\": \"light\" }."

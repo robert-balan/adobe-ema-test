@@ -23,10 +23,13 @@
  * Like xray-push it reconciles rather than recreates: a document whose content already matches is
  * left alone, so re-running after editing one fixture rewrites one document.
  *
- * Nav fixtures are DERIVED from the live nav, not authored. The real nav carries five menus and
- * seventy-five links; a hand-built replacement would differ from production in ways nobody
- * intended, and each difference is a false result waiting to happen. The fixture keeps the whole
- * live document and varies only the axis under test.
+ * Nav and footer fixtures are DERIVED from the live documents, not authored. The real nav carries
+ * five menus and seventy-five links, and the real footer three columns and five social accounts; a
+ * hand-built replacement would differ from production in ways nobody intended, and each difference
+ * is a false result waiting to happen. The fixture keeps the whole live document and varies only
+ * the axis under test. Both are reached the same way — a metadata row on the fixture page that the
+ * block reads (`nav` for header.js, `footer` for footer.js) — so both paths are derived from the
+ * fixture's own spec rather than repeated.
  *
  * Auth: DA_TOKEN, an Adobe IMS token. Short-lived by nature, so its expiry is checked before the
  * first request rather than surfacing as a 401 six documents in.
@@ -36,7 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { validate } from './lib/schema.mjs';
 import { planProblems } from './lib/reconcile.mjs';
-import { fixturePage, transformNav } from './lib/da-render.mjs';
+import { fixturePage, transformNav, transformFooter } from './lib/da-render.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_PATH = join(HERE, '..', 'qa', 'plan.schema.json');
@@ -129,31 +132,38 @@ async function preview(path) {
 // Whitespace differences are not content differences, and DA may normalise on the way in.
 const same = (a, b) => a != null && b != null && a.replace(/\s+/g, ' ').trim() === b.replace(/\s+/g, ' ').trim();
 
-const navSources = new Map();
-async function sourceNavFor(from) {
-  if (!navSources.has(from)) {
+const sources = new Map();
+async function sourceFor(from, kind) {
+  if (!sources.has(from)) {
     const html = await readSource(from);
-    if (!html) throw new Error(`source document ${from} not found — a nav fixture is derived from it`);
-    navSources.set(from, html);
+    if (!html) throw new Error(`source document ${from} not found — a ${kind} fixture is derived from it`);
+    sources.set(from, html);
   }
-  return navSources.get(from);
+  return sources.get(from);
 }
 
 const planned = [];
 for (const f of fixtures) {
   if (f.nav) {
-    const src = await sourceNavFor(f.nav.from);
+    const src = await sourceFor(f.nav.from, 'nav');
     planned.push({ fixture: f.id, kind: 'nav', path: f.nav.path, html: transformNav(src, f.nav) });
   }
-  // The page's nav metadata row is derived from the fixture's own nav when it generates one, so
-  // the path is stated once and cannot drift between the two.
+  // The footer is reached by the same mechanism under a different key: footer.js reads
+  // getMetadata('footer') and falls back to /footer, exactly as header.js does for the nav.
+  if (f.footer) {
+    const src = await sourceFor(f.footer.from, 'footer');
+    planned.push({ fixture: f.id, kind: 'footer', path: f.footer.path, html: transformFooter(src, f.footer) });
+  }
+  // The page's nav and footer metadata rows are derived from the fixture's own documents when it
+  // generates them, so each path is stated once and cannot drift between the two.
   const metadata = { ...(f.metadata || {}) };
   if (f.nav) metadata.nav = f.nav.path;
+  if (f.footer) metadata.footer = f.footer.path;
   planned.push({
     fixture: f.id,
     kind: 'page',
     path: f.page,
-    html: fixturePage({ ...f, metadata }, { source: f.nav?.from }),
+    html: fixturePage({ ...f, metadata }, { source: f.nav?.from || f.footer?.from }),
   });
 }
 

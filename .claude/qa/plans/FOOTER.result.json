@@ -1,0 +1,124 @@
+{
+  "tests": {
+    "FOOTER-TC-01": {
+      "issueId": "302663",
+      "key": "EC-174",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-2",
+        "AC-4",
+        "AC-14",
+        "AC-15",
+        "AC-16",
+        "AC-17"
+      ]
+    },
+    "FOOTER-TC-02": {
+      "issueId": "302664",
+      "key": "EC-175",
+      "suites": [
+        "sanity",
+        "regression",
+        "e2e"
+      ],
+      "ac": [
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10",
+        "AC-11"
+      ]
+    },
+    "FOOTER-TC-03": {
+      "issueId": "302665",
+      "key": "EC-176",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-29",
+        "AC-30",
+        "AC-32",
+        "AC-36",
+        "AC-37"
+      ]
+    },
+    "FOOTER-TC-04": {
+      "issueId": "302666",
+      "key": "EC-177",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-3",
+        "AC-12",
+        "AC-13",
+        "AC-29",
+        "AC-33",
+        "AC-34",
+        "AC-35"
+      ]
+    },
+    "FOOTER-TC-05": {
+      "issueId": "302667",
+      "key": "EC-178",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-10",
+        "AC-18",
+        "AC-19",
+        "AC-20",
+        "AC-21",
+        "AC-22",
+        "AC-23",
+        "AC-24",
+        "AC-25",
+        "AC-26",
+        "AC-27",
+        "AC-28",
+        "AC-31"
+      ]
+    },
+    "FOOTER-TC-06": {
+      "issueId": "302668",
+      "key": "EC-179",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-3",
+        "AC-14",
+        "AC-15"
+      ]
+    }
+  },
+  "testSets": {
+    "sanity": {
+      "issueId": "301670",
+      "key": "EC-104",
+      "suite": "sanity"
+    },
+    "regression": {
+      "issueId": "301671",
+      "key": "EC-105",
+      "suite": "regression"
+    },
+    "e2e": {
+      "issueId": "301672",
+      "key": "EC-106",
+      "suite": "e2e"
+    }
+  }
+}

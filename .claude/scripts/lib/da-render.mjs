@@ -461,3 +461,228 @@ export function transformNav(navHtml, spec = {}) {
   }
   return out;
 }
+
+/* ---------------------------------------------------------- footer surgery */
+
+/**
+ * The footer is derived from the live `/footer` document for the same reason the nav is: it
+ * carries three link columns, fourteen links and five social accounts, and a hand-built
+ * replacement would differ from production in ways nobody chose. The fixture keeps the whole
+ * document and varies only the axis under test.
+ *
+ * The footer is reached differently from the nav, though. `footer.js` reads `getMetadata('footer')`
+ * and falls back to `/footer`, so a fixture page points at its own footer document with a `footer`
+ * metadata row — the same mechanism as `nav`, a different key.
+ *
+ * `decorate()` is positional: it destructures the document's sections as
+ * `[newsletter, columns, bottom]`. So this transform is positional too. Matching the
+ * implementation's own rule is the point — a transform that searched for the bottom bar by
+ * content would edit a section the block never treats as one.
+ */
+
+/** The direct child `<div>`s of `<main>` — a DA document's sections. */
+function mainSections(html) {
+  const open = html.indexOf('<main>');
+  const close = html.lastIndexOf('</main>');
+  if (open === -1 || close === -1) throw new Error('no <main> element in the source document');
+  const sections = [];
+  let i = open + '<main>'.length;
+  while (i < close) {
+    const start = html.indexOf('<div', i);
+    if (start === -1 || start >= close) break;
+    const end = closeDiv(html, start);
+    sections.push({ start, end, text: html.slice(start, end) });
+    i = end;
+  }
+  return sections;
+}
+
+/** Paragraphs, in document order. They do not nest, so a flat scan is exact rather than a guess. */
+function paras(html) {
+  return [...html.matchAll(/<p\b[^>]*>[\s\S]*?<\/p>/g)]
+    .map((m) => ({ start: m.index, end: m.index + m[0].length, text: m[0] }));
+}
+
+const splice = (html, at, text = '') => html.slice(0, at.start) + text + html.slice(at.end);
+
+const LOGO_TOKEN = ':ufs-logo:';
+
+/**
+ * The newsletter band — section one, the standalone `newsletter` block.
+ *
+ * Its cell holds a heading, a paragraph of body copy, and a link that `newsletter.js` turns into
+ * the Subscribe form. Which paragraph is which is decided by whether it holds a link, exactly as
+ * the block's own decorator decides it.
+ *
+ * @param {string} html
+ * @param {object} spec  { remove, heading, headingLevel, removeHeading, subtext, removeSubtext,
+ *                         cta: 'Label|/href', removeCta }
+ */
+function editBand(html, spec = {}) {
+  if (spec.remove) return null;
+  let out = html;
+
+  const hm = /<h[1-6]\b[^>]*>[\s\S]*?<\/h[1-6]>/.exec(out);
+  if (spec.removeHeading) {
+    if (!hm) throw new Error('no heading found in the newsletter band');
+    out = splice(out, { start: hm.index, end: hm.index + hm[0].length });
+  } else if (spec.heading !== undefined || spec.headingLevel !== undefined) {
+    if (!hm) throw new Error('no heading found in the newsletter band');
+    // The authored level is worth varying rather than fixing: footer.js promotes whatever it finds
+    // to an h2 so the footer does not skip a level after the page's h1, and a fixture that authors
+    // an h2 directly proves the already-correct path as well as the promotion.
+    const level = spec.headingLevel ?? /<h([1-6])/.exec(hm[0])[1];
+    const text = spec.heading ?? hm[0].replace(/<[^>]+>/g, '');
+    // The authored id is dropped rather than carried over: the pipeline derives one from the text,
+    // and keeping a stale slug on retitled copy is a difference no test asked for.
+    out = splice(out, { start: hm.index, end: hm.index + hm[0].length }, `<h${level}>${esc(text)}</h${level}>`);
+  }
+
+  // Body copy is a paragraph with no link in it; the CTA is the one that has a link.
+  const sub = () => paras(out).find((p) => !/<a\b/.test(p.text));
+  if (spec.removeSubtext) {
+    const p = sub();
+    if (p) out = splice(out, p);
+  } else if (spec.subtext !== undefined) {
+    const p = sub();
+    if (p) out = splice(out, p, `<p>${esc(spec.subtext)}</p>`);
+  }
+
+  const ctaP = paras(out).find((p) => /<a\b/.test(p.text));
+  if (spec.removeCta) {
+    // No link means no form at all — the band keeps its heading and copy and renders nothing else,
+    // which is the "required slot absent" case the Content Slots table calls for.
+    if (ctaP) out = splice(out, ctaP);
+  } else if (spec.cta !== undefined) {
+    const [label, href = '/subscribe'] = String(spec.cta).split('|');
+    const rebuilt = `<p><a href="${esc(href)}">${esc(label)}</a></p>`;
+    out = ctaP ? splice(out, ctaP, rebuilt) : out.replace(/<\/div>\s*$/, `${rebuilt}</div>`);
+  }
+  return out;
+}
+
+/**
+ * The link columns — section two: the brand column, then a heading paragraph and a list per column.
+ *
+ * There are no column `<div>`s in the document. DA flattens them, and `decorate()` rebuilds them by
+ * starting a new column at every `<p>` that holds a `<strong>` and no image. So `strongHeading:
+ * false` is not a cosmetic option — it is the authoring mistake that silently merges two columns,
+ * and the only way to author it is to leave the bold off.
+ *
+ * @param {string} html
+ * @param {object} spec  { brand: { logoText, removeLogo, tagline: 'lead|accent', removeTagline },
+ *                         columns: [{ heading, strongHeading, links: ['Label|/href'] }] }
+ */
+function editColumns(html, spec = {}) {
+  const brand = spec.brand || {};
+  let out = html;
+
+  if (brand.removeLogo || brand.logoText !== undefined) {
+    const i = out.indexOf(LOGO_TOKEN);
+    if (i === -1) throw new Error(`no ${LOGO_TOKEN} token found in the source footer`);
+    if (brand.logoText !== undefined) {
+      // The Content Slots table gives the logo one fallback — a text brand — and an author
+      // produces it by typing the name where the icon token was. So that is what this does.
+      out = out.slice(0, i) + esc(brand.logoText) + out.slice(i + LOGO_TOKEN.length);
+    } else {
+      const p = paras(out).find((q) => q.start <= i && q.end >= i);
+      if (p) out = splice(out, p);
+    }
+  }
+
+  const taglineOf = () => paras(out).find((p) => /<br\s*\/?>/.test(p.text));
+  if (brand.removeTagline) {
+    const t = taglineOf();
+    if (t) out = splice(out, t);
+  } else if (brand.tagline !== undefined) {
+    const [lead, accent] = String(brand.tagline).split('|');
+    const t = taglineOf();
+    // No `|` means no <br>, and no <br> means decorate() finds nothing to wrap in the script
+    // accent. That is a degraded case worth being able to author, not an accident.
+    const rebuilt = accent === undefined ? `<p>${esc(lead)}</p>` : `<p>${esc(lead)}<br>${esc(accent)}</p>`;
+    if (t) out = splice(out, t, rebuilt);
+  }
+
+  if (spec.columns) {
+    const first = out.search(/<p><strong>/);
+    const lastUl = out.lastIndexOf('</ul>');
+    if (first === -1 || lastUl === -1) throw new Error('no link columns found in the source footer');
+    const built = spec.columns.map((c) => {
+      const items = (c.links || []).map((l) => {
+        const [label, href] = String(l).split('|');
+        return href ? `<li><a href="${esc(href)}">${esc(label)}</a></li>` : `<li>${esc(label)}</li>`;
+      }).join('\n');
+      const head = c.heading === undefined ? ''
+        : `${c.strongHeading === false ? `<p>${esc(c.heading)}</p>` : `<p><strong>${esc(c.heading)}</strong></p>`}\n`;
+      return `${head}<ul>\n${items}\n</ul>`;
+    }).join('\n');
+    // An empty array is meaningful: every link column gone, brand column alone.
+    out = out.slice(0, first) + built + out.slice(lastUl + '</ul>'.length);
+  }
+  return out;
+}
+
+/**
+ * The bottom bar — section three: a copyright paragraph and a paragraph of social icon links.
+ *
+ * `decorate()` finds the social row as "the child holding an `.icon`" and gives each icon-only link
+ * an `aria-label` derived from its hostname. A social entry therefore carries both a label and a
+ * URL, and the icon token is derived from the label unless one is given.
+ *
+ * @param {string} html
+ * @param {object} spec  { remove, copyright, removeCopyright,
+ *                         socials: ['Instagram|https://…|instagram'], removeSocials }
+ */
+function editBottom(html, spec = {}) {
+  if (spec.remove) return null;
+  let out = html;
+
+  const copyOf = () => paras(out).find((p) => !/<a\b/.test(p.text));
+  if (spec.removeCopyright) {
+    const p = copyOf();
+    if (p) out = splice(out, p);
+  } else if (spec.copyright !== undefined) {
+    const p = copyOf();
+    if (p) out = splice(out, p, `<p>${esc(spec.copyright)}</p>`);
+  }
+
+  const socialP = paras(out).find((p) => /<a\b/.test(p.text));
+  if (spec.removeSocials) {
+    if (socialP) out = splice(out, socialP);
+  } else if (spec.socials) {
+    const links = spec.socials.map((s) => {
+      const [label, href = '#', token] = String(s).split('|');
+      // "TikTok" authors as :tiktok:, which is also what the hostname-derived accessible name
+      // will be compared against.
+      const icon = token || label.toLowerCase().replace(/[^a-z0-9]+/g, '');
+      return `<a href="${esc(href)}" title="${esc(label)}">:${esc(icon)}:</a>`;
+    }).join('');
+    const rebuilt = `<p>${links}</p>`;
+    out = socialP ? splice(out, socialP, rebuilt) : out.replace(/<\/div>\s*$/, `${rebuilt}</div>`);
+  }
+  return out;
+}
+
+/**
+ * Produce a footer document for a fixture by transforming the live one.
+ *
+ * @param {string} footerHtml  the live footer document source
+ * @param {object} spec        { newsletter, brand, columns, bottom } — see the editors above
+ */
+export function transformFooter(footerHtml, spec = {}) {
+  const secs = mainSections(footerHtml);
+  if (secs.length < 3) {
+    throw new Error(`the source footer has ${secs.length} section(s); decorate() destructures three `
+      + '— newsletter band, link columns, bottom bar');
+  }
+  const parts = [
+    editBand(secs[0].text, spec.newsletter),
+    editColumns(secs[1].text, spec),
+    editBottom(secs[2].text, spec.bottom),
+    // Anything an author added beyond the three the block reads is carried through untouched:
+    // dropping it would make the fixture differ from production on an axis nobody chose.
+    ...secs.slice(3).map((s) => s.text),
+  ].filter((p) => p != null);
+
+  return footerHtml.slice(0, secs[0].start) + parts.join('\n') + footerHtml.slice(secs[secs.length - 1].end);
+}
