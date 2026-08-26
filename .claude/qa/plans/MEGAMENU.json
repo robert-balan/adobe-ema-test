@@ -1,0 +1,487 @@
+{
+  "project": "EC",
+  "feature": "MEGAMENU",
+  "projectId": "11590",
+  "assignee": "712020:543dd2f2-c9ed-422b-822d-d75634813a18",
+  "source": {
+    "key": "EC-8",
+    "summary": "Header: Megamenu",
+    "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-8",
+    "acDigest": "sha256:f615a5947fb4018c",
+    "acCheckedOn": "2026-08-26"
+  },
+  "folder": "/Header/Megamenu",
+  "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "fixtures": [
+    {
+      "id": "MEGAMENU-FX-01",
+      "title": "Reference panels — the three desktop layouts as production authors them",
+      "purpose": "All three layouts reachable from one page so a tester compares them without reloading: Products is Layout A (three columns, promo tile, brand carousel), Recipes is Layout B (wide editorial feature, two columns, promo tile), Promotions is Layout C (two columns, nothing else). This is the case every other fixture is read against.",
+      "page": "/drafts/qa/megamenu/reference",
+      "nav": {
+        "path": "/drafts/qa/megamenu/nav-reference",
+        "from": "/nav"
+      },
+      "metadata": {
+        "Language": "en"
+      }
+    },
+    {
+      "id": "MEGAMENU-FX-02",
+      "title": "Layout C — two columns and nothing optional",
+      "purpose": "Promotions authored with only its two link columns: no promo tile, no editorial feature, no brand carousel. Proves the optional slots omit cleanly rather than leaving an empty fourth grid track or a trailing divider behind.",
+      "page": "/drafts/qa/megamenu/layout-c",
+      "nav": {
+        "path": "/drafts/qa/megamenu/nav-layout-c",
+        "from": "/nav",
+        "promo": [
+          { "menu": "Promotions", "remove": true }
+        ]
+      },
+      "metadata": {
+        "Language": "en"
+      }
+    },
+    {
+      "id": "MEGAMENU-FX-03",
+      "title": "Overflowing panel — nine links in one category",
+      "purpose": "A panel with more links than the drawer shows at once, so the mobile 'View more' affordance has something to hide. Nine is chosen so the reveal is unmistakable: four visible, five behind the toggle.",
+      "page": "/drafts/qa/megamenu/overflow",
+      "nav": {
+        "path": "/drafts/qa/megamenu/nav-overflow",
+        "from": "/nav"
+      },
+      "metadata": {
+        "Language": "en"
+      }
+    },
+    {
+      "id": "MEGAMENU-FX-04",
+      "title": "Exactly four links — the boundary where View more must not appear",
+      "purpose": "The drawer reveals links past the fourth. A panel of exactly four sits on the boundary, where an off-by-one would produce a 'View more' button that reveals nothing. Worth its own fixture because the bug is invisible on any other count.",
+      "page": "/drafts/qa/megamenu/four-links",
+      "nav": {
+        "path": "/drafts/qa/megamenu/nav-four-links",
+        "from": "/nav"
+      },
+      "metadata": {
+        "Language": "en"
+      }
+    },
+    {
+      "id": "MEGAMENU-FX-05",
+      "title": "Single column — the minimum the content model allows",
+      "purpose": "The Content Slots table makes one link column required and everything else optional. This authors that minimum, to prove a panel with one column still lays out rather than collapsing or stretching the column across the full grid.",
+      "page": "/drafts/qa/megamenu/one-column",
+      "nav": {
+        "path": "/drafts/qa/megamenu/nav-one-column",
+        "from": "/nav"
+      },
+      "metadata": {
+        "Language": "en"
+      }
+    },
+    {
+      "id": "MEGAMENU-FX-06",
+      "title": "Right-to-left",
+      "purpose": "The reference panels with the page language set to Arabic, so the whole megamenu mirrors and the drawer changes which edge it enters from — the same content, read the other way.",
+      "page": "/drafts/qa/megamenu/rtl",
+      "metadata": {
+        "nav": "/drafts/qa/megamenu/nav-reference",
+        "Language": "ar-MA"
+      }
+    },
+    {
+      "id": "MEGAMENU-FX-07",
+      "title": "Dark colour context",
+      "purpose": "The reference panels on a page whose header is set to the dark context. The spec makes the context a modifier on the nav with no markup change, so this fixture authors identical content to FX-01 — any difference a tester sees must come from the context alone.",
+      "page": "/drafts/qa/megamenu/dark",
+      "metadata": {
+        "nav": "/drafts/qa/megamenu/nav-reference",
+        "Header Style": "dark",
+        "Language": "en"
+      }
+    },
+    {
+      "id": "MEGAMENU-FX-08",
+      "title": "Glass colour context over an image",
+      "purpose": "The same content again in the glass context, laid over a full-bleed hero image. Glass is the context most likely to fail contrast, because what sits behind the header changes per page, so the fixture deliberately puts busy imagery underneath it.",
+      "page": "/drafts/qa/megamenu/glass",
+      "metadata": {
+        "nav": "/drafts/qa/megamenu/nav-reference",
+        "Header Style": "glass",
+        "Language": "en"
+      },
+      "sections": [
+        {
+          "blocks": [
+            {
+              "name": "hero",
+              "rows": [
+                ["<p>A full-bleed photograph busy enough to sit awkwardly behind translucent chrome.</p>"]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "MEGAMENU-TC-01",
+      "summary": "Header: Megamenu - Authoring - Three layouts from one content model, and what an omitted slot leaves behind",
+      "scope": "What authored content produces in each of the three desktop panels: the grid each layout resolves to, which optional slots each one honours, and the fact that the layout follows from what was authored rather than from a variant the author picks. Also the minimum the content model allows.",
+      "ac": ["AC-1", "AC-2", "AC-3"],
+      "suites": ["sanity", "regression"],
+      "labels": ["megamenu", "authoring"],
+      "fixtures": ["MEGAMENU-FX-01", "MEGAMENU-FX-02", "MEGAMENU-FX-05"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a desktop width and expand the Products menu.",
+          "data": "FX-01, /drafts/qa/megamenu/reference, viewport 1440x900",
+          "result": "The panel carries the Layout A class .mm-a and resolves to four columns — three equal link columns and a 260px promo column, matching the grid 1fr 1fr 1fr 260px. Each link column is led by an overline label (.mm-col-label) above a list of arrow links (.mm-link)."
+        },
+        {
+          "action": "Still on Products, look at the right-hand column and the foot of the panel.",
+          "data": "FX-01",
+          "result": "The promo tile (.mm-promo) holds a 16:9 image, a badge, a product name and a call to action, in that order. Below the columns, a brands carousel (.mm-brands) runs the width of the panel showing circular brand tiles 80px by 80px."
+        },
+        {
+          "action": "Expand the Recipes menu.",
+          "data": "FX-01",
+          "result": "The Products panel closes as Recipes opens. Recipes carries the Layout B class .mm-b and resolves to the grid 1.8fr 1fr 1fr 260px: a wide editorial feature (.mm-featured) first, holding an image, overline, title, body copy and a call to action; then two equal link columns; then the 260px promo tile. There is no brands carousel."
+        },
+        {
+          "action": "Expand the Promotions menu.",
+          "data": "FX-01",
+          "result": "Promotions carries the Layout C class .mm-a2 and resolves to two equal columns of links, grid 1fr 1fr. There is no promo tile and no editorial feature, and the last column has no divider on its trailing edge."
+        },
+        {
+          "action": "Open fixture FX-02, which authors Promotions with its optional slots removed entirely, and expand it.",
+          "data": "FX-02, /drafts/qa/megamenu/layout-c",
+          "result": "The panel matches the Promotions panel in FX-01. The two columns fill the panel — no empty fourth track, no reserved promo column, and no gap where the tile would have been."
+        },
+        {
+          "action": "Open fixture FX-05, which authors a category with a single link column, and expand it.",
+          "data": "FX-05, /drafts/qa/megamenu/one-column",
+          "result": "The panel renders with one column of links under its overline label. The column keeps its normal width rather than stretching across the panel, and nothing is dropped or duplicated."
+        }
+      ],
+      "notes": "Steps assert the spec's class taxonomy (.mm-a / .mm-b / .mm-a2, .mm-col-label, .mm-link, .mm-promo, .mm-featured, .mm-brands). On develop today the header ships the .nav-* taxonomy and none of those classes exist, so the class half of every step above is expected to fail until the rename in section 8 lands. The geometry the classes are meant to produce is already correct: repeat(3, 1fr) 260px, 1.8fr 1fr 1fr 260px and repeat(2, 1fr) are all in header.css as specified."
+    },
+    {
+      "id": "MEGAMENU-TC-02",
+      "summary": "Header: Megamenu - Desktop - Opening, closing, and the rule that only one panel is open at a time",
+      "scope": "The desktop open model: what opens a panel, the three ways to close one, and the fact that opening a second closes the first. Covers the .is-open state hook and the chevron as its visible half.",
+      "ac": ["AC-6", "AC-7"],
+      "suites": ["sanity", "regression", "e2e"],
+      "labels": ["megamenu", "desktop", "interaction"],
+      "fixtures": ["MEGAMENU-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a desktop width. Before touching anything, check the nav row.",
+          "data": "FX-01, viewport 1440x900",
+          "result": "No panel is open. Every trigger points its chevron down, reports aria-expanded=\"false\", and every panel is marked aria-hidden=\"true\"."
+        },
+        {
+          "action": "Click the Products trigger.",
+          "result": "The Products panel opens below the nav row. Both the panel and the trigger gain the class .is-open, the chevron flips to point up, the trigger reports aria-expanded=\"true\", and the panel is no longer aria-hidden."
+        },
+        {
+          "action": "Click the Recipes trigger while Products is still open.",
+          "result": "Products closes as Recipes opens — the two are never open together. .is-open moves from the Products pair to the Recipes pair, and the Products chevron returns to pointing down."
+        },
+        {
+          "action": "Click the Recipes trigger a second time.",
+          "result": "The Recipes panel closes. No panel carries .is-open, the chevron points down, and the trigger reports aria-expanded=\"false\"."
+        },
+        {
+          "action": "Open any panel, then click the page well outside both the panel and the nav row.",
+          "result": "The panel closes and .is-open is removed from both the panel and its trigger."
+        },
+        {
+          "action": "Open any panel, then press Escape.",
+          "result": "The panel closes, in the same state as the outside click left it."
+        }
+      ],
+      "notes": "AC-6 and AC-7 name .is-open on both the panel and the trigger as the state hook. That class does not appear anywhere in develop's header.js — the open state is carried by aria-expanded on the section instead, which is the swap section 8 lists as outstanding. The .is-open half of these steps is expected to fail; the behaviour and the ARIA half should pass today."
+    },
+    {
+      "id": "MEGAMENU-TC-03",
+      "summary": "Header: Megamenu - Presentation - The open panel's frame, and the three colour contexts over one markup",
+      "scope": "How an open panel presents itself regardless of layout — width, the border and shadow that separate it from the page, and the promise that it never makes the page scroll sideways. Then the same content in all three colour contexts, which the spec makes a modifier rather than a variant.",
+      "ac": ["AC-4", "AC-5"],
+      "suites": ["sanity", "regression"],
+      "labels": ["megamenu", "desktop", "design"],
+      "fixtures": ["MEGAMENU-FX-01", "MEGAMENU-FX-07", "MEGAMENU-FX-08"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a desktop width and expand any menu.",
+          "data": "FX-01, viewport 1440x900",
+          "result": "The panel spans the full width of the page below the nav row, not just the width of its trigger. It has a 2px top border in the brand primary colour and an elevation shadow beneath it."
+        },
+        {
+          "action": "With the widest panel open, check whether the page can be scrolled horizontally, at 1440, 1280 and 1024 wide.",
+          "data": "FX-01",
+          "result": "At every width the page has no horizontal scrollbar and no content is cut off at either edge. The brands carousel scrolls inside itself; that internal scrolling is expected and is not page overflow."
+        },
+        {
+          "action": "Open fixture FX-07, which sets the header to the dark context, and expand the same menus.",
+          "data": "FX-07, /drafts/qa/megamenu/dark",
+          "result": "The panels carry the --dark modifier on the nav. Surfaces, link colours and icon tints all change to their dark-context values and stay legible. The panels hold the same content, in the same grid, as FX-01."
+        },
+        {
+          "action": "Compare the underlying markup of a panel in FX-07 against the same panel in FX-01.",
+          "data": "FX-07 against FX-01",
+          "result": "The markup is identical apart from the modifier class on the nav — no extra wrappers, no swapped class names, no duplicated panel for the dark case."
+        },
+        {
+          "action": "Open fixture FX-08, which sets the glass context over a hero image, and expand a menu.",
+          "data": "FX-08, /drafts/qa/megamenu/glass",
+          "result": "The panels carry the --glass modifier. The chrome is translucent over the image behind it, and link text, labels and icons all stay readable against the busiest part of that image."
+        }
+      ],
+      "notes": "AC-4's dark and glass contexts are listed in section 8 as still to be built, and a search of develop's header.css finds no --dark or --glass modifier — the only 'dark' matches are colour values such as --color-brand-dark. Every step touching FX-07 and FX-08 is expected to fail until those contexts exist. The fixtures set the context through page metadata; if the implementation ends up selecting it another way, the fixtures need updating but the assertions do not."
+    },
+    {
+      "id": "MEGAMENU-TC-04",
+      "summary": "Header: Megamenu - Desktop - Link hover, focus, and the carousel arrows that fade at the ends",
+      "scope": "The small feedback details that tell a user something is interactive: what a link does under the pointer, that focus is always visible, and the way the brands carousel signals it has run out of room to scroll.",
+      "ac": ["AC-8"],
+      "suites": ["regression"],
+      "labels": ["megamenu", "desktop", "interaction"],
+      "fixtures": ["MEGAMENU-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a desktop width, expand Products, and hover a link in one of the columns.",
+          "data": "FX-01, viewport 1440x900",
+          "result": "The link text turns orange and its arrow slides 2px to the right (translateX(2px)). Moving the pointer away returns both to their resting state."
+        },
+        {
+          "action": "Tab to the same link instead of hovering it.",
+          "result": "A clearly visible focus ring is drawn around the link. The ring is visible in every colour context, not only the light one."
+        },
+        {
+          "action": "With the Products panel open, look at the brands carousel scroll buttons before scrolling.",
+          "result": "The carousel is scrolled to its start, so the previous button is faded out (.is-hidden) and the next button is shown."
+        },
+        {
+          "action": "Scroll the carousel to the middle of its range.",
+          "result": "Both buttons are shown — neither carries .is-hidden."
+        },
+        {
+          "action": "Scroll the carousel all the way to its end.",
+          "result": "The next button fades out (.is-hidden) and the previous button stays shown."
+        }
+      ]
+    },
+    {
+      "id": "MEGAMENU-TC-05",
+      "summary": "Header: Megamenu - Mobile drawer - Single-open accordion, and the links held back behind View more",
+      "scope": "The drawer's own model, which is not the desktop panel at a smaller size: one section open at a time, only the first four links of a section shown, and a toggle that must not appear when it has nothing to reveal.",
+      "ac": ["AC-10", "AC-11"],
+      "suites": ["sanity", "regression"],
+      "labels": ["megamenu", "mobile", "drawer"],
+      "fixtures": ["MEGAMENU-FX-03", "MEGAMENU-FX-04", "MEGAMENU-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-03 at a mobile width and tap the hamburger.",
+          "data": "FX-03, /drafts/qa/megamenu/overflow, viewport 390x844",
+          "result": "The drawer (.ufs-drawer) slides in from the left edge with its own logo and a close control. The categories are listed as collapsed accordion rows, mirroring the desktop categories one for one."
+        },
+        {
+          "action": "Expand the category authored with nine links.",
+          "result": "Exactly four links are visible, followed by a 'View more' control. The remaining five carry .is-extra and are not shown."
+        },
+        {
+          "action": "Activate 'View more'.",
+          "result": "All nine links are visible, the .is-extra links now shown, and the control's label changes to 'View less'. It reports aria-expanded=\"true\"."
+        },
+        {
+          "action": "Activate the control again.",
+          "result": "The list returns to four visible links and the label returns to 'View more'."
+        },
+        {
+          "action": "With that category still open, expand a different category.",
+          "result": "The first category collapses as the second opens. Only one is open at any time."
+        },
+        {
+          "action": "Open fixture FX-04, which authors a category with exactly four links, and expand it in the drawer.",
+          "data": "FX-04, /drafts/qa/megamenu/four-links, viewport 390x844",
+          "result": "All four links are visible and there is no 'View more' control at all — the toggle appears only when it has something to reveal."
+        },
+        {
+          "action": "Open FX-01 in the drawer and expand Products.",
+          "data": "FX-01, viewport 390x844",
+          "result": "A mini brands carousel appears in the panel. It scrolls by dragging and has no arrow buttons at either end."
+        }
+      ],
+      "notes": "The drawer, the single-open accordion and the View more toggle are all built and working on develop, with the cut-off set to four (DRAWER_VISIBLE_LINKS = 4) and .is-extra used as the spec names it. Section 8 of the ticket records the repo's mobile pattern as a 'simple stack' with all three still to build, which is out of date and worth correcting on the ticket."
+    },
+    {
+      "id": "MEGAMENU-TC-06",
+      "summary": "Header: Megamenu - Mobile drawer - What replaces the desktop nav, and what the drawer deliberately leaves out",
+      "scope": "The content decisions that make the drawer a different design rather than a narrower one: the desktop nav is replaced rather than reflowed, the editorial and promo tiles are dropped, and the drawer grows a footer the desktop panel never has.",
+      "ac": ["AC-9", "AC-12"],
+      "suites": ["regression"],
+      "labels": ["megamenu", "mobile", "drawer", "authoring"],
+      "fixtures": ["MEGAMENU-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 below 1024px wide and look at the header before opening anything.",
+          "data": "FX-01, viewport 390x844",
+          "result": "The desktop nav is hidden and the mobile nav (.ufs-mnav) is shown in its place. A hamburger sits in the bar, and the Cart, Favourites and Account icons are still present and reachable."
+        },
+        {
+          "action": "Tap the hamburger.",
+          "result": "The drawer opens from the left edge of the screen."
+        },
+        {
+          "action": "Expand the Recipes category.",
+          "result": "The category's links are shown as a list. The editorial feature that leads the desktop Recipes panel — image, overline, title, body, call to action — does not appear anywhere in the drawer."
+        },
+        {
+          "action": "Expand the Products category.",
+          "result": "The promo tile from the desktop Products panel does not appear in the drawer."
+        },
+        {
+          "action": "Scroll to the bottom of the open drawer.",
+          "result": "A footer holds the utility links and the language control, the language control opening as an accordion in place rather than as a separate menu."
+        }
+      ]
+    },
+    {
+      "id": "MEGAMENU-TC-07",
+      "summary": "Header: Megamenu - Right-to-left - What mirrors, what only rotates, and which edge the drawer uses",
+      "scope": "RTL is driven entirely by the direction on the document, with no separate authored content, so the test is that the same content reads correctly the other way — including the two cases where mirroring would be wrong.",
+      "ac": ["AC-13", "AC-14"],
+      "suites": ["regression"],
+      "labels": ["megamenu", "rtl"],
+      "fixtures": ["MEGAMENU-FX-06"],
+      "steps": [
+        {
+          "action": "Open fixture FX-06 at a desktop width and confirm the document direction before judging any layout.",
+          "data": "FX-06, /drafts/qa/megamenu/rtl, viewport 1440x900",
+          "result": "The html element carries dir=\"rtl\". The nav row reads from the right, and the megamenu columns run right to left in the same order they run left to right in FX-01."
+        },
+        {
+          "action": "Expand a menu and check the spacing and positioning against the same panel in FX-01.",
+          "result": "Padding, margins and column positions are mirrored — the panel is a true mirror image, not the same layout nudged sideways."
+        },
+        {
+          "action": "Look at the horizontal arrows on the links and on the brands carousel buttons.",
+          "result": "Horizontal arrows are flipped with scaleX(-1) so they point the other way."
+        },
+        {
+          "action": "Look at a menu trigger's chevron, closed and then open.",
+          "result": "The chevron points down closed and up open, exactly as in FX-01. It rotates only — it is not flipped, because a vertical indicator has no direction to mirror."
+        },
+        {
+          "action": "Switch to a mobile width and open the drawer.",
+          "data": "viewport 390x844",
+          "result": "The drawer enters from the right edge, and its close control sits at the mirrored end of the drawer header."
+        },
+        {
+          "action": "Read the Arabic text in the panels and in the drawer.",
+          "result": "Arabic renders in IBM Plex Arabic rather than a Latin fallback, with letter-spacing 0 and line-height 1.75."
+        }
+      ]
+    },
+    {
+      "id": "MEGAMENU-TC-08",
+      "summary": "Header: Megamenu - Accessibility - State, keyboard operation, names, and contrast in every context",
+      "scope": "What assistive technology is told about the megamenu, whether the whole thing can be operated without a pointer, and whether it holds up to an automated audit in all three colour contexts.",
+      "ac": ["AC-15", "AC-16", "AC-17", "AC-18"],
+      "suites": ["regression"],
+      "labels": ["megamenu", "a11y"],
+      "fixtures": ["MEGAMENU-FX-01", "MEGAMENU-FX-03", "MEGAMENU-FX-07", "MEGAMENU-FX-08"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at a desktop width and Tab through the nav row without using the mouse.",
+          "data": "FX-01, viewport 1440x900",
+          "result": "Every trigger takes focus in turn with a clearly visible focus ring, and each reports aria-expanded=\"false\" while closed. Closed panels are aria-hidden=\"true\"."
+        },
+        {
+          "action": "Open a panel from the keyboard and keep tabbing.",
+          "result": "The trigger flips to aria-expanded=\"true\" and the panel is no longer aria-hidden. Focus reaches every link, the promo tile's call to action, and the carousel scroll buttons. Nothing is reachable by pointer but not by keyboard."
+        },
+        {
+          "action": "Press Escape with a panel open.",
+          "result": "The panel closes and focus is left on a sensible control rather than lost to the top of the page."
+        },
+        {
+          "action": "Inspect the accessible names of the brand logo links, and the chevron and arrow icons.",
+          "result": "Each brand logo link has a name identifying the brand — not a filename, and not empty. The chevrons and link arrows are aria-hidden, since they repeat what the label already says."
+        },
+        {
+          "action": "Switch to a mobile width, open the drawer from the keyboard, and inspect the 'View more' control in the nine-link category.",
+          "data": "FX-03, viewport 390x844",
+          "result": "The control has an aria-label naming its category — 'Show more Products links' or equivalent — rather than only the words 'View more'."
+        },
+        {
+          "action": "With the drawer open, Tab repeatedly past its last control.",
+          "result": "Focus stays inside the drawer and cycles back to its first control rather than moving to the page behind it."
+        },
+        {
+          "action": "Press Escape to close the drawer.",
+          "result": "The drawer closes and focus returns to the hamburger that opened it."
+        },
+        {
+          "action": "Run axe-core over an open megamenu in each of the three colour contexts, and check text contrast against WCAG AA.",
+          "data": "FX-01 light, FX-07 dark, FX-08 glass",
+          "result": "No new axe-core violations are reported in any context. All text and meaningful icons meet WCAG AA contrast, including glass over the busiest part of the image behind it."
+        },
+        {
+          "action": "Run a Lighthouse accessibility audit on the page with the megamenu present.",
+          "data": "FX-01",
+          "result": "The accessibility score is 100, allowing for issues that belong to other blocks on the page rather than the header."
+        }
+      ],
+      "notes": "Three things here are expected to fail on develop today. The View more button is built with aria-expanded but no aria-label, so its only accessible name is the literal text 'View more' — repeated identically for every category in the drawer, which is the ambiguity AC-17 is written to prevent. There is no focus trap: the drawer registers a keydown handler for Escape only, with no Tab handling and no focus return, so both halves of AC-16's trap requirement are unimplemented. And the contrast and axe steps cannot pass in the dark and glass contexts while those contexts do not exist."
+    },
+    {
+      "id": "MEGAMENU-TC-09",
+      "summary": "Header: Megamenu - Viewport - The 1024px switch, and matching the approved design at both sizes",
+      "scope": "The boundary itself. Desktop megamenu and mobile drawer are two designs, so crossing between them is a state change rather than a reflow, and the interesting failures are at the crossing: content lost, content duplicated, or a panel left stuck open.",
+      "ac": ["AC-19", "AC-20"],
+      "suites": ["sanity", "regression", "e2e"],
+      "labels": ["megamenu", "responsive"],
+      "fixtures": ["MEGAMENU-FX-01"],
+      "steps": [
+        {
+          "action": "Open fixture FX-01 at 1024px wide exactly.",
+          "data": "FX-01, viewport 1024x900",
+          "result": "The desktop megamenu is in use: the nav links are shown on the bar and there is no hamburger. 1024 is the desktop side of the boundary."
+        },
+        {
+          "action": "Narrow the window to 1023px.",
+          "data": "viewport 1023x900",
+          "result": "The header switches to the mobile design: the desktop nav is hidden and the hamburger and mobile bar take its place."
+        },
+        {
+          "action": "At 1440px, compare the open panels against the approved design preview — grid ratios, spacing, colours, the 260px promo column and the 80x80 brand tiles.",
+          "data": "FX-01, viewport 1440x900, design reference handover/full-page-preview-v0.2.html",
+          "result": "Layout, spacing, colours and sizes match the approved design within normal rendering tolerance."
+        },
+        {
+          "action": "At 390px, compare the drawer against the same preview.",
+          "data": "viewport 390x844",
+          "result": "The drawer's layout, spacing and colours match the approved mobile design."
+        },
+        {
+          "action": "Open a desktop megamenu panel at 1440px, then narrow the window past 1024px without closing it.",
+          "result": "The panel does not survive as a stuck-open overlay. The header becomes the mobile design cleanly, with the drawer closed."
+        },
+        {
+          "action": "Open a drawer category at 390px, then widen the window past 1024px without closing it.",
+          "result": "The drawer closes and the desktop nav returns with no panel stuck open. No category is left expanded on the bar."
+        },
+        {
+          "action": "Resize slowly back and forth across 1024px several times, then check the nav for duplicates.",
+          "result": "Each link, icon and category appears exactly once. Nothing is duplicated by repeated crossings, and nothing is lost."
+        }
+      ],
+      "notes": "AC-19 and AC-20 both name 1024px and these steps assert it. develop currently switches at 1200px (matchMedia('(min-width: 1200px)') in header.js, with the matching desktop media block in header.css), while section 8 of the ticket records the repo as being on 900px. Three different numbers are in play — spec 1024, ticket's delta table 900, code 1200 — so this needs settling with the RE and the developer. The steps stay on the spec's 1024 and the boundary steps are expected to fail until the code matches."
+    }
+  ]
+}
