@@ -36,7 +36,7 @@ const aTest = (over = {}) => ({
 
 const liveOf = (plan, t, over = {}) => ({
   issueId: '900',
-  steps: stepsOf(t),
+  steps: stepsOf(plan, t),
   jira: {
     key: 'EC-120',
     summary: t.summary,
@@ -62,6 +62,51 @@ test('describeTest: preconditions lead, then Covers, then Source', () => {
     '*Source:* EC-14 — Header: Products Brand Carousel',
     'Known risk.',
   ].join('\n\n'));
+});
+
+const FIXTURED = {
+  ...PLAN,
+  previewBase: 'https://develop--ufs--foodsolutions-04.aem.page',
+  fixtures: [
+    { id: 'BRANDS-FX-01', page: '/drafts/qa/brands/reference' },
+    { id: 'BRANDS-FX-05', page: '/drafts/qa/brands/hostile' },
+  ],
+};
+
+test('stepsOf: a step that opens a fixture gets the full preview URL as its data', () => {
+  const t = aTest({ steps: [{ action: 'Open FX-01', fixtures: ['BRANDS-FX-01'], result: 'It loads' }] });
+  assert.deepEqual(stepsOf(FIXTURED, t), [{
+    action: 'Open FX-01',
+    data: 'https://develop--ufs--foodsolutions-04.aem.page/drafts/qa/brands/reference',
+    result: 'It loads',
+  }]);
+});
+
+test('stepsOf: the URL leads and the authored data follows it', () => {
+  const t = aTest({ steps: [{ action: 'Open FX-01', fixtures: ['BRANDS-FX-01'], data: 'viewport 1440x900', result: 'r' }] });
+  assert.equal(stepsOf(FIXTURED, t)[0].data,
+    'https://develop--ufs--foodsolutions-04.aem.page/drafts/qa/brands/reference\nviewport 1440x900');
+});
+
+test('stepsOf: several fixtures render in the order the step opens them', () => {
+  const t = aTest({ steps: [{ action: 'Compare', fixtures: ['BRANDS-FX-05', 'BRANDS-FX-01'], result: 'r' }] });
+  assert.equal(stepsOf(FIXTURED, t)[0].data, [
+    'https://develop--ufs--foodsolutions-04.aem.page/drafts/qa/brands/hostile',
+    'https://develop--ufs--foodsolutions-04.aem.page/drafts/qa/brands/reference',
+  ].join('\n'));
+});
+
+test('stepsOf: a step that stays on the page already open is left alone', () => {
+  const t = aTest({ steps: [{ action: 'Hover a tile', data: 'Expected #d14900', result: 'r' }] });
+  assert.deepEqual(stepsOf(FIXTURED, t), [{ action: 'Hover a tile', data: 'Expected #d14900', result: 'r' }]);
+});
+
+// The origin is never written into a step, so pointing the plan at another branch is a one-line
+// change rather than an edit to every step that names a page.
+test('stepsOf: the URL follows the plan previewBase, so a branch switch needs no step edits', () => {
+  const stage = { ...FIXTURED, previewBase: 'https://stage--ufs--foodsolutions-04.aem.page' };
+  const t = aTest({ steps: [{ action: 'Open FX-01', fixtures: ['BRANDS-FX-01'], result: 'r' }] });
+  assert.equal(stepsOf(stage, t)[0].data, 'https://stage--ufs--foodsolutions-04.aem.page/drafts/qa/brands/reference');
 });
 
 test('sameSteps: treats a missing data field and an empty one as equal', () => {
@@ -393,6 +438,45 @@ test('planProblems: no AC is allowed only when notes explain why', () => {
 test('planProblems: a test citing an unknown fixture is rejected', () => {
   const p = planOf({ tests: [aTest({ fixtures: ['BRANDS-FX-99'] })] });
   assert.match(planProblems(p).join(), /cites unknown fixture "BRANDS-FX-99"/);
+});
+
+// A step's fixture id is what becomes the URL a tester pastes, so a wrong one sends them nowhere.
+test('planProblems: a step opening an unknown fixture is rejected', () => {
+  const p = planOf({
+    tests: [aTest({
+      fixtures: ['BRANDS-FX-01'],
+      steps: [{ action: 'Open it', fixtures: ['BRANDS-FX-99'], result: 'r' }],
+    })],
+  });
+  assert.match(planProblems(p).join(), /step 1: opens unknown fixture "BRANDS-FX-99"/);
+});
+
+// The description lists the test's own fixtures. A step reaching past that list would send a
+// tester to a page the test never admits to using.
+test('planProblems: a step may only open a fixture the test itself lists', () => {
+  const reaching = planOf({
+    fixtures: [
+      { id: 'BRANDS-FX-01', title: 'happy', page: '/drafts/qa/brands/happy' },
+      { id: 'BRANDS-FX-02', title: 'other', page: '/drafts/qa/brands/other' },
+    ],
+    tests: [aTest({
+      fixtures: ['BRANDS-FX-01'],
+      steps: [{ action: 'Open the other one', fixtures: ['BRANDS-FX-02'], result: 'r' }],
+    })],
+  });
+  assert.match(planProblems(reaching).join(), /step 1: opens fixture "BRANDS-FX-02", which the test does not list/);
+
+  const listed = planOf({
+    fixtures: [
+      { id: 'BRANDS-FX-01', title: 'happy', page: '/drafts/qa/brands/happy' },
+      { id: 'BRANDS-FX-02', title: 'other', page: '/drafts/qa/brands/other' },
+    ],
+    tests: [aTest({
+      fixtures: ['BRANDS-FX-01', 'BRANDS-FX-02'],
+      steps: [{ action: 'Open the other one', fixtures: ['BRANDS-FX-02'], result: 'r' }],
+    })],
+  });
+  assert.deepEqual(planProblems(listed), []);
 });
 
 // The mistake that would publish test content to a client's live site.

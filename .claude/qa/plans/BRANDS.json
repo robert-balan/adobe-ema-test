@@ -337,27 +337,42 @@
       "steps": [
         {
           "action": "Open fixture FX-01 and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
           "result": "The brand carousel renders with the \"Our brands:\" label and every authored logo shown as a round white tile in a single horizontal row."
         },
         {
           "action": "Count the tiles and compare against the links authored in the fixture's nav document.",
-          "data": "FX-01 authors 8 image-only links",
+          "data": "The fixture authors 8 image-only links",
           "result": "Exactly 8 tiles render, in the authored order, none missing and none duplicated."
         },
         {
           "action": "Open fixture FX-02 and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-02"
+          ],
           "result": "Two logos still render as a brand carousel with the same structure as FX-01 — the block does not change shape because there are fewer items."
         },
         {
           "action": "Open fixture FX-03 and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-03"
+          ],
           "result": "No brand carousel is built. A single image-only link is below the two-link threshold, and the panel renders without an empty carousel container left behind."
         },
         {
           "action": "Open fixture FX-04 and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-04"
+          ],
           "result": "The captioned image links render as featured products, not as a brand carousel — captions are what distinguish the two."
         },
         {
           "action": "Open fixture FX-05, which omits the label, and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-05"
+          ],
           "result": "No labelless carousel renders. The label is a required slot, so the block does not present the strip as though the authored content were complete."
         },
         {
@@ -403,6 +418,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 on a desktop viewport and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
           "result": "The strip is at its start: the previous arrow is hidden and the next arrow is visible."
         },
         {
@@ -415,10 +433,16 @@
         },
         {
           "action": "Open fixture FX-02, where all logos fit without overflowing, and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-02"
+          ],
           "result": "Both arrows are hidden — there is nothing to scroll to."
         },
         {
           "action": "Return to FX-01 and scroll the logo row horizontally using a trackpad or mouse wheel.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
           "result": "The row scrolls, and no scrollbar is visible at any point."
         },
         {
@@ -469,6 +493,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a 1440px-wide desktop viewport and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
           "result": "The carousel sits at the bottom of the open panel as a full-width tinted band."
         },
         {
@@ -504,6 +531,9 @@
         },
         {
           "action": "Open fixture FX-05, which omits the label, at 1440px.",
+          "fixtures": [
+            "BRANDS-FX-05"
+          ],
           "result": "The strip starts at the band's leading edge with no reserved gap, and the band's height and alignment are unchanged."
         }
       ]
@@ -534,6 +564,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop viewport above the breakpoint and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
           "result": "The carousel renders at the bottom of the panel, below the category columns, as a full-width tinted band."
         },
         {
@@ -586,6 +619,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 on a mobile viewport, open the navigation drawer and expand the Products section.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
           "result": "The brand carousel appears at the top of the Products section, above the category columns."
         },
         {
@@ -635,6 +671,9 @@
       "steps": [
         {
           "action": "Open fixture FX-07 on a desktop viewport, open the Products megamenu, and Tab forward until focus enters the carousel.",
+          "fixtures": [
+            "BRANDS-FX-07"
+          ],
           "result": "Focus reaches the carousel in a logical reading order, after the category columns."
         },
         {
@@ -697,6 +736,9 @@
       "steps": [
         {
           "action": "Open fixture FX-06 on a right-to-left page at a desktop viewport and open the Products megamenu.",
+          "fixtures": [
+            "BRANDS-FX-06"
+          ],
           "result": "The carousel mirrors: the label — \"تعرّف على علاماتنا التجارية العالمية:\" — sits at the right-hand end of the strip and the logo row begins from the right."
         },
         {
@@ -717,7 +759,6 @@
         },
         {
           "action": "Read the strip's label, which is the longest translation we hold, and check it against the logo row.",
-          "data": "BRANDS-FX-06",
           "result": "The label renders in full. It does not clip, wrap awkwardly, overlap the logo row, or push the strip into page-level horizontal scrolling. The logos keep their size and spacing."
         }
       ]

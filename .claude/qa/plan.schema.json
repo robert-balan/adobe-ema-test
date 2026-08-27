@@ -480,13 +480,23 @@
               "additionalProperties": false,
               "properties": {
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "What the tester does. A step that sends them to a fixture page must also name that fixture in `fixtures`, which is what puts the full preview URL into the step's data — prose alone leaves them hunting for the page."
+                },
+                "fixtures": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Fixture ids this step opens, in the order the tester opens them. Each is rendered as `{previewBase}{fixture.page}` at the top of the step's Test Data, so the tester gets a URL to paste rather than an id to look up. Set it on every step that navigates — the first step of a test, a step that moves to a second fixture, a step that compares one against another — and leave it off a step that stays on the page already open, such as resizing, hovering or inspecting. Ids only, never a written-out URL: the path lives once in the plan's `fixtures`, and a second copy is a second thing to leave behind when a page moves. Every id must also appear in the test's own `fixtures`."
                 },
                 "data": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Test Data: the values this step needs — a viewport, an input, an expected colour. The URLs from `fixtures` are prepended to it, so never write a page path or an origin here."
                 },
                 "result": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "What the tester should see. One observable outcome, stated so that it can fail."
                 }
               }
             }

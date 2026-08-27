@@ -52,7 +52,9 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
 - **Sprint testing runs against `develop` and `stage`, not `main`, and the branches diverge.**
   Ground every plan in the branch that ticket will be tested on and record which branch you read.
   Never hard-code an environment or a branch-dependent value into a test step — write steps against
-  "the environment under test" and let the Test Execution record the branch. If a value the spec
+  "the environment under test" and let the Test Execution record the branch. The fixture URLs in a
+  step's data are not an exception to this: nothing types an origin into a step, and `previewBase`
+  on the plan is the single place a branch is named, so re-pointing a plan re-points every step. If a value the spec
   asserts differs between branches, that is a clarification, not a number to pick.
 - Xray Test Environments carry the branch (configured 2026-08-24):
   `develop-eds-ufs`, `stage-eds-ufs`, `main-eds-ufs`. Xray keeps the latest result **per test per
@@ -203,7 +205,17 @@ AC that is not objectively verifiable (e.g. "must feel smooth") as needing clari
   - graceful DOM suppression — no orphan containers when a block has nothing to render
 - Steps must be concrete and executable by someone who has not read the ticket: name the
   viewport, the page path, the authored fixture state, the exact element, the exact expectation.
-  Each step needs `action` and `result`; use `data` for fixture/input detail.
+  Each step needs `action` and `result`; use `data` for the values it needs — a viewport, an input,
+  an expected colour.
+- **Every step that sends the tester to a page names the fixture in the step's own `fixtures`.**
+  `xray-push` turns each id into the full preview URL and puts it at the top of that step's Test
+  Data, so the tester gets something to paste rather than an id to go hunting for. Set it on the
+  first step of every test, on a step that moves to a second fixture, and on a step that compares
+  one fixture against another. Leave it off a step that stays on the page already open — resizing,
+  hovering, inspecting, running axe. Write ids, never URLs, and never a page path in `data`: the
+  path is written down once, in the plan's `fixtures`, and a second copy is a second thing to leave
+  behind when a page moves. A step may only name a fixture its own test lists, and `xray-push`
+  refuses the plan otherwise, because the description is what carries those pages.
 
 ### Granularity — one test per category
 
@@ -249,7 +261,8 @@ makes six broad tests workable rather than a loss of coverage — see *Fixtures*
 
 A step must never ask a tester to author anything. It cites a fixture, and the fixture already
 exists. Fixtures are declared in the plan's `fixtures` block, generated into Document Authoring,
-and their URLs are published into each test's Jira description.
+and their URLs are published into each test's Jira description — and into the Test Data of every
+step that opens one, so a tester working down the table never has to scroll back up for a page.
 
 - **They live under `/drafts/qa/{feature}/` and nowhere else.** `xray-push` refuses a plan whose
   fixture path sits outside `/drafts/`, because that is the mistake that publishes test content to

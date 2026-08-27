@@ -562,8 +562,11 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width above the megamenu breakpoint and expand the Products menu.",
-          "result": "The promotional tile renders as a dark card in the last column of the panel. Its parts appear top to bottom in this order: a plain coloured band, the eyebrow 'New Arrival', the title 'Seasonal range now in one-litre packs', then the call to action 'Explore range'.",
-          "data": "FX-01, /drafts/qa/promo/reference, viewport 1440x900"
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
+          "data": "viewport 1440x900",
+          "result": "The promotional tile renders as a dark card in the last column of the panel. Its parts appear top to bottom in this order: a plain coloured band, the eyebrow 'New Arrival', the title 'Seasonal range now in one-litre packs', then the call to action 'Explore range'."
         },
         {
           "action": "Still on FX-01, expand the Recipes menu instead.",
@@ -575,6 +578,9 @@
         },
         {
           "action": "Open FX-02 and expand Products. This promo authors an eyebrow and a title and no call to action at all.",
+          "fixtures": [
+            "PROMO-FX-02"
+          ],
           "result": "The card renders with just the eyebrow and title. There is no empty link, no empty paragraph and no reserved blank strip where the CTA would have been — the card simply ends after the title."
         },
         {
@@ -587,6 +593,9 @@
         },
         {
           "action": "Open FX-03 and expand Products. This fixture authors the SAME promo copy as FX-01, moved to the first row of the panel and changed in no other way.",
+          "fixtures": [
+            "PROMO-FX-03"
+          ],
           "result": "The identical copy now renders as the LIGHT feature card, not the dark promo: no coloured band, a pale background, and it leads the panel instead of closing it. The rest of the panel reflows around it. This is AC-13: position alone decided the variant, with nothing in the document naming either one."
         },
         {
@@ -595,6 +604,9 @@
         },
         {
           "action": "Open FX-04 and expand Recipes. This feature's title was authored as ordinary text, without the bold the other fixtures use.",
+          "fixtures": [
+            "PROMO-FX-04"
+          ],
           "result": "The tile still renders and still finds a title: with no bold text to look for, the second paragraph is treated as the title. Record whether the resulting card is the one the author intended."
         },
         {
@@ -607,6 +619,12 @@
         },
         {
           "action": "Across FX-01 to FX-04, check every panel that has no tile left in it (Promotions, and Training & Inspiration on FX-04).",
+          "fixtures": [
+            "PROMO-FX-01",
+            "PROMO-FX-02",
+            "PROMO-FX-03",
+            "PROMO-FX-04"
+          ],
           "result": "No empty card, no stray coloured band and no leftover container appears where a tile is absent. A panel with nothing to render leaves nothing behind."
         }
       ],
@@ -639,8 +657,11 @@
       "steps": [
         {
           "action": "Open FX-01 above the megamenu breakpoint with the browser console visible, and expand and collapse each of the four menus that have a panel.",
-          "result": "Every panel opens and closes, the tiles render inside them, and the console stays clean — no errors and no warnings raised by the header.",
-          "data": "FX-01, viewport 1440x900"
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
+          "data": "viewport 1440x900",
+          "result": "Every panel opens and closes, the tiles render inside them, and the console stays clean — no errors and no warnings raised by the header."
         },
         {
           "action": "Expand Products and hold the pointer over the promo's 'Explore range' link for two seconds. AC-7 expects a hover colour change here and AC-29 asks for the promo's hover to be confirmed.",
@@ -660,11 +681,16 @@
         },
         {
           "action": "Open FX-05, whose CTAs do author the arrow icon, and expand Products.",
-          "result": "A small arrow now renders after the link text, sized and aligned with it. This confirms the arrow is available but opt-in: it appears only where an author asks for it, which is the change AC-7 has not caught up with.",
-          "data": "FX-05, /drafts/qa/promo/a11y"
+          "fixtures": [
+            "PROMO-FX-05"
+          ],
+          "result": "A small arrow now renders after the link text, sized and aligned with it. This confirms the arrow is available but opt-in: it appears only where an author asks for it, which is the change AC-7 has not caught up with."
         },
         {
           "action": "Back on FX-01, expand and collapse Products ten times in quick succession, moving the pointer on and off the tile each time.",
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
           "result": "The tile renders identically every time. There is never a second coloured band, a duplicated eyebrow or a doubled CTA, no state sticks after the panel closes, and the panel's layout does not drift."
         },
         {
@@ -710,8 +736,11 @@
       "steps": [
         {
           "action": "Open FX-01 at the reference viewport and expand Products. Measure the promo card's width.",
-          "result": "260px exactly. It is the panel's last column and the link columns share what is left.",
-          "data": "FX-01, viewport 1440x900, all measurements from computed styles"
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
+          "data": "viewport 1440x900, all measurements from computed styles",
+          "result": "260px exactly. It is the panel's last column and the link columns share what is left."
         },
         {
           "action": "Read the promo card's background colour.",
@@ -751,8 +780,10 @@
         },
         {
           "action": "Open FX-04 and expand Products, whose promo authors an eyebrow, a title and a CTA label all far longer than the card.",
-          "result": "All three wrap inside the 260px column. Nothing spills past the card's edges, nothing is clipped mid-word, no text is hidden behind a neighbouring column, and the call to action is still fully visible and clickable. The card grows taller and the panel grows with it.",
-          "data": "FX-04, /drafts/qa/promo/hostile"
+          "fixtures": [
+            "PROMO-FX-04"
+          ],
+          "result": "All three wrap inside the 260px column. Nothing spills past the card's edges, nothing is clipped mid-word, no text is hidden behind a neighbouring column, and the call to action is still fully visible and clickable. The card grows taller and the panel grows with it."
         },
         {
           "action": "With each panel open in turn on both fixtures, check the page for a horizontal scrollbar.",
@@ -788,8 +819,11 @@
       "steps": [
         {
           "action": "Open FX-01 at 1440px wide and expand Products, then Recipes.",
-          "result": "Both tiles render as fully styled cards — the dark promo in the right rail, the light feature leading the Recipes panel.",
-          "data": "FX-01, widths 1440, 1200, 1199, 1024, 900, 390"
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
+          "data": "widths 1440, 1200, 1199, 1024, 900, 390",
+          "result": "Both tiles render as fully styled cards — the dark promo in the right rail, the light feature leading the Recipes panel."
         },
         {
           "action": "Narrow the window to exactly 1200px and expand the same two menus.",
@@ -809,8 +843,8 @@
         },
         {
           "action": "At 390px, open the hamburger drawer and expand a submenu inside it.",
-          "result": "The submenu lists the column links. Neither tile appears in any form, and there is no empty card, stray coloured band or blank gap where one would have been.",
-          "data": "FX-01 at 390x844"
+          "data": "viewport 390x844",
+          "result": "The submenu lists the column links. Neither tile appears in any form, and there is no empty card, stray coloured band or blank gap where one would have been."
         },
         {
           "action": "Resize slowly from 1199px up to 1200px and back down again, three times, with a panel left open throughout.",
@@ -822,8 +856,10 @@
         },
         {
           "action": "Repeat step 1 and step 6 on FX-02, whose tiles have missing optional slots.",
-          "result": "The same holds regardless of which slots were authored: fully styled above the breakpoint, entirely absent below it, nothing left behind either way.",
-          "data": "FX-02, /drafts/qa/promo/slots"
+          "fixtures": [
+            "PROMO-FX-02"
+          ],
+          "result": "The same holds regardless of which slots were authored: fully styled above the breakpoint, entirely absent below it, nothing left behind either way."
         },
         {
           "action": "At each of 360, 390, 768, 1024, 1200 and 1440px, with every panel opened in turn, check for a horizontal page scrollbar.",
@@ -861,8 +897,11 @@
       "steps": [
         {
           "action": "Open FX-05 at a desktop width and, using only the keyboard, reach the Products menu and open its panel.",
-          "result": "The panel opens from the keyboard and focus moves into it.",
-          "data": "FX-05, /drafts/qa/promo/a11y, viewport 1440x900"
+          "fixtures": [
+            "PROMO-FX-05"
+          ],
+          "data": "viewport 1440x900",
+          "result": "The panel opens from the keyboard and focus moves into it."
         },
         {
           "action": "Continue pressing Tab through the open panel.",
@@ -941,8 +980,11 @@
       "steps": [
         {
           "action": "Open FX-06, whose page metadata sets an Arabic locale, and inspect the document element.",
-          "result": "It carries lang=\"ar-MA\" and dir=\"rtl\". The locale row is what produces both; there is no separate switch.",
-          "data": "FX-06, /drafts/qa/promo/rtl, viewport 1440x900"
+          "fixtures": [
+            "PROMO-FX-06"
+          ],
+          "data": "viewport 1440x900",
+          "result": "It carries lang=\"ar-MA\" and dir=\"rtl\". The locale row is what produces both; there is no separate switch."
         },
         {
           "action": "Expand Products and look at where the promo card sits in the panel.",
@@ -966,8 +1008,10 @@
         },
         {
           "action": "Open FX-07, whose locale is German and whose copy uses the long compounds German produces, and inspect the document element.",
-          "result": "It carries lang=\"de-DE\" and dir=\"ltr\".",
-          "data": "FX-07, /drafts/qa/promo/expansion"
+          "fixtures": [
+            "PROMO-FX-07"
+          ],
+          "result": "It carries lang=\"de-DE\" and dir=\"ltr\"."
         },
         {
           "action": "Expand Products and Recipes and look at both cards.",

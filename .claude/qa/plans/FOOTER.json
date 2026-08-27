@@ -311,67 +311,66 @@
       "steps": [
         {
           "action": "Open the reference fixture and scroll to the footer.",
-          "data": "FOOTER-FX-01",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
           "result": "Three zones render in the authored order: the newsletter band, then the dark area holding the brand column and three link columns, then the bottom bar with the copyright and the social row. Nothing else appears between them."
         },
         {
           "action": "Read the brand column — the first column in the dark area.",
-          "data": "FOOTER-FX-01",
           "result": "It shows the UFS logo, then the tagline \"Products and services created\" with \"by chefs for chefs\" on a second line in the script accent face. Both parts of the tagline are present; the second line is styled differently from the first."
         },
         {
           "action": "Read the three link columns left to right.",
-          "data": "FOOTER-FX-01",
           "result": "Company, Help & Support and Legal appear in the authored order, each with its heading above its own list. Every authored label reads exactly as authored, and each link points at the authored path — Company holds About Us, Brands, Sustainability, Trade Terms, Partners."
         },
         {
           "action": "Read the bottom bar.",
-          "data": "FOOTER-FX-01",
           "result": "The copyright line renders as authored, and five social links follow it — Instagram, TikTok, Facebook, YouTube and LinkedIn — each one an icon with no visible text."
         },
         {
           "action": "Open the degraded fixture, where the band's body copy was left out, and look at the newsletter band.",
-          "data": "FOOTER-FX-02",
+          "fixtures": [
+            "FOOTER-FX-02"
+          ],
           "result": "The band shows its heading and the signup form with nothing between them. There is no empty paragraph, no reserved blank space and no change in the band's alignment."
         },
         {
           "action": "On the same fixture, look at the brand column, where the author typed the brand name instead of placing the logo image.",
-          "data": "FOOTER-FX-02",
           "result": "\"Unilever Food Solutions\" renders as text inside the same link the logo occupied. There is no broken-image icon, no empty image box and no gap where the logo was."
         },
         {
           "action": "On the same fixture, read the tagline, authored as a single line with no second line after it.",
-          "data": "FOOTER-FX-02",
           "result": "The tagline renders on one line in the ordinary tagline style. No script-accent text appears, and no empty styled element is left behind where the second line would have been."
         },
         {
           "action": "On the same fixture, look at the link columns and the bottom bar. One column was authored, and the social row was left out.",
-          "data": "FOOTER-FX-02",
           "result": "The brand column and the single Company column render side by side with no empty columns or placeholder tracks beside them. The bottom bar shows the copyright alone, with no empty space held open where the social row would sit."
         },
         {
           "action": "Open the stripped fixture, where the band was authored with neither a heading nor a Subscribe link.",
-          "data": "FOOTER-FX-03",
+          "fixtures": [
+            "FOOTER-FX-03"
+          ],
           "result": "The band renders its body copy and nothing else. No signup form appears — no stray email field, no unlabelled button, and no empty form outline."
         },
         {
           "action": "On the same fixture, look at the dark area and the bottom bar. No link columns were authored, and the bottom bar was left with neither copyright nor social links.",
-          "data": "FOOTER-FX-03",
           "result": "The dark area shows the brand column with no empty tracks beside it. The bottom bar is not rendered at all — there is no empty bar and no stray hairline rule left above the space it would have occupied."
         },
         {
           "action": "Open the hostile fixture and read the fourth column heading, \"Legal\", which the author typed without making it bold.",
-          "data": "FOOTER-FX-04",
+          "fixtures": [
+            "FOOTER-FX-04"
+          ],
           "result": "Record what happens. The block starts a new column only at a bold heading, so \"Legal\" and its four links are expected to join the end of the Help & Support column instead of starting a fifth one. Note the observed behaviour either way — this is the authoring mistake the content model does not prevent."
         },
         {
           "action": "On the same fixture, read the second column's heading and its first link, authored as \"Sauces & <b>Condiments</b>\" and \"Ürünler & Çeşitler\".",
-          "data": "FOOTER-FX-04",
           "result": "Both read on screen exactly as they were typed, angle brackets and all. Nothing renders as bold markup, no tag is interpreted, and the accented characters display correctly."
         },
         {
           "action": "On the same fixture, read the long heading, the long link labels and the long copyright line.",
-          "data": "FOOTER-FX-04",
           "result": "Every one of them is fully present and readable. Text wraps within its column rather than overflowing it, and no label is cut off, hidden behind another element, or pushed outside the footer."
         }
       ]
@@ -398,18 +397,20 @@
         "desktop"
       ],
       "fixtures": [
-        "FOOTER-FX-01"
+        "FOOTER-FX-01",
+        "FOOTER-FX-05"
       ],
       "precondition": "A desktop browser at 1440x900 with the developer console open, so a step can check that nothing was logged.",
       "steps": [
         {
           "action": "Open the reference fixture, scroll to the footer and look at the newsletter band.",
-          "data": "FOOTER-FX-01",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
           "result": "The band holds an email field and a Subscribe button side by side. The field shows the placeholder \"Enter your email\" and is an email-type input — a phone or tablet keyboard offers the @ key on it."
         },
         {
           "action": "Move the pointer over the Subscribe button and hold it there.",
-          "data": "FOOTER-FX-01",
           "result": "The button's background fills with a faint white tint while the pointer is over it, and returns to transparent when the pointer leaves. Its white outline and label stay legible throughout."
         },
         {
@@ -419,47 +420,45 @@
         },
         {
           "action": "With the address still in the field, press Enter.",
-          "data": "FOOTER-FX-01",
           "result": "The browser navigates to the path the Subscribe link was authored with, carrying the address as a query parameter. Record the resulting URL. Whether that destination exists is not under test — only that submitting does something rather than nothing."
         },
         {
           "action": "Go back to the fixture, scroll to the footer and click Subscribe with the field left empty.",
-          "data": "FOOTER-FX-01",
           "result": "Record what happens — the form does not block on an empty or malformed address today, so note whether it navigates, warns, or does nothing at all. Nothing should throw an error into the console."
         },
         {
           "action": "Move the pointer over one link in the Company column and hold it there.",
-          "data": "FOOTER-FX-01",
           "result": "That link's text brightens to white. No other link in that column or any other changes colour, moves, or changes size, and the column does not reflow."
         },
         {
           "action": "Click that link.",
-          "data": "FOOTER-FX-01",
           "result": "The browser navigates to the path the link was authored with. Record the URL. The destination page itself is not under test."
         },
         {
           "action": "Go back, scroll to the footer and move the pointer over one social icon.",
-          "data": "FOOTER-FX-01",
           "result": "The icon's round button responds — its fill and outline step up — and returns to rest when the pointer leaves. The icon itself does not move or change size, and the neighbouring icons are unaffected."
         },
         {
           "action": "Sweep the pointer quickly back and forth across all the column links and all five social icons, ten times or so, then stop.",
-          "data": "FOOTER-FX-01",
           "result": "Nothing sticks in a hovered state once the pointer has left. No link or icon is duplicated, no column reflows, and the footer looks exactly as it did before the sweep."
         },
         {
           "action": "Press Tab repeatedly to move focus through the whole footer, then Shift+Tab back out again, twice over.",
-          "data": "FOOTER-FX-01",
           "result": "Focus moves through the same elements in the same order each time. No element gains a duplicate, and the footer's layout does not shift as focus moves."
         },
         {
           "action": "Reload the page, then navigate to the accessibility fixture — a different page that uses the same footer document — and compare the two footers.",
-          "data": "FOOTER-FX-01, FOOTER-FX-05",
+          "fixtures": [
+            "FOOTER-FX-01",
+            "FOOTER-FX-05"
+          ],
           "result": "Both pages show the same footer: the same band, the same columns in the same order, the same copyright and the same five social links. Neither page shows a duplicated form, a duplicated column or a second footer."
         },
         {
           "action": "Read the developer console for the whole session.",
-          "data": "FOOTER-FX-01",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
           "result": "No errors and no warnings were logged by the footer during load, hover, focus or navigation."
         }
       ]
@@ -494,68 +493,58 @@
       "precondition": "A desktop browser at exactly 1440x900, at 100% zoom, with the developer tools open. Measure the rendered box of an element, borders included, rather than reading a width out of the stylesheet — a rule states an intention and an element can still render a different size. Judging by eye is not enough either; several values below differ from the design by two pixels.",
       "steps": [
         {
-          "action": "Scroll to the footer and read the newsletter band's background colour.",
-          "data": "FOOTER-FX-01",
+          "action": "Open the reference fixture, scroll to the footer and read the newsletter band's background colour.",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
           "result": "The band is filled edge to edge with the accessible orange, #d14900. It is not transparent, and it spans the full width of the viewport with no page margin showing at either side."
         },
         {
           "action": "Read the band's heading and body copy.",
-          "data": "FOOTER-FX-01",
           "result": "The heading renders in the script display face in white. The body copy is white, 14px, and is constrained to a readable measure rather than running the full width of the band. Both are centred."
         },
         {
           "action": "Measure the email field itself — the input, not the form around it.",
-          "data": "FOOTER-FX-01",
           "result": "The field is 476px wide and 54px tall, filled with mushroom-100 (#f5f3f4), with an 8px corner radius and no border. Its text colour is brand-dark (#221d37). Measure the input's own box: the form has a width of its own and holds the Subscribe button as well, so the field can be much narrower than any width you find in the stylesheet."
         },
         {
           "action": "Measure the Subscribe button.",
-          "data": "FOOTER-FX-01",
           "result": "54px tall with a transparent background, a 1px white border and an 8px corner radius, sitting beside the field rather than beneath it. On hover its background becomes white at 12% opacity."
         },
         {
           "action": "Read the dark area's background and its column layout.",
-          "data": "FOOTER-FX-01",
           "result": "The background is brand-dark, #221d37. The columns sit on a grid of four tracks: a fixed 303px brand column followed by three equal columns."
         },
         {
           "action": "Measure the gap between the columns, and between the rows.",
-          "data": "FOOTER-FX-01",
           "result": "80px in both directions — the design's --space-20."
         },
         {
           "action": "Measure the brand logo, then read the tagline's type.",
-          "data": "FOOTER-FX-01",
           "result": "The logo renders 98px wide and about 44px tall. The tagline is 18px at weight 600 in white, and the second line renders in the orange script accent (--color-brand-primary, #ff5a00)."
         },
         {
           "action": "Read a column heading's type.",
-          "data": "FOOTER-FX-01",
           "result": "18px at weight 600 in white, with the column's links beginning below it."
         },
         {
           "action": "Read a column link's colour at rest and on hover.",
-          "data": "FOOTER-FX-01",
           "result": "At rest, squid-100 (#d3d2d7) at 14px with no underline. On hover it becomes white (#ffffff). Nothing else about the link changes."
         },
         {
           "action": "Read the hairline rule above the bottom bar and the copyright's colour.",
-          "data": "FOOTER-FX-01",
           "result": "A 1px rule in white at 12% opacity runs the width of the bottom bar. The copyright renders at 14px in mushroom-700 (#989495)."
         },
         {
           "action": "Measure one social button's outer box, borders included, and then its icon.",
-          "data": "FOOTER-FX-01",
           "result": "48 by 48 — a circle filled with white at 5% opacity and outlined with 1px of white at 10%. The icon inside is 24px and renders solid white. On hover the fill goes to 12% and the outline to 20%. Measure the outer box rather than trusting the declared width: whether the border sits inside or outside it changes the rendered size by 2px, and that is the size a user sees."
         },
         {
           "action": "Read the bottom bar's arrangement.",
-          "data": "FOOTER-FX-01",
           "result": "One row: the copyright at the left edge and the social cluster at the right, pushed apart across the full width of the bar."
         },
         {
           "action": "Check the whole page for sideways movement.",
-          "data": "FOOTER-FX-01",
           "result": "No horizontal scrollbar appears, and dragging the page sideways moves nothing. Nothing in the footer is clipped at either edge or overlaps anything else."
         }
       ]
@@ -590,63 +579,57 @@
       "precondition": "A browser whose window can be set to an exact width. Set the width precisely — the whole point of several steps is which side of a boundary the layout falls on.",
       "steps": [
         {
-          "action": "Set the viewport to 1440px wide and scroll to the footer.",
-          "data": "FOOTER-FX-01",
+          "action": "Open the reference fixture at 1440px wide and scroll to the footer.",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
           "result": "Desktop layout: the email field and Subscribe button sit side by side on one row; the columns are a four-track grid with the brand column first; the bottom bar is a single row with the copyright at the left and the social cluster at the right."
         },
         {
           "action": "Set the viewport to exactly 1025px.",
-          "data": "FOOTER-FX-01",
           "result": "Still the desktop layout in every respect — the form is on one row, the grid still has four tracks, the bottom bar is still a single row."
         },
         {
           "action": "Set the viewport to exactly 1024px.",
-          "data": "FOOTER-FX-01",
           "result": "The mobile layout takes over: the field and button stack full-width, the link columns become a two-up grid with the brand column spanning the full width above them, and the bottom bar puts the social row above the copyright. Record which layout you actually see — the design's breakpoint is 1024px."
         },
         {
           "action": "Set the viewport to exactly 901px.",
-          "data": "FOOTER-FX-01",
           "result": "Still the mobile layout, unchanged from the previous step. Nothing about the footer should differ between 1024px and 901px."
         },
         {
           "action": "Set the viewport to exactly 899px.",
-          "data": "FOOTER-FX-01",
           "result": "Still the mobile layout, and still identical to the two steps above. Crossing 900px should change nothing, because the design places its only breakpoint at 1024px."
         },
         {
           "action": "Set the viewport to 375px and read the dark area.",
-          "data": "FOOTER-FX-01",
           "result": "The brand column runs the full width, centred, with a hairline rule beneath it separating it from the link columns. Below it the link columns sit two per row."
         },
         {
           "action": "At 375px, read the newsletter band and the bottom bar.",
-          "data": "FOOTER-FX-01",
           "result": "The email field and the Subscribe button are each full width and stacked, the field above the button. In the bottom bar the five social icons form a row above the copyright, spread across the full width, with the copyright centred beneath them."
         },
         {
           "action": "At 375px, check the page for sideways movement, then repeat at 320px.",
-          "data": "FOOTER-FX-01",
           "result": "At both widths no horizontal scrollbar appears, nothing is clipped at either edge, and every link label is readable rather than running under a neighbour."
         },
         {
           "action": "Count the links, the copyright and the social icons at 1440px. Then drag the window slowly down to 375px and count them again, then drag it slowly back up to 1440px and count once more.",
-          "data": "FOOTER-FX-01",
           "result": "The same fourteen column links, the same copyright line and the same five social icons are present at every count. Nothing disappears, nothing appears twice, and the footer does not end up in a broken intermediate state at any width along the way."
         },
         {
           "action": "At 1440px, check that none of the mobile-only rules are in force.",
-          "data": "FOOTER-FX-01",
           "result": "The brand column occupies its own track rather than spanning the row, it has no hairline rule beneath it, it is left-aligned rather than centred, and the bottom bar is not reversed."
         },
         {
           "action": "At 375px, check that none of the desktop-only rules are in force.",
-          "data": "FOOTER-FX-01",
           "result": "The form is not on one row, the grid does not have four tracks, and the copyright and social row are not on the same line."
         },
         {
           "action": "Open the same fixture on a touch device or with touch emulation on, at a mobile width, and use the footer with taps only.",
-          "data": "FOOTER-FX-01",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
           "result": "Every column link and every social icon can be tapped and activates on the first tap. Nothing is only reachable by hovering, and no control is too small or too close to its neighbour to hit reliably."
         }
       ]
@@ -683,28 +666,26 @@
       "precondition": "A desktop browser with axe DevTools and Lighthouse available, and a screen reader running — VoiceOver on macOS or NVDA on Windows. Run the checks at 1440x900 and repeat the keyboard steps at 375px.",
       "steps": [
         {
-          "action": "Inspect the element wrapping the footer, and check how many such landmarks the page has.",
-          "data": "FOOTER-FX-05",
+          "action": "Open the accessibility fixture, then inspect the element wrapping the footer and check how many such landmarks the page has.",
+          "fixtures": [
+            "FOOTER-FX-05"
+          ],
           "result": "The footer is a <footer> element exposed as the contentinfo landmark, and it is the only one on the page. A screen reader's landmark list offers it by name."
         },
         {
           "action": "List the page's headings in order, from the page title down through the footer.",
-          "data": "FOOTER-FX-05",
           "result": "The newsletter band's title is a level-2 heading, so it follows the page's level-1 title without skipping a level — even though it is authored at level 3."
         },
         {
           "action": "Ask the screen reader for the headings inside the footer, then check how the three column headings — Company, Help & Support, Legal — are marked up.",
-          "data": "FOOTER-FX-05",
           "result": "Each column heading is a real heading, at level 3, so a screen reader user can jump between the columns. Record what you find: bold text inside a paragraph looks the same but is not a heading, and would not appear in this list."
         },
         {
           "action": "Put focus at the top of the page and press Tab until focus leaves the footer, noting every element it lands on.",
-          "data": "FOOTER-FX-05",
           "result": "Focus reaches the email field, then the Subscribe button, then every column link in the order the columns read, then each of the five social links. Nothing interactive is skipped, nothing non-interactive is stopped on, and the order matches the visual reading order."
         },
         {
           "action": "Focus the email field and ask the screen reader what it is.",
-          "data": "FOOTER-FX-05",
           "result": "It is announced as an edit field named \"Email address\". Its type is email, so a touch keyboard offers the @ key."
         },
         {
@@ -714,42 +695,34 @@
         },
         {
           "action": "Focus the Subscribe button and press Space, then reload and press Enter on it.",
-          "data": "FOOTER-FX-05",
           "result": "Both keys activate the button — it is a real button, not a link styled as one."
         },
         {
           "action": "Focus a column link and press Enter, then reload, focus it again and press Space.",
-          "data": "FOOTER-FX-05",
           "result": "Enter follows the link. Space scrolls the page instead of following it, because Space activates buttons and not links. Record the behaviour observed — the criterion asks for both keys, but Space on a link is browser behaviour no implementation should override."
         },
         {
           "action": "Tab to each of the five social links in turn and ask the screen reader to read each one.",
-          "data": "FOOTER-FX-05",
           "result": "Each is announced as a link with the name of its network — \"Instagram\", \"TikTok\", \"Facebook\", \"YouTube\", \"LinkedIn\" — spelled as the brand spells it. The icon image inside is not announced separately, so no name is read twice."
         },
         {
           "action": "Tab through every control in the footer, watching the focus indicator on the orange band and then on the dark surface.",
-          "data": "FOOTER-FX-05",
           "result": "Every control shows a focus indicator that is clearly visible against the background behind it, on both surfaces, and stands out from that background by at least 3:1. No control receives focus invisibly."
         },
         {
           "action": "Measure the contrast of the band's white heading and body copy against the orange, and of the links, copyright, column headings and script accent against the dark background.",
-          "data": "FOOTER-FX-05",
           "result": "All pass AA — 4.5:1 for the 14px body copy and 3:1 for the large heading. Record the band's figure: white on #d14900 measures 4.50:1, which passes with essentially no margin, so note any value you measure below that."
         },
         {
           "action": "Measure each social button and each column link's clickable area.",
-          "data": "FOOTER-FX-05",
           "result": "Every target is at least 24 by 24 CSS pixels, and no two adjacent targets overlap."
         },
         {
           "action": "From the last social link, keep pressing Tab; then Shift+Tab back through the footer to the top of the page.",
-          "data": "FOOTER-FX-05",
           "result": "Focus leaves the footer in both directions. Nothing holds focus, and no control has to be escaped with the mouse."
         },
         {
           "action": "Run axe DevTools on the page, then run a Lighthouse accessibility audit. Repeat both at 375px.",
-          "data": "FOOTER-FX-05",
           "result": "axe reports no violations attributable to the footer at either width. The Lighthouse accessibility score is 100. Record every finding with its rule id."
         }
       ]
@@ -773,34 +746,33 @@
       ],
       "fixtures": [
         "FOOTER-FX-06",
-        "FOOTER-FX-07"
+        "FOOTER-FX-07",
+        "FOOTER-FX-01"
       ],
       "notes": "Right-to-left is a standing requirement for every block in this project, not something EC-6 asks for — the ticket's criteria never mention direction, mirroring or locale. The steps that cover it are listed under Coverage gaps so the absence is visible rather than implied. AC-15's \"translated text remains readable\" is the only criterion that reaches any of this, and it reaches the expansion half.",
       "precondition": "A desktop browser at 1440x900, repeating the layout steps at 375px. No browser language change is needed — each fixture sets its own locale through page metadata.",
       "steps": [
         {
           "action": "Open the Arabic fixture and inspect the page's root element.",
-          "data": "FOOTER-FX-06",
+          "fixtures": [
+            "FOOTER-FX-06"
+          ],
           "result": "The <html> element carries dir=\"rtl\" and lang=\"ar-MA\"."
         },
         {
           "action": "Scroll to the footer and read the dark area at 1440px.",
-          "data": "FOOTER-FX-06",
           "result": "The area mirrors: the brand column sits at the right edge and the three link columns run right to left after it — الشركة, then المساعدة والدعم, then الشؤون القانونية. Each column's text is aligned to the right."
         },
         {
           "action": "Read the bottom bar at 1440px.",
-          "data": "FOOTER-FX-06",
           "result": "The copyright sits at the right edge and the five social icons at the left. Reading the icons from the right they are in the authored order: Instagram, TikTok, Facebook, YouTube, LinkedIn. The copyright's \"© 2027\" stays together and reads left to right inside the Arabic sentence."
         },
         {
           "action": "Read the newsletter band's heading and body copy.",
-          "data": "FOOTER-FX-06",
           "result": "Both are centred and read right to left. The heading renders in the script display face — check the glyphs actually are the script face and not a system substitute, since a handwriting font built for Latin may carry no Arabic coverage and fall back silently."
         },
         {
           "action": "Read the brand tagline's second line — the orange accent line — and look at the gap between it and the line above.",
-          "data": "FOOTER-FX-06",
           "result": "The accent text is fully legible with clear space above and below it. If it wraps onto two lines, those lines must not touch or overlap each other. Record the rendered height: .text-ch-h5 sets a 34px font in a 28px line box, which is invisible in English because the label never wraps."
         },
         {
@@ -810,37 +782,40 @@
         },
         {
           "action": "Compare the order of the email field and the Subscribe button against the left-to-right reference.",
-          "data": "FOOTER-FX-06, FOOTER-FX-01",
+          "fixtures": [
+            "FOOTER-FX-06",
+            "FOOTER-FX-01"
+          ],
           "result": "The pair mirrors — the field takes the right-hand position and the button the left — while the field's own contents stay left to right."
         },
         {
           "action": "Set the Arabic fixture to 375px and read the whole footer top to bottom.",
-          "data": "FOOTER-FX-06",
+          "fixtures": [
+            "FOOTER-FX-06"
+          ],
           "result": "The stacked layout mirrors correctly: the brand column is centred with its hairline rule beneath it, the two-up link columns fill right to left, and the social row sits above the copyright."
         },
         {
           "action": "At 375px and again at 1440px, check the page for sideways movement and for clipping at both edges.",
-          "data": "FOOTER-FX-06",
           "result": "No horizontal scrollbar at either width, nothing clipped at the left or the right edge, and no label running underneath a neighbouring column."
         },
         {
           "action": "Hover and focus a column link and a social icon at both widths.",
-          "data": "FOOTER-FX-06",
           "result": "Hover and focus behave exactly as they do left to right — the same colour change and the same focus indicator, in the same place relative to the control."
         },
         {
           "action": "Ask a screen reader to read the social links and the email field.",
-          "data": "FOOTER-FX-06",
           "result": "Each social link is named for its network. No accessible name describes a position on screen — nothing is announced as \"left\", \"right\", \"first\" or \"last\", because those words invert under mirroring. The email field's own name is in the page's language."
         },
         {
           "action": "Open the German fixture at 1440px and read the three link columns and the Subscribe button.",
-          "data": "FOOTER-FX-07",
+          "fixtures": [
+            "FOOTER-FX-07"
+          ],
           "result": "Every label is fully readable. Long compounds — \"Nachhaltigkeitsverpflichtungen\", \"Allgemeine Geschäftsbedingungen\", \"Barrierefreiheitserklärung\" — wrap inside their own column rather than overflowing it, running under the next column, or being cut off. \"Newsletter abonnieren\" fits its button without clipping."
         },
         {
           "action": "Set the German fixture to 375px, then inspect its root element and read a few labels with a screen reader.",
-          "data": "FOOTER-FX-07",
           "result": "The two-up columns hold their labels without overlapping, no horizontal scrollbar appears, and the <html> element carries lang=\"de\" so the labels are pronounced as German rather than English."
         }
       ]

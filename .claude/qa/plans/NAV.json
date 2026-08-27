@@ -520,6 +520,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 and look at the nav bar.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
           "result": "The logo sits at the start edge and all five authored items follow it in a single row, in the order they were authored: Products, Recipes, Training & Inspiration, Promotions, Loyalty Program."
         },
         {
@@ -528,18 +531,30 @@
         },
         {
           "action": "Open fixture FX-05, where every item was authored with nothing under it.",
+          "fixtures": [
+            "NAV-FX-05"
+          ],
           "result": "All five render as ordinary links and not one of them shows a chevron. The bar is otherwise laid out exactly as on FX-01."
         },
         {
           "action": "Open fixture FX-02, which authors a single nav link.",
+          "fixtures": [
+            "NAV-FX-02"
+          ],
           "result": "The bar renders with the logo at the start and that one link after it. No gap, placeholder or stray separator is left where the other items would have been."
         },
         {
           "action": "Open fixture FX-04, where the logo was authored as text instead of an image.",
+          "fixtures": [
+            "NAV-FX-04"
+          ],
           "result": "The brand name renders as text in the logo's place and is still a link to the home page. Nothing shifts out of position and no broken-image icon appears."
         },
         {
           "action": "Open fixture FX-03, which authors eight items including several long labels.",
+          "fixtures": [
+            "NAV-FX-03"
+          ],
           "result": "All eight render, in the authored order, with none dropped or merged. Each label stays on one line."
         }
       ],
@@ -569,6 +584,9 @@
       "steps": [
         {
           "action": "On FX-01, move the pointer onto Recipes and hold it there.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
           "result": "The label changes to the hover colour and a coloured line appears under it. Both appear smoothly rather than snapping."
         },
         {
@@ -593,10 +611,16 @@
         },
         {
           "action": "On FX-05, click any item.",
+          "fixtures": [
+            "NAV-FX-05"
+          ],
           "result": "The browser navigates to that item's destination. Nothing opens on the bar first."
         },
         {
           "action": "Back on FX-01, scroll down about three screens.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
           "result": "The nav row stays pinned at the very top of the window the whole way down — it never scrolls out of view and never jumps or flickers. The thin utility strip above it slides away as you scroll, which is expected."
         },
         {
@@ -631,6 +655,9 @@
       "steps": [
         {
           "action": "On FX-01 at 1440px wide, measure the nav row.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
           "result": "It is 68px tall. The logo image is 40px tall and sits at the start; the links follow in a row; the tools on the right sit in their own space without pushing the links or overlapping them."
         },
         {
@@ -659,6 +686,9 @@
         },
         {
           "action": "Open FX-03 and view it at 1440px, 1280px and 1024px.",
+          "fixtures": [
+            "NAV-FX-03"
+          ],
           "result": "At every width all eight labels are fully readable — nothing is cut off, nothing overlaps the logo or the tools, and the page itself never scrolls sideways."
         }
       ]
@@ -689,6 +719,9 @@
       "steps": [
         {
           "action": "Open FX-01 at 1440px.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
           "result": "The full bar shows: logo, then the horizontal row of links, then the tools. No hamburger anywhere."
         },
         {
@@ -713,6 +746,9 @@
         },
         {
           "action": "Open FX-03 and step through 1440, 1280, 1100, 1024 and 900.",
+          "fixtures": [
+            "NAV-FX-03"
+          ],
           "result": "The crowded bar keeps all eight items on one row at each width, with no clipping and no sideways page scroll."
         },
         {
@@ -746,6 +782,9 @@
       "steps": [
         {
           "action": "Open FX-01 at 899px, one pixel below the breakpoint.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
           "result": "The horizontal links are gone and the mobile bar has taken over: a hamburger at the start edge and the logo beside it."
         },
         {
@@ -774,6 +813,9 @@
         },
         {
           "action": "Open FX-03 at 390px.",
+          "fixtures": [
+            "NAV-FX-03"
+          ],
           "result": "Eight long top-level labels make no difference on mobile — they are not on the bar, so the mobile bar looks the same as it does on FX-01."
         }
       ]
@@ -803,6 +845,9 @@
       "steps": [
         {
           "action": "Open FX-07, click once in the address bar, then press Tab repeatedly through the header.",
+          "fixtures": [
+            "NAV-FX-07"
+          ],
           "result": "Focus moves in the order things appear on screen: the logo first, then each nav link left to right, then the tools on the right. Nothing is skipped and nothing is reached out of order."
         },
         {
@@ -869,12 +914,16 @@
       ],
       "fixtures": [
         "NAV-FX-06",
-        "NAV-FX-03"
+        "NAV-FX-03",
+        "NAV-FX-01"
       ],
       "notes": "Step 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
       "steps": [
         {
           "action": "Open fixture FX-06, which sets the page language to Arabic.",
+          "fixtures": [
+            "NAV-FX-06"
+          ],
           "result": "The whole bar mirrors: the logo is now at the right-hand start edge and the links run from right to left, still in the authored order — المنتجات, then الوصفات, then التدريب والإلهام, then الاستدامة, then برنامج الولاء."
         },
         {
@@ -895,14 +944,23 @@
         },
         {
           "action": "Open FX-03 and find the long German label, Nachhaltigkeitsverpflichtungen.",
+          "fixtures": [
+            "NAV-FX-03"
+          ],
           "result": "It renders in full on one line. It does not wrap, and it does not get cut off or replaced by an ellipsis."
         },
         {
           "action": "Compare the crowded bar's spacing with FX-01's.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
           "result": "Longer labels change how much room each item takes, but not the padding around it or the height of the row."
         },
         {
           "action": "View FX-06 at 390px.",
+          "fixtures": [
+            "NAV-FX-06"
+          ],
           "result": "The mobile bar mirrors too — the hamburger is at the right-hand start edge with the logo beside it."
         }
       ]

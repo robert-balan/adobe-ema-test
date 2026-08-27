@@ -380,12 +380,37 @@ A test step should never ask a tester to author anything. Fixtures are declared 
 `fixtures` block, generated into Document Authoring under `/drafts/qa/{feature}/`, and their URLs
 published into each test's Jira description.
 
-Two rules are enforced by the tooling rather than trusted to a reviewer:
+A step that sends the tester to a page names that fixture in its own `fixtures`, and the push
+renders the id as a full preview URL at the top of that step's Test Data:
+
+```json
+{ "action": "Open the Arabic fixture and inspect the page's root element.",
+  "fixtures": ["FOOTER-FX-06"],
+  "result": "The <html> element carries dir=\"rtl\" and lang=\"ar-MA\"." }
+```
+
+```
+Action  Open the Arabic fixture and inspect the page's root element.
+Data    https://develop--ufs--foodsolutions-04.aem.page/drafts/qa/footer/rtl
+```
+
+Set it on the first step of a test, on a step that moves to a second fixture, and on a step that
+compares one against another. Leave it off a step that stays on the page already open — resizing,
+hovering, running axe. Ids only: a written-out URL in a step is a second copy of a path that
+already exists in `fixtures`, and the second copy is the one nobody updates when a page moves.
+
+Four rules are enforced by the tooling rather than trusted to a reviewer:
 
 - **A fixture path outside `/drafts/` is refused.** That is the mistake that publishes test
   content to the client's live site.
 - **The fixture tooling calls the preview endpoint and never `/live/`.** Not a flag, not an
   override — the folder convention is the second line of defence, not the first.
+- **A step naming an unknown fixture is refused**, since the id is what becomes the URL.
+- **A step may only name a fixture its own test lists.** Reaching past that list would send a
+  tester to a page the test's description never mentions.
+
+The origin comes from the plan's `previewBase`, so it is named once and a plan re-pointed at
+another branch produces steps for that branch without one of them being edited.
 
 Header-family blocks (header, megamenu, utility bar, brand carousel) live in one site-wide `nav`
 document, so a fixture page carries a `nav` metadata row pointing at its own nav document;

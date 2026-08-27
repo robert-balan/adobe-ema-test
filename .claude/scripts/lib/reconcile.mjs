@@ -12,7 +12,33 @@ export const LINK_TYPE = 'Test';
 
 /* ------------------------------------------------------------------- payloads */
 
-export const stepsOf = (t) => t.steps.map((s) => ({ action: s.action, data: s.data || '', result: s.result }));
+/**
+ * A step's Test Data, with the page a tester has to open resolved to a full preview URL.
+ *
+ * A step that says "open FX-06" is only useful to somebody who already knows where FX-06 lives.
+ * The description carries the URLs, but a tester works down the step table and should not have to
+ * go back up to it — so any step that sends them to a page names that page in its own data, in
+ * full, ready to paste into the address bar.
+ *
+ * The URL is derived rather than authored, because a fixture's path is already written down once
+ * in `plan.fixtures` and a second copy is a second thing to get wrong. That is not hypothetical:
+ * a comment on EC-6 pointed at /drafts/qa/footer/arabic for days after the fixture moved to
+ * /drafts/qa/footer/rtl, and it went unnoticed precisely because the dead page still rendered.
+ *
+ * The origin comes from `plan.previewBase`, so a plan pointed at another branch produces steps for
+ * that branch without any of them being edited.
+ */
+export const stepsOf = (plan, t) => {
+  const byId = new Map((plan?.fixtures || []).map((f) => [f.id, f]));
+  const base = plan?.previewBase || '';
+  return t.steps.map((s) => {
+    const urls = (s.fixtures || [])
+      .map((id) => byId.get(id))
+      .filter((f) => f && f.page)
+      .map((f) => `${base}${f.page}`);
+    return { action: s.action, data: [...urls, s.data].filter(Boolean).join('\n'), result: s.result };
+  });
+};
 
 export const sameSteps = (a, b) => JSON.stringify(a.map((s) => [s.action, s.data || '', s.result]))
                                 === JSON.stringify(b.map((s) => [s.action, s.data || '', s.result]));
@@ -95,6 +121,21 @@ export function planProblems(plan) {
     for (const fx of t.fixtures || []) {
       if (!fixtureIds.has(fx)) problems.push(`tests (${t.id}): cites unknown fixture "${fx}"`);
     }
+    // A step that opens a page must name the fixture, and the test must own that fixture. Both
+    // halves matter: the id is what resolves to a URL in the step's data, and the test's own list
+    // is what puts that URL in the description. A step reaching past its test's fixtures would
+    // send a tester to a page the test never says it uses.
+    const owned = new Set(t.fixtures || []);
+    (t.steps || []).forEach((s, i) => {
+      for (const fx of s.fixtures || []) {
+        if (!fixtureIds.has(fx)) {
+          problems.push(`tests (${t.id}) step ${i + 1}: opens unknown fixture "${fx}"`);
+        } else if (!owned.has(fx)) {
+          problems.push(`tests (${t.id}) step ${i + 1}: opens fixture "${fx}", which the test does not list `
+            + 'in its own "fixtures" — add it there so the description carries the page too');
+        }
+      }
+    });
   }
 
   const seenFixtures = new Set();
@@ -199,7 +240,7 @@ export function resolveIdentity({ scoped, prior, labelled }) {
  */
 export function diffTest({ plan, t, cur }) {
   const diffs = [];
-  if (!sameSteps(stepsOf(t), cur.steps || [])) diffs.push('steps');
+  if (!sameSteps(stepsOf(plan, t), cur.steps || [])) diffs.push('steps');
   if (cur.jira?.summary !== t.summary) diffs.push('summary');
   if (JSON.stringify([...(cur.jira?.labels || [])].sort()) !== JSON.stringify(labelsFor(plan, t))) diffs.push('labels');
   if (sameText(cur.jira?.description, describeTest(plan, t)) === false) diffs.push('description');

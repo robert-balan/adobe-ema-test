@@ -409,14 +409,17 @@ function report() {
       for (const line of b.filter((x) => !a.includes(x))) console.log(`      desc:     + ${line}`);
     }
     if (diffs.includes('steps')) {
-      const a = cur.steps; const b = stepsOf(t);
+      const a = cur.steps; const b = stepsOf(plan, t);
+      // Data is compared, so it has to be shown. It was not, and a change that touched only the
+      // data — which is where the fixture URLs live — printed two identical-looking lines.
+      const render = (s) => `${s.action} → ${s.result}${s.data ? `  [data: ${s.data.replace(/\n/g, ' | ')}]` : ''}`;
       for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
         const x = a[i]; const y = b[i];
         if (x && y && x.action === y.action && (x.data || '') === (y.data || '') && x.result === y.result) continue;
-        if (!x) { console.log(`      step ${i + 1}: + ${y.action} → ${y.result}`); continue; }
-        if (!y) { console.log(`      step ${i + 1}: - ${x.action} → ${x.result}`); continue; }
-        console.log(`      step ${i + 1}: - ${x.action} → ${x.result}`);
-        console.log(`              + ${y.action} → ${y.result}`);
+        if (!x) { console.log(`      step ${i + 1}: + ${render(y)}`); continue; }
+        if (!y) { console.log(`      step ${i + 1}: - ${render(x)}`); continue; }
+        console.log(`      step ${i + 1}: - ${render(x)}`);
+        console.log(`              + ${render(y)}`);
       }
     }
   }
@@ -538,7 +541,7 @@ try {
 
   for (const t of CREATE) {
     const d = await gqlOrThrow(Q.createTest, {
-      steps: stepsOf(t).map(stepInput),
+      steps: stepsOf(plan, t).map(stepInput),
       folder: t.folder || plan.folder || undefined,
       jira: {
         fields: {
@@ -558,7 +561,7 @@ try {
 
   for (const { t, rec, cur, diffs } of UPDATE) {
     if (diffs.includes('steps') || diffs.includes('forced')) {
-      await rewriteSteps({ issueId: rec.issueId, key: rec.key, next: stepsOf(t), previous: cur.steps || [] });
+      await rewriteSteps({ issueId: rec.issueId, key: rec.key, next: stepsOf(plan, t), previous: cur.steps || [] });
     }
     if (diffs.includes('folder')) {
       const want = folderFor(plan, t);

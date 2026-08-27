@@ -338,32 +338,36 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and expand the Products menu.",
-          "data": "FX-01, /drafts/qa/megamenu/reference, viewport 1440x900",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 1440x900",
           "result": "The panel carries the Layout A class .mm-a and resolves to four columns — three equal link columns and a 260px promo column, matching the grid 1fr 1fr 1fr 260px. Each link column is led by an overline label (.mm-col-label) above a list of arrow links (.mm-link)."
         },
         {
           "action": "Still on Products, look at the right-hand column and the foot of the panel.",
-          "data": "FX-01",
           "result": "The promo tile (.mm-promo) holds a 16:9 image, a badge, a product name and a call to action, in that order. Below the columns, a brands carousel (.mm-brands) runs the width of the panel showing circular brand tiles 80px by 80px."
         },
         {
           "action": "Expand the Recipes menu.",
-          "data": "FX-01",
           "result": "The Products panel closes as Recipes opens. Recipes carries the Layout B class .mm-b and resolves to the grid 1.8fr 1fr 1fr 260px: a wide editorial feature (.mm-featured) first, holding an image, overline, title, body copy and a call to action; then two equal link columns; then the 260px promo tile. There is no brands carousel."
         },
         {
           "action": "Expand the Promotions menu.",
-          "data": "FX-01",
           "result": "Promotions carries the Layout C class .mm-a2 and resolves to two equal columns of links, grid 1fr 1fr. There is no promo tile and no editorial feature, and the last column has no divider on its trailing edge."
         },
         {
           "action": "Open fixture FX-02, which authors Promotions with its optional slots removed entirely, and expand it.",
-          "data": "FX-02, /drafts/qa/megamenu/layout-c",
+          "fixtures": [
+            "MEGAMENU-FX-02"
+          ],
           "result": "The panel matches the Promotions panel in FX-01. The two columns fill the panel — no empty fourth track, no reserved promo column, and no gap where the tile would have been."
         },
         {
           "action": "Open fixture FX-05, which authors a category with a single link column, and expand it.",
-          "data": "FX-05, /drafts/qa/megamenu/one-column",
+          "fixtures": [
+            "MEGAMENU-FX-05"
+          ],
           "result": "The panel renders with one column of links under its overline label. The column keeps its normal width rather than stretching across the panel, and nothing is dropped or duplicated."
         }
       ],
@@ -393,7 +397,10 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width. Before touching anything, check the nav row.",
-          "data": "FX-01, viewport 1440x900",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 1440x900",
           "result": "No panel is open. Every trigger points its chevron down, reports aria-expanded=\"false\", and every panel is marked aria-hidden=\"true\"."
         },
         {
@@ -444,27 +451,36 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and expand any menu.",
-          "data": "FX-01, viewport 1440x900",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 1440x900",
           "result": "The panel spans the full width of the page below the nav row, not just the width of its trigger. It has a 2px top border in the brand primary colour and an elevation shadow beneath it."
         },
         {
           "action": "With the widest panel open, check whether the page can be scrolled horizontally, at 1440, 1280 and 1024 wide.",
-          "data": "FX-01",
           "result": "At every width the page has no horizontal scrollbar and no content is cut off at either edge. The brands carousel scrolls inside itself; that internal scrolling is expected and is not page overflow."
         },
         {
           "action": "Open fixture FX-07, which sets the header to the dark context, and expand the same menus.",
-          "data": "FX-07, /drafts/qa/megamenu/dark",
+          "fixtures": [
+            "MEGAMENU-FX-07"
+          ],
           "result": "The panels carry the --dark modifier on the nav. Surfaces, link colours and icon tints all change to their dark-context values and stay legible. The panels hold the same content, in the same grid, as FX-01."
         },
         {
           "action": "Compare the underlying markup of a panel in FX-07 against the same panel in FX-01.",
-          "data": "FX-07 against FX-01",
+          "fixtures": [
+            "MEGAMENU-FX-07",
+            "MEGAMENU-FX-01"
+          ],
           "result": "The markup is identical apart from the modifier class on the nav — no extra wrappers, no swapped class names, no duplicated panel for the dark case."
         },
         {
           "action": "Open fixture FX-08, which sets the glass context over a hero image, and expand a menu.",
-          "data": "FX-08, /drafts/qa/megamenu/glass",
+          "fixtures": [
+            "MEGAMENU-FX-08"
+          ],
           "result": "The panels carry the --glass modifier. The chrome is translucent over the image behind it, and link text, labels and icons all stay readable against the busiest part of that image."
         }
       ],
@@ -491,7 +507,10 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width, expand Products, and hover a link in one of the columns.",
-          "data": "FX-01, viewport 1440x900",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 1440x900",
           "result": "The link text turns orange and its arrow slides 2px to the right (translateX(2px)). Moving the pointer away returns both to their resting state."
         },
         {
@@ -537,7 +556,10 @@
       "steps": [
         {
           "action": "Open fixture FX-03 at a mobile width and tap the hamburger.",
-          "data": "FX-03, /drafts/qa/megamenu/overflow, viewport 390x844",
+          "fixtures": [
+            "MEGAMENU-FX-03"
+          ],
+          "data": "viewport 390x844",
           "result": "The drawer (.ufs-drawer) slides in from the left edge with its own logo and a close control. The categories are listed as collapsed accordion rows, mirroring the desktop categories one for one."
         },
         {
@@ -558,12 +580,18 @@
         },
         {
           "action": "Open fixture FX-04, which authors a category with exactly four links, and expand it in the drawer.",
-          "data": "FX-04, /drafts/qa/megamenu/four-links, viewport 390x844",
+          "fixtures": [
+            "MEGAMENU-FX-04"
+          ],
+          "data": "viewport 390x844",
           "result": "All four links are visible and there is no 'View more' control at all — the toggle appears only when it has something to reveal."
         },
         {
           "action": "Open FX-01 in the drawer and expand Products.",
-          "data": "FX-01, viewport 390x844",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 390x844",
           "result": "A mini brands carousel appears in the panel. It scrolls by dragging and has no arrow buttons at either end."
         }
       ],
@@ -592,7 +620,10 @@
       "steps": [
         {
           "action": "Open fixture FX-01 below 1024px wide and look at the header before opening anything.",
-          "data": "FX-01, viewport 390x844",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 390x844",
           "result": "The desktop nav is hidden and the mobile nav (.ufs-mnav) is shown in its place. A hamburger sits in the bar, and the Cart, Favourites and Account icons are still present and reachable."
         },
         {
@@ -629,16 +660,23 @@
         "rtl"
       ],
       "fixtures": [
-        "MEGAMENU-FX-06"
+        "MEGAMENU-FX-06",
+        "MEGAMENU-FX-01"
       ],
       "steps": [
         {
           "action": "Open fixture FX-06 at a desktop width and confirm the document direction before judging any layout.",
-          "data": "FX-06, /drafts/qa/megamenu/rtl, viewport 1440x900",
+          "fixtures": [
+            "MEGAMENU-FX-06"
+          ],
+          "data": "viewport 1440x900",
           "result": "The html element carries dir=\"rtl\". The nav row reads from the right, and the megamenu columns run right to left in the same order they run left to right in FX-01. The panel's columns read right to left with Arabic headings — الفئات, then حسب المطبخ — and every link inside them is Arabic."
         },
         {
           "action": "Expand a menu and check the spacing and positioning against the same panel in FX-01.",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
           "result": "Padding, margins and column positions are mirrored — the panel is a true mirror image, not the same layout nudged sideways."
         },
         {
@@ -686,7 +724,10 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and Tab through the nav row without using the mouse.",
-          "data": "FX-01, viewport 1440x900",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 1440x900",
           "result": "Every trigger takes focus in turn with a clearly visible focus ring, and each reports aria-expanded=\"false\" while closed. Closed panels are aria-hidden=\"true\"."
         },
         {
@@ -703,7 +744,10 @@
         },
         {
           "action": "Switch to a mobile width, open the drawer from the keyboard, and inspect the 'View more' control in the nine-link category.",
-          "data": "FX-03, viewport 390x844",
+          "fixtures": [
+            "MEGAMENU-FX-03"
+          ],
+          "data": "viewport 390x844",
           "result": "The control has an aria-label naming its category — 'Show more Products links' or equivalent — rather than only the words 'View more'."
         },
         {
@@ -716,12 +760,19 @@
         },
         {
           "action": "Run axe-core over an open megamenu in each of the three colour contexts, and check text contrast against WCAG AA.",
-          "data": "FX-01 light, FX-07 dark, FX-08 glass",
+          "fixtures": [
+            "MEGAMENU-FX-01",
+            "MEGAMENU-FX-07",
+            "MEGAMENU-FX-08"
+          ],
+          "data": "the three colour contexts in order: light, dark, glass",
           "result": "No new axe-core violations are reported in any context. All text and meaningful icons meet WCAG AA contrast, including glass over the busiest part of the image behind it."
         },
         {
           "action": "Run a Lighthouse accessibility audit on the page with the megamenu present.",
-          "data": "FX-01",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
           "result": "The accessibility score is 100, allowing for issues that belong to other blocks on the page rather than the header."
         }
       ],
@@ -750,7 +801,10 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at 1024px wide exactly.",
-          "data": "FX-01, viewport 1024x900",
+          "fixtures": [
+            "MEGAMENU-FX-01"
+          ],
+          "data": "viewport 1024x900",
           "result": "The desktop megamenu is in use: the nav links are shown on the bar and there is no hamburger. 1024 is the desktop side of the boundary."
         },
         {
@@ -760,7 +814,7 @@
         },
         {
           "action": "At 1440px, compare the open panels against the approved design preview — grid ratios, spacing, colours, the 260px promo column and the 80x80 brand tiles.",
-          "data": "FX-01, viewport 1440x900, design reference handover/full-page-preview-v0.2.html",
+          "data": "viewport 1440x900, design reference handover/full-page-preview-v0.2.html",
           "result": "Layout, spacing, colours and sizes match the approved design within normal rendering tolerance."
         },
         {

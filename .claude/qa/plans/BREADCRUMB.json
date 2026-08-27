@@ -141,6 +141,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01, which sets Breadcrumb to auto on a nested page.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
           "result": "A breadcrumb renders, beginning with Home and following the URL hierarchy, with the final segment as the current page."
         },
         {
@@ -150,6 +153,9 @@
         },
         {
           "action": "Open fixture FX-02, which supplies its own labels.",
+          "fixtures": [
+            "BREADCRUMB-FX-02"
+          ],
           "data": "Breadcrumb: Products | Sauces & Condiments | <b>Ketchup</b>",
           "result": "The trail reads Home, Products, Sauces & Condiments, then the current page — Home is added automatically because the authored list does not start with it."
         },
@@ -159,22 +165,39 @@
         },
         {
           "action": "Open fixture FX-03, which has both a hand-authored breadcrumb block and Breadcrumb: auto.",
+          "fixtures": [
+            "BREADCRUMB-FX-03"
+          ],
           "result": "Exactly one trail renders — the authored one, ending at \"Professional Development\". There is no second, URL-derived trail anywhere on the page."
         },
         {
           "action": "Open fixture FX-04, a nested page with Breadcrumb set to false.",
+          "fixtures": [
+            "BREADCRUMB-FX-04"
+          ],
           "result": "No breadcrumb renders, and no empty container is left in its place, even though the URL would have produced a trail."
         },
         {
           "action": "Open fixture FX-05, a nested page with no Breadcrumb row at all.",
+          "fixtures": [
+            "BREADCRUMB-FX-05"
+          ],
           "result": "No breadcrumb renders. The block is opt-in, so a page that says nothing gets nothing."
         },
         {
           "action": "Open fixture FX-06, whose authored trail is a single label.",
+          "fixtures": [
+            "BREADCRUMB-FX-06"
+          ],
           "result": "The trail is Home followed by the current page — two crumbs, one separator."
         },
         {
           "action": "Compare the structure of FX-01, FX-02 and FX-06 with each other.",
+          "fixtures": [
+            "BREADCRUMB-FX-01",
+            "BREADCRUMB-FX-02",
+            "BREADCRUMB-FX-06"
+          ],
           "result": "Changing how many crumbs there are, or what they are called, changes only the content — the markup, separators and layout are identical in each case."
         }
       ]
@@ -205,6 +228,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 on a desktop viewport and click an ancestor crumb.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
           "result": "The browser navigates to that ancestor's path."
         },
         {
@@ -218,6 +244,9 @@
         },
         {
           "action": "Open fixture FX-01 on a mobile viewport.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
           "result": "Only Home, a collapse control, and the current page are shown; the intermediate ancestors are hidden behind the control."
         },
         {
@@ -230,6 +259,9 @@
         },
         {
           "action": "Open fixture FX-06, whose trail is only Home plus the current page, on a mobile viewport.",
+          "fixtures": [
+            "BREADCRUMB-FX-06"
+          ],
           "result": "No collapse control is shown — there is nothing to hide."
         }
       ]
@@ -258,6 +290,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a 1440px-wide desktop viewport.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
           "result": "The breadcrumb sits at the top of the page content, flush to the page's start edge, above everything else in the main content."
         },
         {
@@ -280,6 +315,9 @@
         },
         {
           "action": "Open fixture FX-08, which has a longer four-level trail, at 1440px, 1280px and 1024px.",
+          "fixtures": [
+            "BREADCRUMB-FX-08"
+          ],
           "result": "The trail stays on one line, nothing is clipped, and the document never scrolls horizontally."
         },
         {
@@ -312,6 +350,9 @@
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop viewport of 1440px.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
           "result": "Every crumb in the trail is shown, ancestors as links and the last as the current page."
         },
         {
@@ -362,6 +403,9 @@
       "steps": [
         {
           "action": "Open fixture FX-08 and inspect the element wrapping the trail.",
+          "fixtures": [
+            "BREADCRUMB-FX-08"
+          ],
           "result": "It is a nav element with aria-label=\"Breadcrumb\", containing an ordered list — one list item per crumb."
         },
         {
@@ -423,6 +467,9 @@
       "steps": [
         {
           "action": "Open fixture FX-07 on a desktop viewport and confirm the document direction.",
+          "fixtures": [
+            "BREADCRUMB-FX-07"
+          ],
           "result": "The page carries dir=\"rtl\" and the Arabic locale in its lang attribute."
         },
         {
