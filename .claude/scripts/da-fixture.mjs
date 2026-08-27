@@ -40,6 +40,7 @@ import { dirname, join } from 'node:path';
 import { validate } from './lib/schema.mjs';
 import { planProblems } from './lib/reconcile.mjs';
 import { fixturePage, transformNav, transformFooter } from './lib/da-render.mjs';
+import { tokenExpiry } from './lib/da-token.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_PATH = join(HERE, '..', 'qa', 'plan.schema.json');
@@ -75,12 +76,16 @@ if (!token) fail('DA_TOKEN is not set (see .claude/qa/README.md)');
 
 // An IMS token is a JWT, so its expiry is readable locally with no secret and no request.
 // Checking it up front turns "401 halfway through" into one clear sentence.
-try {
-  const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
-  const left = payload.exp * 1000 - Date.now();
-  if (left <= 0) fail(`DA_TOKEN expired ${Math.round(-left / 3.6e6)}h ago — refresh it and re-run`);
-  if (left < 5 * 60_000) console.error(`warn     DA_TOKEN expires in ${Math.round(left / 60_000)} minute(s)`);
-} catch { /* not a JWT we can read; let the API be the judge */ }
+const expiry = tokenExpiry(token);
+if (expiry.kind === 'expired') fail(`DA_TOKEN expired ${expiry.hours}h ago — refresh it and re-run`);
+if (expiry.kind === 'expiring') console.error(`warn     DA_TOKEN expires in ${expiry.minutes} minute(s)`);
+// A readable token with no exp claim cannot be vouched for either way. Saying so is the point:
+// silence here is what let one through to die as a raw 401 mid-run.
+if (expiry.kind === 'no-expiry') {
+  console.error('warn     DA_TOKEN carries no expiry claim, so it cannot be checked here — if a');
+  console.error('         request below fails with 401, the token is stale; refresh it and re-run');
+}
+// 'unreadable' stays quiet: not every credential is a JWT, and the API is the better judge.
 
 /* -------------------------------------------------------------------- api */
 
@@ -96,6 +101,9 @@ const auth = { Authorization: `Bearer ${token}` };
 async function readSource(path) {
   const res = await fetch(`${DA_ADMIN}/source/${ORG_SITE.org}/${ORG_SITE.site}${path}.html`, { headers: auth });
   if (res.status === 404) return null;
+  // 401 here is always the token, never the path — and it is the one failure the expiry check
+  // above cannot rule out, since a token can be well-formed, unexpired and still rejected.
+  if (res.status === 401) throw new Error(`read ${path}: HTTP 401 — DA_TOKEN was rejected. Refresh it and re-run.`);
   if (!res.ok) throw new Error(`read ${path}: HTTP ${res.status}`);
   return res.text();
 }
@@ -142,29 +150,36 @@ async function sourceFor(from, kind) {
   return sources.get(from);
 }
 
+// Reading the source documents and transforming them happens before anything is written, so a
+// failure here is already a clean stop — but it has to LOOK like one. Uncaught, it surfaced as a
+// stack trace with the real message buried in the middle of it.
 const planned = [];
-for (const f of fixtures) {
-  if (f.nav) {
-    const src = await sourceFor(f.nav.from, 'nav');
-    planned.push({ fixture: f.id, kind: 'nav', path: f.nav.path, html: transformNav(src, f.nav) });
+try {
+  for (const f of fixtures) {
+    if (f.nav) {
+      const src = await sourceFor(f.nav.from, 'nav');
+      planned.push({ fixture: f.id, kind: 'nav', path: f.nav.path, html: transformNav(src, f.nav) });
+    }
+    // The footer is reached by the same mechanism under a different key: footer.js reads
+    // getMetadata('footer') and falls back to /footer, exactly as header.js does for the nav.
+    if (f.footer) {
+      const src = await sourceFor(f.footer.from, 'footer');
+      planned.push({ fixture: f.id, kind: 'footer', path: f.footer.path, html: transformFooter(src, f.footer) });
+    }
+    // The page's nav and footer metadata rows are derived from the fixture's own documents when it
+    // generates them, so each path is stated once and cannot drift between the two.
+    const metadata = { ...(f.metadata || {}) };
+    if (f.nav) metadata.nav = f.nav.path;
+    if (f.footer) metadata.footer = f.footer.path;
+    planned.push({
+      fixture: f.id,
+      kind: 'page',
+      path: f.page,
+      html: fixturePage({ ...f, metadata }, { source: f.nav?.from || f.footer?.from }),
+    });
   }
-  // The footer is reached by the same mechanism under a different key: footer.js reads
-  // getMetadata('footer') and falls back to /footer, exactly as header.js does for the nav.
-  if (f.footer) {
-    const src = await sourceFor(f.footer.from, 'footer');
-    planned.push({ fixture: f.id, kind: 'footer', path: f.footer.path, html: transformFooter(src, f.footer) });
-  }
-  // The page's nav and footer metadata rows are derived from the fixture's own documents when it
-  // generates them, so each path is stated once and cannot drift between the two.
-  const metadata = { ...(f.metadata || {}) };
-  if (f.nav) metadata.nav = f.nav.path;
-  if (f.footer) metadata.footer = f.footer.path;
-  planned.push({
-    fixture: f.id,
-    kind: 'page',
-    path: f.page,
-    html: fixturePage({ ...f, metadata }, { source: f.nav?.from || f.footer?.from }),
-  });
+} catch (err) {
+  fail(err.message);
 }
 
 const actions = [];
