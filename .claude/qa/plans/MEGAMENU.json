@@ -52,7 +52,53 @@
       "page": "/drafts/qa/megamenu/overflow",
       "nav": {
         "path": "/drafts/qa/megamenu/nav-overflow",
-        "from": "/nav"
+        "from": "/nav",
+        "menus": {
+          "items": [
+            {
+              "label": "Products",
+              "href": "/products"
+            },
+            {
+              "label": "Recipes",
+              "href": "/recipes"
+            },
+            {
+              "label": "Training & Inspiration",
+              "href": "/training-inspiration"
+            },
+            {
+              "label": "Promotions",
+              "href": "/promotions",
+              "columnsExact": true,
+              "columns": [
+                {
+                  "heading": "Current Offers",
+                  "links": [
+                    "Bulk Case Discounts|/promotions/bulk-case",
+                    "Seasonal Menu Bundles|/promotions/seasonal-bundles",
+                    "New Customer Offer|/promotions/new-customer",
+                    "Clearance Lines|/promotions/clearance",
+                    "Free Delivery Threshold|/promotions/free-delivery"
+                  ]
+                },
+                {
+                  "heading": "Programmes",
+                  "links": [
+                    "Chef Rewards|/promotions/chef-rewards",
+                    "Menu Planning Support|/promotions/menu-planning",
+                    "Sampling Requests|/promotions/sampling",
+                    "Trade Show Offers|/promotions/trade-shows"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Loyalty Program",
+              "href": "/loyalty-program"
+            }
+          ]
+        }
       },
       "metadata": {
         "Language": "en"
@@ -65,7 +111,48 @@
       "page": "/drafts/qa/megamenu/four-links",
       "nav": {
         "path": "/drafts/qa/megamenu/nav-four-links",
-        "from": "/nav"
+        "from": "/nav",
+        "menus": {
+          "items": [
+            {
+              "label": "Products",
+              "href": "/products"
+            },
+            {
+              "label": "Recipes",
+              "href": "/recipes"
+            },
+            {
+              "label": "Training & Inspiration",
+              "href": "/training-inspiration"
+            },
+            {
+              "label": "Promotions",
+              "href": "/promotions",
+              "columnsExact": true,
+              "columns": [
+                {
+                  "heading": "Current Offers",
+                  "links": [
+                    "Bulk Case Discounts|/promotions/bulk-case",
+                    "Seasonal Menu Bundles|/promotions/seasonal-bundles"
+                  ]
+                },
+                {
+                  "heading": "Programmes",
+                  "links": [
+                    "Chef Rewards|/promotions/chef-rewards",
+                    "Sampling Requests|/promotions/sampling"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Loyalty Program",
+              "href": "/loyalty-program"
+            }
+          ]
+        }
       },
       "metadata": {
         "Language": "en"
@@ -78,7 +165,42 @@
       "page": "/drafts/qa/megamenu/one-column",
       "nav": {
         "path": "/drafts/qa/megamenu/nav-one-column",
-        "from": "/nav"
+        "from": "/nav",
+        "menus": {
+          "items": [
+            {
+              "label": "Products",
+              "href": "/products"
+            },
+            {
+              "label": "Recipes",
+              "href": "/recipes"
+            },
+            {
+              "label": "Training & Inspiration",
+              "href": "/training-inspiration"
+            },
+            {
+              "label": "Promotions",
+              "href": "/promotions",
+              "columnsExact": true,
+              "columns": [
+                {
+                  "heading": "Current Offers",
+                  "links": [
+                    "Bulk Case Discounts|/promotions/bulk-case",
+                    "Seasonal Menu Bundles|/promotions/seasonal-bundles",
+                    "Chef Rewards|/promotions/chef-rewards"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Loyalty Program",
+              "href": "/loyalty-program"
+            }
+          ]
+        }
       },
       "metadata": {
         "Language": "en"
@@ -364,7 +486,7 @@
           "result": "The panel matches the Promotions panel in FX-01. The two columns fill the panel — no empty fourth track, no reserved promo column, and no gap where the tile would have been."
         },
         {
-          "action": "Open fixture FX-05, which authors a category with a single link column, and expand it.",
+          "action": "Open fixture FX-05, whose Promotions category authors a single link column, and expand it.",
           "fixtures": [
             "MEGAMENU-FX-05"
           ],
@@ -563,7 +685,7 @@
           "result": "The drawer (.ufs-drawer) slides in from the left edge with its own logo and a close control. The categories are listed as collapsed accordion rows, mirroring the desktop categories one for one."
         },
         {
-          "action": "Expand the category authored with nine links.",
+          "action": "Expand Promotions, the category authored with nine links.",
           "result": "Exactly four links are visible, followed by a 'View more' control. The remaining five carry .is-extra and are not shown."
         },
         {
@@ -579,7 +701,7 @@
           "result": "The first category collapses as the second opens. Only one is open at any time."
         },
         {
-          "action": "Open fixture FX-04, which authors a category with exactly four links, and expand it in the drawer.",
+          "action": "Open fixture FX-04, whose Promotions category authors exactly four links, and expand it in the drawer.",
           "fixtures": [
             "MEGAMENU-FX-04"
           ],

@@ -206,6 +206,10 @@
                           "type": "boolean",
                           "description": "Drop the megamenu columns, leaving a link with nothing to open. That absence is what makes an item plain \u2014 there is no flag in the content model."
                         },
+                        "columnsExact": {
+                          "type": "boolean",
+                          "description": "Treat `columns` as the panel's complete set: live columns past the end of the list are dropped rather than left in place. Needed when the point of the fixture IS the column count \u2014 a one-column panel cannot be authored by replacing the first of three. Off by default, because leaving unreached columns alone is what a translation fixture wants and blanking them silently is the worse mistake."
+                        },
                         "columns": {
                           "type": "array",
                           "description": "Replace this item's labelled megamenu columns, positionally by kind \u2014 tiles and brand strips are left where they are, and live columns the list does not reach are left alone. Needed for an RTL or text-expansion fixture, where translating only the bar label leaves every submenu link in the source language.",

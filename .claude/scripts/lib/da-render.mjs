@@ -303,14 +303,22 @@ function columnRow(spec = {}) {
  *
  * Live columns the spec does not reach are left alone. That is deliberate: a fixture translating the
  * two columns it asserts should not silently blank a third.
+ *
+ * `exact` is for the other kind of fixture, the one whose whole point is the column count. A panel
+ * of one column cannot be authored by replacing the first of three, so `exact` drops the surplus
+ * and the list becomes the complete set. It stays opt-in because the lenient behaviour is what a
+ * translation fixture wants, and getting that wrong blanks content nobody meant to touch.
  */
-function rebuildColumns(panelRows, specs) {
+function rebuildColumns(panelRows, specs, exact = false) {
   const at = panelRows.map((r, i) => (classifyPanelRow(r) === 'column' ? i : -1)).filter((i) => i >= 0);
   const out = panelRows.slice();
   specs.slice(0, at.length).forEach((spec, n) => { out[at[n]] = columnRow(spec); });
   if (specs.length > at.length) {
     const insertAt = at.length ? at[at.length - 1] + 1 : out.length;
     out.splice(insertAt, 0, ...specs.slice(at.length).map(columnRow));
+  } else if (exact) {
+    // Drop from the end so the earlier indices stay valid as we go.
+    for (const i of at.slice(specs.length).reverse()) out.splice(i, 1);
   }
   return out;
 }
@@ -347,7 +355,7 @@ export function transformMenus(navHtml, spec = {}) {
     let panel = item.plain ? [] : rows.slice(1);
     // Translating or replacing the panel's columns is what an RTL or expansion fixture needs: the
     // bar label alone leaves every submenu link in the source language.
-    if (panel.length && item.columns) panel = rebuildColumns(panel, item.columns);
+    if (panel.length && item.columns) panel = rebuildColumns(panel, item.columns, item.columnsExact);
     return `<div class="nav-menu">${[first, ...panel].join('')}</div>`;
   });
 
@@ -463,8 +471,12 @@ export function transformPromo(navHtml, spec) {
 
     let next = panel.slice();
     if (edit.remove) {
-      if (tileAt === -1) throw new Error(`menu ${edit.menu} has no promo/feature tile to remove`);
-      next.splice(tileAt, 1);
+      // A tile that is not there is already removed. This used to throw, which made the fixture's
+      // correctness depend on the live nav still having a tile to take away — so when Promotions
+      // lost its tile upstream, a fixture asking for "Promotions with no tile" started failing for
+      // having got exactly what it asked for, and took the whole plan's generation down with it.
+      // What a `remove` states is the shape the fixture wants, not an edit that must land.
+      if (tileAt !== -1) next.splice(tileAt, 1);
     } else {
       const row = tileRow(edit);
       if (edit.position === undefined) {

@@ -349,6 +349,27 @@ test('transformPromo: extraCta authors the second CTA the content model forbids'
   assert.match(out, /<a href="\/2">Two<\/a>/);
 });
 
+// The lenient default is for translation fixtures. A fixture whose subject is the column count
+// needs the opposite, and could not be authored at all before this.
+test('transformMenus: columnsExact drops the live columns the list does not reach', () => {
+  const lenient = transformMenus(MENUS, {
+    items: [{ label: 'Recipes', href: '/recipes', columns: [{ heading: 'Only', links: ['A|/a'] }] }],
+  });
+  assert.ok(lenient.includes('By Cuisine'), 'without the flag, the second column survives');
+
+  const exact = transformMenus(MENUS, {
+    items: [{
+      label: 'Recipes',
+      href: '/recipes',
+      columnsExact: true,
+      columns: [{ heading: 'Only', links: ['A|/a'] }],
+    }],
+  });
+  assert.ok(exact.includes('Only'), 'the authored column is there');
+  assert.ok(!exact.includes('By Cuisine'), 'the surplus column is gone');
+  assert.ok(exact.includes('Mastering Umami'), 'tiles are still left where they are');
+});
+
 test('transformPromo: ctaIcon authors the arrow token the CSS sizes', () => {
   const out = transformPromo(MENUS, { menu: 'Recipes', title: 'T', cta: 'Go|/g', ctaIcon: true });
   assert.match(out, /<a href="\/g">Go<\/a> :arrow:/);
@@ -358,6 +379,22 @@ test('transformPromo: remove drops the tile and nothing else', () => {
   const out = transformPromo(MENUS, { menu: 'Recipes', remove: true });
   assert.ok(!out.includes('20-Minute Weeknight Recipes'));
   assert.ok(out.includes('By Cuisine') && out.includes('All Recipes'), 'the columns survive');
+});
+
+// A remove states the shape the fixture wants, not an edit that has to land. Making it throw tied
+// the fixture's correctness to the live nav still having a tile — so when Promotions lost its tile
+// upstream, the fixture asking for a tile-less Promotions broke by getting what it asked for.
+test('transformPromo: removing a tile that is already gone is a no-op, not an error', () => {
+  // Recipes ships two tiles, a leading feature and a trailing promo, so it takes two removes to
+  // empty it. The third is the case that used to throw.
+  const stripped = transformPromo(MENUS, [
+    { menu: 'Recipes', remove: true },
+    { menu: 'Recipes', remove: true },
+  ]);
+  assert.ok(!stripped.includes('Mastering Umami'), 'both tiles are gone');
+  const again = transformPromo(stripped, { menu: 'Recipes', remove: true });
+  assert.equal(again, stripped, 'removing from a panel with no tile left changes nothing');
+  assert.ok(again.includes('By Cuisine') && again.includes('All Recipes'), 'the columns survive');
 });
 
 test('transformPromo: escapes authored text rather than emitting markup', () => {
