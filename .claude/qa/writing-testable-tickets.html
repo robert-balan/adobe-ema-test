@@ -449,6 +449,25 @@
     </ul>
   </section>
 
+  <section class="check" style="border-top:1px solid var(--rule);">
+    <h2>If you’re drafting with Claude</h2>
+    <p class="lede">
+      There’s a prompt that encodes all of the above — where to read from, what not to retype, the
+      five things to answer, and how to word a criterion so it can fail. It lives in the QA repo at
+      <code style="font-family:var(--mono);font-size:0.9em;">.claude/qa/re-spec-prompt.md</code>,
+      ready to paste.
+    </p>
+    <p class="lede" style="margin-top:1rem;">
+      The most important line in it is the one telling the model <strong style="color:var(--ink);">not
+      to invent</strong>. Asked for an empty state or a character limit nobody has decided, it will
+      happily produce something sensible-sounding — and once that’s in the ticket, we can’t tell it
+      from a real decision. We’ll test it, it’ll fail, and someone will spend a day building a
+      requirement that never existed. The prompt tells it to write <code
+      style="font-family:var(--mono);font-size:0.9em;">OPEN:</code> and the question instead. A gap
+      we can see is far cheaper than a confident guess.
+    </p>
+  </section>
+
   <p class="closer">
     <strong>One ask in return.</strong> Where the handover already answers something, link us to the
     component spec rather than retyping it — the specs are detailed enough that a paraphrase in a
