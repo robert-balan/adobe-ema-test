@@ -9,9 +9,45 @@ a vague AC into a testable number — never guess a value the handover already p
 | `https://felipecastro92.github.io/ufs-design-system/handover/index.html` | Component documentation |
 | `https://felipecastro92.github.io/ufs-design-system/handover/full-page-preview-v0.2.html` | Working prototype of the whole site — real markup, CSS and JS for every block |
 | `https://felipecastro92.github.io/ufs-design-system/handover/tokens.css` | The token definitions every value in the prototype resolves through |
+| `.../handover/<component>-spec.html` | **A spec page per component — read this first.** See the list below |
 
 The design-system root (`.../ufs-design-system/`) is a separate, higher-level site. It does **not**
 link to `handover/` and does not contain the blocks — don't go looking for a block there.
+
+## The per-component spec pages
+
+Fourteen of them, and they are the richest thing in the handover — live, interactive pages with the
+working CSS and JS attached, not static images. For a long time this file listed only the three
+URLs above, so plans were being written against the prototype when a component spec answered the
+question directly. Read the component's own spec before anything else.
+
+```
+announcement-banner  breadcrumb  campaign-hero  carousel-full-width-banner  filters-catalog
+flex-carousel  footer  nav-header  product-hero  product-tip  promo-banner  teaser  tiles  title
+```
+
+`nav-header-spec.html` is the big one — the whole header family in a single page: utility bar and
+language dropdown, primary nav, all three megamenu layouts, brands carousel, desktop and mobile
+search, sign-in and profile panels, the mobile drawer, the minimal and checkout headers, and RTL.
+
+Six page templates sit alongside them (`template-home-basic`, `template-catalog`,
+`template-landing`, `template-inspiration`, `template-product-bin`, `template-training-detail`).
+
+**What the component specs reliably answer**, checked across all of them rather than assumed:
+anatomy and structure; desktop vs mobile with the switch widths; **i18n and RTL — every spec has a
+section, saying what mirrors and what must not**; interaction behaviour for the moving parts; and
+colour variants.
+
+**What they do not answer, so the ticket must:** empty states (absent from every one of them),
+error and validation behaviour, loading and slow states, content counts and length limits — the
+breadcrumb's collapse threshold is the sole exception — and keyboard focus, which only
+`nav-header-spec` covers.
+
+**A richer handover does not remove the need for a ruling.** The breadcrumb's mobile switch has four
+written-down candidates: the Jira spec says 900px, `breadcrumb-spec.html` says 768px, the
+implementation's padding agrees with 900px, and its scroll treatment starts at 600px. More sources
+can mean more disagreement, not less. When they conflict, the ticket decides — see the
+question-asking rules in `.claude/agents/qa-xray.md`.
 
 ## The implementation — via the preview, not the repo
 

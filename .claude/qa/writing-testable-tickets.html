@@ -1,0 +1,462 @@
+<title>Writing Tickets We Can Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:      #F1F3F5;
+    --surface:    #FFFFFF;
+    --ink:        #15181D;
+    --graphite:   #5C636D;
+    --faint:      #868D96;
+    --rule:       #D6DAE0;
+    --rule-soft:  #E5E8EC;
+    --mark:       #B32637;
+    --mark-soft:  #FBEFF1;
+    --mark-edge:  #E9C4CA;
+
+    --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --measure: 63ch;
+    --gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #101317;
+      --surface:   #171B21;
+      --ink:       #E7EAEE;
+      --graphite:  #9BA3AD;
+      --faint:     #79818B;
+      --rule:      #2B313A;
+      --rule-soft: #232830;
+      --mark:      #FF8090;
+      --mark-soft: #24181C;
+      --mark-edge: #4A2B32;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:     #101317;
+    --surface:   #171B21;
+    --ink:       #E7EAEE;
+    --graphite:  #9BA3AD;
+    --faint:     #79818B;
+    --rule:      #2B313A;
+    --rule-soft: #232830;
+    --mark:      #FF8090;
+    --mark-soft: #24181C;
+    --mark-edge: #4A2B32;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 61rem;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 4.5rem) clamp(1.15rem, 4vw, 3rem) 6rem;
+  }
+
+  /* ---------------------------------------------------------- masthead */
+
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.4rem; }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--mark);
+    margin: 0 0 1.1rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 6vw, 3.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.022em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    max-width: var(--measure);
+    margin: 1.25rem 0 0;
+    font-size: 1.09rem;
+    color: var(--graphite);
+  }
+
+  /* ---------------------------------------------------------- premise */
+
+  .premise {
+    margin: var(--gap) 0 0;
+    padding: 1.6rem 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--mark);
+    max-width: var(--measure);
+  }
+  .premise p { margin: 0; }
+  .premise p + p { margin-top: 0.85rem; }
+  .premise strong { font-weight: 600; }
+
+  /* ---------------------------------------------------------- sections */
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1.4rem, 3.2vw, 1.9rem);
+    line-height: 1.12;
+    letter-spacing: -0.014em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .area {
+    display: grid;
+    grid-template-columns: 15rem 1fr;
+    gap: 0 3rem;
+    padding: 2.4rem 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .area:first-of-type { border-top: 1px solid var(--rule); }
+
+  .area-head { position: sticky; top: 1.5rem; align-self: start; }
+
+  .given {
+    margin: 0.9rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--faint);
+  }
+  .given b {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--graphite);
+    margin-bottom: 0.3rem;
+  }
+
+  .asks { margin: 0; padding: 0; list-style: none; max-width: var(--measure); }
+  .asks li {
+    position: relative;
+    padding: 0 0 0 1.5rem;
+    margin: 0 0 0.85rem;
+  }
+  .asks li:last-child { margin-bottom: 0; }
+  .asks li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.68em;
+    width: 0.62rem;
+    height: 1px;
+    background: var(--mark);
+  }
+  .asks em { font-style: normal; color: var(--graphite); }
+
+  .aside {
+    margin: 1.4rem 0 0 1.5rem;
+    padding: 0.75rem 0 0.75rem 1rem;
+    border-left: 2px solid var(--mark-edge);
+    background: var(--mark-soft);
+    max-width: calc(var(--measure) - 1.5rem);
+    font-size: 0.94rem;
+    color: var(--graphite);
+  }
+  .aside p { margin: 0; }
+
+  /* ---------------------------------------------------------- wording */
+
+  .wording { margin-top: var(--gap); padding-top: 2.4rem; border-top: 2px solid var(--ink); }
+  .lede { max-width: var(--measure); color: var(--graphite); margin: 0.9rem 0 0; }
+
+  .rules { max-width: var(--measure); margin: 1.6rem 0 2.4rem; padding: 0 0 0 1.15rem; }
+  .rules li { margin-bottom: 0.5rem; }
+  .rules li::marker { color: var(--mark); }
+
+  .pairs { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); }
+  .cell { background: var(--surface); padding: 1.05rem 1.2rem; }
+  .cell span {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .cell.bad span { color: var(--faint); }
+  .cell.good span { color: var(--mark); }
+  .cell.bad { color: var(--graphite); }
+  .cell p { margin: 0; font-size: 0.96rem; }
+
+  /* ---------------------------------------------------------- checklist */
+
+  .check { margin-top: var(--gap); padding-top: 2.4rem; border-top: 2px solid var(--ink); }
+  .check ul { list-style: none; margin: 1.6rem 0 0; padding: 0; max-width: var(--measure); }
+  .check li {
+    position: relative;
+    padding: 0.62rem 0 0.62rem 2.1rem;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .check li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.92em;
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 1.5px solid var(--mark);
+    border-radius: 2px;
+  }
+
+  .closer {
+    margin-top: var(--gap);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+    color: var(--graphite);
+    font-size: 0.98rem;
+  }
+  .closer strong { color: var(--ink); font-weight: 600; }
+
+  @media (max-width: 46rem) {
+    .area { grid-template-columns: 1fr; gap: 1.15rem; padding: 2rem 0; }
+    .area-head { position: static; }
+    .pair { grid-template-columns: 1fr; }
+    .aside { margin-left: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">A note from QA · writing requirements</p>
+    <h1>Writing tickets we can test</h1>
+    <p class="standfirst">
+      We check the build against what your ticket says. So if something isn’t written down
+      somewhere, we can’t really call it a bug — even when it looks wrong to us. Good news: the
+      design handover covers far more than we’d assumed. Here’s the short list of what’s left.
+    </p>
+  </header>
+
+  <div class="premise">
+    <p>
+      <strong>We went and read the whole handover before writing this.</strong> There are fourteen
+      component specs in there, and they’re not just pictures — they’re live, interactive pages with
+      the working code attached. Between those and the block library, you’ve already answered most
+      of what we’d normally ask for.
+    </p>
+    <p>
+      So this isn’t a list of everything a ticket needs. It’s the five things we genuinely can’t
+      find anywhere, plus one that no amount of design detail will ever settle.
+    </p>
+  </div>
+
+  <section class="area">
+    <div class="area-head">
+      <h2>Already sorted — please don’t rewrite it</h2>
+      <p class="given"><b>Where we look</b> The component specs in the handover, and the block library in the authoring tool.</p>
+    </div>
+    <div>
+      <ul class="asks">
+        <li>How it looks — colours, spacing, type, the anatomy of every part. We read those straight off the handover and resolve them through your tokens file.</li>
+        <li>Desktop and mobile layouts, with the switch-over widths written in.</li>
+        <li>What happens in Arabic. Every single component spec has an i18n and right-to-left section, and they say what flips and what stays put. That was the thing we least expected to find, and it’s there for all of them.</li>
+        <li>How the moving parts behave — dropdowns opening and closing, carousels scrolling, arrows greying out at the ends. Often with the actual JavaScript next to it.</li>
+        <li>Colour variants, and which components have them.</li>
+      </ul>
+      <div class="aside">
+        <p>If it’s in the handover, point us at it and we’ll use it. You genuinely don’t need to retype any of the above into a ticket.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="area">
+    <div class="area-head">
+      <h2>When there’s nothing to show</h2>
+      <p class="given"><b>Not in the handover</b> We searched all fourteen specs. Empty states appear in none of them.</p>
+    </div>
+    <div>
+      <ul class="asks">
+        <li>What should someone see when there’s no content at all? Does the whole thing disappear, or stay as an empty box?</li>
+        <li>Which bits does an author have to fill in, and which can they skip? If they skip one, does the gap close up or stay empty?</li>
+        <li>What shows up if an image is missing or won’t load?</li>
+      </ul>
+      <div class="aside">
+        <p>Every spec is drawn with content in it, which is exactly right for a design — but it means the “nothing here yet” version has never been decided by anyone.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="area">
+    <div class="area-head">
+      <h2>When something goes wrong</h2>
+      <p class="given"><b>Not in the handover</b> Forms are drawn, but nothing describes them failing.</p>
+    </div>
+    <div>
+      <ul class="asks">
+        <li>What counts as a valid entry, and what should the message say when it isn’t?</li>
+        <li>When should that message appear — while they’re typing, when they click away, or only when they press the button?</li>
+        <li>What do they see if it fails to send, or if it’s just slow to respond?</li>
+      </ul>
+      <div class="aside">
+        <p>The newsletter sign-up is a good example: the field and the button are fully specified, but there’s nothing anywhere about a bad email address.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="area">
+    <div class="area-head">
+      <h2>How much is too much</h2>
+      <p class="given"><b>Mostly not in the handover</b> The breadcrumb has a rule for this. The others don’t.</p>
+    </div>
+    <div>
+      <ul class="asks">
+        <li>How many items can there be? What should we see with one, and with more than the design shows?</li>
+        <li>How long can the text get before it’s a problem — and then what? Wrap onto more lines, cut off with a “…”, or scroll?</li>
+      </ul>
+      <div class="aside">
+        <p>The breadcrumb spec does this really well — it says only collapse the middle when there are two or more levels to hide, and explains why. That’s the pattern. If every component had a line like that we’d never ask again.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="area">
+    <div class="area-head">
+      <h2>The states that aren’t drawn</h2>
+      <p class="given"><b>Patchy</b> The header spec covers keyboard focus. Most of the others don’t mention it.</p>
+    </div>
+    <div>
+      <ul class="asks">
+        <li>What does it look like when someone reaches it with the keyboard rather than the mouse?</li>
+        <li>What about while it’s loading, or when it’s switched off?</li>
+        <li>If any of those should look the same as one that’s already drawn, just say so — <em>“focus looks the same as hover”</em> is a complete answer and takes five seconds.</li>
+      </ul>
+      <div class="aside">
+        <p>Worth knowing: reaching something with the keyboard isn’t the same as hovering over it with a mouse. A design showing the hover state hasn’t told us what a keyboard user sees, and that’s the most common accessibility problem we find.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="area">
+    <div class="area-head">
+      <h2>Which number wins</h2>
+      <p class="given"><b>Nothing can settle this but you.</b> Not the design, not the code.</p>
+    </div>
+    <div>
+      <ul class="asks">
+        <li><strong>If the built thing and the design don’t match, which one is right?</strong> We can measure both. We can’t choose, and every test has to pick a side.</li>
+        <li>Which parts of this are your ticket’s job, and which belong to a different one? When something gets shared or moved out into its own piece, that’s a decision — we can’t work it out by looking.</li>
+        <li>Anything deliberately left out, so we don’t test it and you don’t get a report about it.</li>
+      </ul>
+      <div class="aside">
+        <p><strong>A live example.</strong> For where the breadcrumb switches to its mobile layout we currently have four different numbers: the ticket says 900, the handover says 768, the stylesheet’s spacing agrees with 900, and the scrolling behaviour starts at 600. All four are written down somewhere. Only you can say which one is the requirement — and notice that more design detail didn’t remove the question, it added a candidate.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wording">
+    <h2>Writing it so it can actually fail</h2>
+    <p class="lede">
+      The quick test is this: could someone take a screenshot that proves it wrong? If not, there’s
+      nothing for us to check. Two things make all the difference — say what sets it off, and say
+      what should be true afterwards.
+    </p>
+    <ul class="rules">
+      <li>One thing per line. Two joined with “and” turn into a half-pass, and there’s nowhere to record that.</li>
+      <li>Say what triggers it, and what someone should see once it has.</li>
+      <li>Try to avoid “correctly”, “properly”, “as expected” and “works”. They quietly hand the decision to whoever’s reading, which is usually us.</li>
+      <li>Describe what a person sees, not how it’s built. Then it still makes sense after the code changes.</li>
+      <li>Keep the numbering steady, so adding one in the middle doesn’t shift all the others. We’ll be quoting those numbers for months.</li>
+    </ul>
+
+    <div class="pairs">
+      <div class="pair">
+        <div class="cell bad">
+          <span>Too vague</span>
+          <p>The carousel works correctly on mobile.</p>
+        </div>
+        <div class="cell good">
+          <span>We can test this</span>
+          <p>On phones the carousel shows one card at a time and you swipe to move along. There are no arrow buttons.</p>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell bad">
+          <span>Locks in the how</span>
+          <p>Enter and Space activate focused controls.</p>
+        </div>
+        <div class="cell good">
+          <span>Says what matters</span>
+          <p>Everything can be reached and used with the keyboard alone.</p>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell bad">
+          <span>No cut-off point</span>
+          <p>Long titles are handled gracefully.</p>
+        </div>
+        <div class="cell good">
+          <span>Has a cut-off point</span>
+          <p>A title longer than two lines is cut off with a “…”. The card stays the same height.</p>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell bad">
+          <span>Nothing to measure</span>
+          <p>The block is responsive.</p>
+        </div>
+        <div class="cell good">
+          <span>Something to measure</span>
+          <p>At 900px and below, the three columns stack up in the order they were added. At 901px and above they sit side by side.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="check">
+    <h2>A quick check before you hand it over</h2>
+    <p class="lede">Five questions. If the ticket answers these, and the handover covers the rest, we can get straight on with the tests.</p>
+    <ul>
+      <li>Have I said what shows when there’s nothing to show, or an image won’t load?</li>
+      <li>Have I said what a wrong entry looks like, and when the message appears?</li>
+      <li>Have I said how many, and how long, and what happens past that?</li>
+      <li>Have I covered the keyboard and loading states — or said they match something already drawn?</li>
+      <li>If the build and the design disagree, have I said which one is right?</li>
+    </ul>
+  </section>
+
+  <p class="closer">
+    <strong>One ask in return.</strong> Where the handover already answers something, link us to the
+    component spec rather than retyping it — the specs are detailed enough that a paraphrase in a
+    ticket is more likely to drift from them than match them. And if you change your mind about
+    something the handover shows, tell us in the ticket, because we read the handover as current
+    unless you say otherwise. Everything we test on every component regardless — accessibility,
+    keyboard use, right-to-left, no sideways scrolling, nothing jumping about as the page loads —
+    stays our job, mentioned or not.
+  </p>
+
+</div>
