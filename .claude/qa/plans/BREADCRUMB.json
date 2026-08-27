@@ -93,11 +93,11 @@
     },
     {
       "id": "BREADCRUMB-FX-07",
-      "title": "RTL",
-      "purpose": "The FX-02 trail on a right-to-left page, so direction, mirroring and the mobile behaviour can be checked together",
+      "title": "Right-to-left — an Arabic trail",
+      "purpose": "An Arabic trail on a right-to-left page, so direction, mirroring and the mobile collapse can be judged on real Arabic labels rather than reversed English ones.",
       "page": "/drafts/qa/breadcrumb/rtl",
       "metadata": {
-        "Breadcrumb": "Products | Sauces & Condiments | Ketchup",
+        "Breadcrumb": "المنتجات | الصلصات والمتبلات | الكاتشب",
         "Language": "ar-MA"
       }
     },
@@ -403,7 +403,7 @@
     {
       "id": "BREADCRUMB-TC-06",
       "summary": "Block: Breadcrumb - Internationalization - RTL direction, mirroring and collapse",
-      "scope": "That the trail works in a right-to-left locale: it reads right to left from the start edge, the chevrons point the other way, and the mobile shortening behaves the same way without clipping or pushing the page sideways.",
+      "scope": "That the trail works in a right-to-left locale with real Arabic labels: it reads right to left from the start edge, the chevrons point the other way, and the mobile shortening behaves the same way without clipping or pushing the page sideways.",
       "ac": [
         "AC-11",
         "AC-12"
@@ -427,7 +427,7 @@
         },
         {
           "action": "Read the trail from the start edge.",
-          "result": "Home sits at the right-hand edge and the trail reads right to left, ending with the current page on the left."
+          "result": "The home crumb sits at the right-hand edge and the trail reads right to left — المنتجات, then الصلصات والمتبلات — ending with the current page, الكاتشب, on the left."
         },
         {
           "action": "Inspect a chevron separator.",

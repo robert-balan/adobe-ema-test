@@ -251,11 +251,10 @@
     },
     {
       "id": "NAV-FX-06",
-      "title": "Right-to-left",
-      "purpose": "The reference bar with the page language set to Arabic, so the whole nav mirrors — the same content, read the other way",
+      "title": "Right-to-left — the bar in Arabic",
+      "purpose": "The nav authored in Arabic under ar-MA, so a reviewer can judge whether the mirrored bar reads correctly rather than inferring it from reversed English. The labels are also longer than the English ones, which is the expansion axis for free.",
       "page": "/drafts/qa/nav/rtl",
       "metadata": {
-        "nav": "/drafts/qa/nav/nav-reference",
         "Language": "ar-MA"
       },
       "sections": [
@@ -266,40 +265,222 @@
           ],
           "rows": [
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ],
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ],
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ],
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ],
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ],
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ],
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ],
             [
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>",
-              "<p>Filler copy so the page is tall enough to scroll. The nav is the thing under test; this section only exists to give it something to stay pinned above.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ]
           ]
         }
-      ]
+      ],
+      "nav": {
+        "path": "/drafts/qa/nav/nav-rtl",
+        "from": "/nav",
+        "utility": {
+          "links": [
+            "من نحن|/ar/about-us",
+            "اتصل بنا|/ar/contact",
+            "الأسئلة الشائعة|/ar/faq"
+          ],
+          "trigger": ":globe: المغرب · AR",
+          "languages": [
+            "العربية · AR|/ar",
+            "Français · FR|/fr",
+            "English · EN|/"
+          ],
+          "note": "أنت تتصفح موقع المغرب",
+          "change": "تغيير البلد|/ar/change-country"
+        },
+        "tools": [
+          ":search: بحث|/ar/search",
+          ":fav: المفضلة|/ar/favorites",
+          ":cart: السلة (٣)|/ar/cart",
+          ":account: حسابي|/ar/account"
+        ],
+        "menus": {
+          "items": [
+            {
+              "label": "المنتجات",
+              "href": "/ar/products",
+              "columns": [
+                {
+                  "heading": "الصلصات والمتبلات",
+                  "links": [
+                    "الكاتشب|/ar/products/ketchup",
+                    "المايونيز|/ar/products/mayonnaise",
+                    "صلصات السلطة|/ar/products/dressings"
+                  ]
+                },
+                {
+                  "heading": "الألبان والدهون",
+                  "links": [
+                    "الزبدة|/ar/products/butter",
+                    "الكريمة|/ar/products/cream",
+                    "الزيوت|/ar/products/oils"
+                  ]
+                },
+                {
+                  "heading": "الأساسيات الطهوية",
+                  "links": [
+                    "المرق|/ar/products/bouillon",
+                    "الشوربات|/ar/products/soups",
+                    "التوابل|/ar/products/seasonings"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الوصفات",
+              "href": "/ar/recipes",
+              "columns": [
+                {
+                  "heading": "الوصفات",
+                  "links": [
+                    "كل الوصفات|/ar/recipes/all",
+                    "المقبلات والشوربات|/ar/recipes/starters",
+                    "الأطباق الرئيسية|/ar/recipes/mains",
+                    "الحلويات|/ar/recipes/desserts"
+                  ]
+                },
+                {
+                  "heading": "حسب المطبخ",
+                  "links": [
+                    "آسيوي|/ar/recipes/asian",
+                    "متوسطي|/ar/recipes/mediterranean",
+                    "أمريكا اللاتينية|/ar/recipes/latin",
+                    "أوروبي كلاسيكي|/ar/recipes/european"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "التدريب والإلهام",
+              "href": "/ar/training",
+              "columns": [
+                {
+                  "heading": "التدريب",
+                  "links": [
+                    "الدورات المتاحة|/ar/training/courses",
+                    "التطوير المهني|/ar/training/development",
+                    "الشهادات|/ar/training/certificates"
+                  ]
+                },
+                {
+                  "heading": "الإلهام",
+                  "links": [
+                    "اتجاهات القطاع|/ar/inspiration/trends",
+                    "أفكار القوائم|/ar/inspiration/menus",
+                    "قصص الطهاة|/ar/inspiration/stories"
+                  ]
+                },
+                {
+                  "heading": "المصادر",
+                  "links": [
+                    "أدلة الاستخدام|/ar/resources/guides",
+                    "الأدوات الحسابية|/ar/resources/tools",
+                    "التحميلات|/ar/resources/downloads"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الاستدامة",
+              "href": "/ar/sustainability",
+              "columns": [
+                {
+                  "heading": "العروض الحالية",
+                  "links": [
+                    "عروض الموسم|/ar/offers/seasonal",
+                    "خصومات الكميات|/ar/offers/bulk"
+                  ]
+                },
+                {
+                  "heading": "الولاء والمكافآت",
+                  "links": [
+                    "برنامج النقاط|/ar/loyalty/points",
+                    "المكافآت|/ar/loyalty/rewards"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "برنامج الولاء",
+              "href": "/ar/loyalty-program",
+              "plain": true
+            }
+          ]
+        },
+        "promo": [
+          {
+            "menu": "المنتجات",
+            "eyebrow": "وصل حديثاً",
+            "title": "مرق كنور بروفيشنال متوفر الآن بعبوات سعة لتر واحد",
+            "cta": "استكشف التشكيلة|/ar/products/seasonal"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "feature",
+            "eyebrow": "اختيار الشيف",
+            "title": "وصفات سريعة في عشرين دقيقة",
+            "description": "أطباق بجودة احترافية من مكونات المخزن الأساسية، مع وصفات جديدة كل أسبوع.",
+            "cta": "تصفح الوصفات|/ar/recipes/all"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "promo",
+            "eyebrow": "الأكثر رواجاً",
+            "title": "إتقان الأومامي: وحدة تدريبية مجانية للطهاة",
+            "cta": "ابدأ التعلم|/ar/academy/umami"
+          },
+          {
+            "menu": "التدريب والإلهام",
+            "eyebrow": "وحدة مجانية",
+            "title": "دورة تدريبية جديدة في فنون الطهي الحديثة",
+            "cta": "سجّل الآن|/ar/training/enrol"
+          }
+        ],
+        "label": "تعرّف على علاماتنا التجارية العالمية:",
+        "links": [
+          {
+            "alt": "كنور"
+          },
+          {
+            "alt": "هيلمانز"
+          },
+          {
+            "alt": "ليبتون"
+          },
+          {
+            "alt": "كاريت دور"
+          }
+        ]
+      }
     },
     {
       "id": "NAV-FX-07",
@@ -673,7 +854,7 @@
     {
       "id": "NAV-TC-07",
       "summary": "Header: Navigation - Internationalization - Right-to-left and long labels",
-      "scope": "The bar in a right-to-left market: everything mirrors except the chevrons, which the spec deliberately leaves alone. Also that labels longer than English ones do not break the row.",
+      "scope": "The bar in a right-to-left market, authored in Arabic rather than reversed English: everything mirrors except the chevrons, which the spec deliberately leaves alone. Also that labels longer than English ones do not break the row.",
       "ac": [
         "AC-9",
         "AC-4"
@@ -694,7 +875,7 @@
       "steps": [
         {
           "action": "Open fixture FX-06, which sets the page language to Arabic.",
-          "result": "The whole bar mirrors: the logo is now at the right-hand start edge and the links run from right to left, still in the authored order."
+          "result": "The whole bar mirrors: the logo is now at the right-hand start edge and the links run from right to left, still in the authored order — المنتجات, then الوصفات, then التدريب والإلهام, then الاستدامة, then برنامج الولاء."
         },
         {
           "action": "Look at the chevrons next to the dropdown items.",

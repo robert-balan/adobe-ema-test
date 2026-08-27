@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
   metadataBlock, block, document_, fixturePage, findBrandStrip, editLink, transformNav, transformUtility,
-  transformMenus, transformLogo, transformPromo, classifyPanelRow, transformFooter,
+  transformMenus, transformLogo, transformPromo, classifyPanelRow, transformFooter, transformTools,
 } from '../lib/da-render.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -568,4 +568,96 @@ test('transformFooter: sections beyond the three are carried through untouched',
 test('transformFooter: refuses a footer with no logo token rather than editing the wrong thing', () => {
   const noLogo = FOOTER.replace(':ufs-logo:', 'UFS');
   assert.throws(() => transformFooter(noLogo, { brand: { logoText: 'X' } }), /no :ufs-logo: token/);
+});
+
+/* ------------------------------------- submenu columns (RTL / expansion) */
+
+test('transformMenus: columns replaces a panel’s labelled columns, in the stored shape', () => {
+  const out = transformMenus(MENUS, {
+    items: [{
+      label: 'الوصفات',
+      href: '/ar/recipes',
+      columns: [{ heading: 'الوصفات', links: ['كل الوصفات|/ar/recipes/all', 'المقبلات|/ar/recipes/starters'] }],
+    }],
+  });
+  // heading is a plain <p> in cell one, links are <p><a> in cell two — no <strong>, or the row
+  // stops being a column at all.
+  assert.match(out, /<div><div><p>الوصفات<\/p><\/div><div><p><a href="\/ar\/recipes\/all">كل الوصفات<\/a><\/p>/);
+  assert.ok(!out.includes('All Recipes'), 'the first live column was replaced');
+});
+
+test('transformMenus: columns leaves tiles and untouched columns alone', () => {
+  const out = transformMenus(MENUS, {
+    items: [{ label: 'Recipes', columns: [{ heading: 'C1', links: ['L1|/l1'] }] }],
+  });
+  // Recipes ships a leading feature tile and a trailing promo tile; neither is a column.
+  assert.ok(out.includes('20-Minute Weeknight Recipes'), 'the feature tile survives');
+  assert.ok(out.includes('Mastering Umami'), 'the promo tile survives');
+  assert.ok(out.includes('By Cuisine'), 'a column the spec did not reach is left as it was');
+});
+
+test('transformMenus: more columns than the panel has are appended inside the column run', () => {
+  const out = transformMenus(MENUS, {
+    items: [{ label: 'Recipes', columns: [{ heading: 'A', links: ['a|/a'] }, { heading: 'B', links: ['b|/b'] }, { heading: 'C', links: ['c|/c'] }] }],
+  });
+  assert.ok(out.includes('<p>A</p>') && out.includes('<p>B</p>') && out.includes('<p>C</p>'));
+  // The third lands before the trailing promo tile rather than after it.
+  assert.ok(out.indexOf('<p>C</p>') < out.indexOf('Mastering Umami'), 'appended inside the columns');
+});
+
+test('transformMenus: a plain item has no panel, so columns cannot resurrect one', () => {
+  const out = transformMenus(MENUS, {
+    items: [{ label: 'Loyalty', plain: true, columns: [{ heading: 'X', links: ['x|/x'] }] }],
+  });
+  assert.ok(!out.includes('<p>X</p>'), 'nothing to rebuild on an item with no columns');
+});
+
+test('transformMenus: column values are escaped, not emitted as markup', () => {
+  const out = transformMenus(MENUS, {
+    items: [{ label: 'R', columns: [{ heading: 'Sauces & <b>Dips</b>', links: ['A & B|/ab'] }] }],
+  });
+  assert.ok(out.includes('Sauces &amp; &lt;b&gt;Dips&lt;/b&gt;') && out.includes('A &amp; B'));
+});
+
+test('transformNav: columns compose with a promo edit on the same menu', () => {
+  const out = transformNav(MENUS, {
+    menus: { items: [{ label: 'Recipes', columns: [{ heading: 'الوصفات', links: ['كل الوصفات|/ar/all'] }] }] },
+    promo: { menu: 'Recipes', eyebrow: 'مختارات الطاهي', title: 'وصفات سريعة', cta: 'تصفح|/ar/browse' },
+  });
+  assert.match(out, /<p>الوصفات<\/p>/, 'the column was translated');
+  assert.match(out, /<p><strong>وصفات سريعة<\/strong><\/p>/, 'and the tile was edited too');
+});
+
+test('transformTools: replaces the LAST list, leaving the utility links alone', () => {
+  const withTools = NAV.replace('</main>', '<div><ul><li><a href="/search">:search: Search</a></li><li><a href="/cart">:cart: Cart</a></li></ul></div></main>');
+  const out = transformTools(withTools, [':search: بحث|/search', ':cart: السلة|/cart']);
+  assert.match(out, /<li><a href="\/search">:search: بحث<\/a><\/li>/);
+  assert.ok(!out.includes(':search: Search'), 'the English tools are gone');
+  assert.ok(out.includes('>About Us<'), 'the utility links are untouched');
+});
+
+// The nav sample authors its megamenu columns as lists, so "the last <ul>" is a submenu there. A
+// nav with no tools row must be refused rather than have a submenu quietly rewritten.
+test('transformTools: refuses a nav with no icon-token list rather than rewriting a submenu', () => {
+  assert.throws(() => transformTools(NAV, [':search: بحث|/search']), /no list here looks like that/);
+  assert.ok(NAV.includes('>About Us<') && NAV.includes('>One<'), 'nothing was touched');
+});
+
+test('transformTools: picks the tools row even when submenus are authored as lists', () => {
+  const withTools = NAV.replace('</main>', '<div><ul><li><a href="/search">:search: Search</a></li></ul></div></main>');
+  const out = transformTools(withTools, [':search: بحث|/search']);
+  assert.ok(out.includes(':search: بحث'), 'the tools row was replaced');
+  assert.ok(out.includes('>One<') && out.includes('>R1<'), 'the megamenu lists survive');
+  assert.ok(out.includes('>About Us<'), 'the utility links survive');
+});
+
+test('transformNav: tools compose with utility and menus without either moving the other', () => {
+  const withTools = MENUS.replace('</main>', '<div><ul><li><a href="/search">:search: Search</a></li></ul></div></main>');
+  const out = transformNav(withTools, {
+    utility: { links: ['من نحن|/ar/about'] },
+    tools: [':search: بحث|/search'],
+    menus: { items: [{ label: 'الوصفات', columns: [{ heading: 'الوصفات', links: ['كل الوصفات|/ar/all'] }] }] },
+  });
+  assert.ok(out.includes('من نحن') && out.includes(':search: بحث') && out.includes('<p>الوصفات</p>'));
+  assert.ok(!out.includes('About Us') && !out.includes(':search: Search'));
 });

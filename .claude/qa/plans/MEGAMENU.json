@@ -35,7 +35,10 @@
         "path": "/drafts/qa/megamenu/nav-layout-c",
         "from": "/nav",
         "promo": [
-          { "menu": "Promotions", "remove": true }
+          {
+            "menu": "Promotions",
+            "remove": true
+          }
         ]
       },
       "metadata": {
@@ -83,12 +86,193 @@
     },
     {
       "id": "MEGAMENU-FX-06",
-      "title": "Right-to-left",
-      "purpose": "The reference panels with the page language set to Arabic, so the whole megamenu mirrors and the drawer changes which edge it enters from — the same content, read the other way.",
+      "title": "Right-to-left — the panels in Arabic",
+      "purpose": "The megamenu authored in Arabic under ar-MA — bar labels, column headings and every submenu link — so the mirrored panel, the drawer's entry edge and the accordion can be judged on real right-to-left text. Translating only the bar label would leave every panel link in English, which is what made the previous fixture hard to read.",
       "page": "/drafts/qa/megamenu/rtl",
       "metadata": {
-        "nav": "/drafts/qa/megamenu/nav-reference",
         "Language": "ar-MA"
+      },
+      "nav": {
+        "path": "/drafts/qa/megamenu/nav-rtl",
+        "from": "/nav",
+        "utility": {
+          "links": [
+            "من نحن|/ar/about-us",
+            "اتصل بنا|/ar/contact",
+            "الأسئلة الشائعة|/ar/faq"
+          ],
+          "trigger": ":globe: المغرب · AR",
+          "languages": [
+            "العربية · AR|/ar",
+            "Français · FR|/fr",
+            "English · EN|/"
+          ],
+          "note": "أنت تتصفح موقع المغرب",
+          "change": "تغيير البلد|/ar/change-country"
+        },
+        "tools": [
+          ":search: بحث|/ar/search",
+          ":fav: المفضلة|/ar/favorites",
+          ":cart: السلة (٣)|/ar/cart",
+          ":account: حسابي|/ar/account"
+        ],
+        "menus": {
+          "items": [
+            {
+              "label": "المنتجات",
+              "href": "/ar/products",
+              "columns": [
+                {
+                  "heading": "الصلصات والمتبلات",
+                  "links": [
+                    "الكاتشب|/ar/products/ketchup",
+                    "المايونيز|/ar/products/mayonnaise",
+                    "صلصات السلطة|/ar/products/dressings"
+                  ]
+                },
+                {
+                  "heading": "الألبان والدهون",
+                  "links": [
+                    "الزبدة|/ar/products/butter",
+                    "الكريمة|/ar/products/cream",
+                    "الزيوت|/ar/products/oils"
+                  ]
+                },
+                {
+                  "heading": "الأساسيات الطهوية",
+                  "links": [
+                    "المرق|/ar/products/bouillon",
+                    "الشوربات|/ar/products/soups",
+                    "التوابل|/ar/products/seasonings"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الوصفات",
+              "href": "/ar/recipes",
+              "columns": [
+                {
+                  "heading": "الوصفات",
+                  "links": [
+                    "كل الوصفات|/ar/recipes/all",
+                    "المقبلات والشوربات|/ar/recipes/starters",
+                    "الأطباق الرئيسية|/ar/recipes/mains",
+                    "الحلويات|/ar/recipes/desserts"
+                  ]
+                },
+                {
+                  "heading": "حسب المطبخ",
+                  "links": [
+                    "آسيوي|/ar/recipes/asian",
+                    "متوسطي|/ar/recipes/mediterranean",
+                    "أمريكا اللاتينية|/ar/recipes/latin",
+                    "أوروبي كلاسيكي|/ar/recipes/european"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "التدريب والإلهام",
+              "href": "/ar/training",
+              "columns": [
+                {
+                  "heading": "التدريب",
+                  "links": [
+                    "الدورات المتاحة|/ar/training/courses",
+                    "التطوير المهني|/ar/training/development",
+                    "الشهادات|/ar/training/certificates"
+                  ]
+                },
+                {
+                  "heading": "الإلهام",
+                  "links": [
+                    "اتجاهات القطاع|/ar/inspiration/trends",
+                    "أفكار القوائم|/ar/inspiration/menus",
+                    "قصص الطهاة|/ar/inspiration/stories"
+                  ]
+                },
+                {
+                  "heading": "المصادر",
+                  "links": [
+                    "أدلة الاستخدام|/ar/resources/guides",
+                    "الأدوات الحسابية|/ar/resources/tools",
+                    "التحميلات|/ar/resources/downloads"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الاستدامة",
+              "href": "/ar/sustainability",
+              "columns": [
+                {
+                  "heading": "العروض الحالية",
+                  "links": [
+                    "عروض الموسم|/ar/offers/seasonal",
+                    "خصومات الكميات|/ar/offers/bulk"
+                  ]
+                },
+                {
+                  "heading": "الولاء والمكافآت",
+                  "links": [
+                    "برنامج النقاط|/ar/loyalty/points",
+                    "المكافآت|/ar/loyalty/rewards"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "برنامج الولاء",
+              "href": "/ar/loyalty-program",
+              "plain": true
+            }
+          ]
+        },
+        "promo": [
+          {
+            "menu": "المنتجات",
+            "eyebrow": "وصل حديثاً",
+            "title": "مرق كنور بروفيشنال متوفر الآن بعبوات سعة لتر واحد",
+            "cta": "استكشف التشكيلة|/ar/products/seasonal"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "feature",
+            "eyebrow": "اختيار الشيف",
+            "title": "وصفات سريعة في عشرين دقيقة",
+            "description": "أطباق بجودة احترافية من مكونات المخزن الأساسية، مع وصفات جديدة كل أسبوع.",
+            "cta": "تصفح الوصفات|/ar/recipes/all"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "promo",
+            "eyebrow": "الأكثر رواجاً",
+            "title": "إتقان الأومامي: وحدة تدريبية مجانية للطهاة",
+            "cta": "ابدأ التعلم|/ar/academy/umami"
+          },
+          {
+            "menu": "التدريب والإلهام",
+            "eyebrow": "وحدة مجانية",
+            "title": "دورة تدريبية جديدة في فنون الطهي الحديثة",
+            "cta": "سجّل الآن|/ar/training/enrol"
+          }
+        ],
+        "label": "تعرّف على علاماتنا التجارية العالمية:",
+        "links": [
+          {
+            "alt": "كنور"
+          },
+          {
+            "alt": "هيلمانز"
+          },
+          {
+            "alt": "ليبتون"
+          },
+          {
+            "alt": "كاريت دور"
+          }
+        ]
       }
     },
     {
@@ -118,7 +302,9 @@
             {
               "name": "hero",
               "rows": [
-                ["<p>A full-bleed photograph busy enough to sit awkwardly behind translucent chrome.</p>"]
+                [
+                  "<p>A full-bleed photograph busy enough to sit awkwardly behind translucent chrome.</p>"
+                ]
               ]
             }
           ]
@@ -131,10 +317,24 @@
       "id": "MEGAMENU-TC-01",
       "summary": "Header: Megamenu - Authoring - Three layouts from one content model, and what an omitted slot leaves behind",
       "scope": "What authored content produces in each of the three desktop panels: the grid each layout resolves to, which optional slots each one honours, and the fact that the layout follows from what was authored rather than from a variant the author picks. Also the minimum the content model allows.",
-      "ac": ["AC-1", "AC-2", "AC-3"],
-      "suites": ["sanity", "regression"],
-      "labels": ["megamenu", "authoring"],
-      "fixtures": ["MEGAMENU-FX-01", "MEGAMENU-FX-02", "MEGAMENU-FX-05"],
+      "ac": [
+        "AC-1",
+        "AC-2",
+        "AC-3"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "megamenu",
+        "authoring"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-01",
+        "MEGAMENU-FX-02",
+        "MEGAMENU-FX-05"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and expand the Products menu.",
@@ -173,10 +373,23 @@
       "id": "MEGAMENU-TC-02",
       "summary": "Header: Megamenu - Desktop - Opening, closing, and the rule that only one panel is open at a time",
       "scope": "The desktop open model: what opens a panel, the three ways to close one, and the fact that opening a second closes the first. Covers the .is-open state hook and the chevron as its visible half.",
-      "ac": ["AC-6", "AC-7"],
-      "suites": ["sanity", "regression", "e2e"],
-      "labels": ["megamenu", "desktop", "interaction"],
-      "fixtures": ["MEGAMENU-FX-01"],
+      "ac": [
+        "AC-6",
+        "AC-7"
+      ],
+      "suites": [
+        "sanity",
+        "regression",
+        "e2e"
+      ],
+      "labels": [
+        "megamenu",
+        "desktop",
+        "interaction"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-01"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width. Before touching anything, check the nav row.",
@@ -210,10 +423,24 @@
       "id": "MEGAMENU-TC-03",
       "summary": "Header: Megamenu - Presentation - The open panel's frame, and the three colour contexts over one markup",
       "scope": "How an open panel presents itself regardless of layout — width, the border and shadow that separate it from the page, and the promise that it never makes the page scroll sideways. Then the same content in all three colour contexts, which the spec makes a modifier rather than a variant.",
-      "ac": ["AC-4", "AC-5"],
-      "suites": ["sanity", "regression"],
-      "labels": ["megamenu", "desktop", "design"],
-      "fixtures": ["MEGAMENU-FX-01", "MEGAMENU-FX-07", "MEGAMENU-FX-08"],
+      "ac": [
+        "AC-4",
+        "AC-5"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "megamenu",
+        "desktop",
+        "design"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-01",
+        "MEGAMENU-FX-07",
+        "MEGAMENU-FX-08"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and expand any menu.",
@@ -247,10 +474,20 @@
       "id": "MEGAMENU-TC-04",
       "summary": "Header: Megamenu - Desktop - Link hover, focus, and the carousel arrows that fade at the ends",
       "scope": "The small feedback details that tell a user something is interactive: what a link does under the pointer, that focus is always visible, and the way the brands carousel signals it has run out of room to scroll.",
-      "ac": ["AC-8"],
-      "suites": ["regression"],
-      "labels": ["megamenu", "desktop", "interaction"],
-      "fixtures": ["MEGAMENU-FX-01"],
+      "ac": [
+        "AC-8"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "megamenu",
+        "desktop",
+        "interaction"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-01"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width, expand Products, and hover a link in one of the columns.",
@@ -279,10 +516,24 @@
       "id": "MEGAMENU-TC-05",
       "summary": "Header: Megamenu - Mobile drawer - Single-open accordion, and the links held back behind View more",
       "scope": "The drawer's own model, which is not the desktop panel at a smaller size: one section open at a time, only the first four links of a section shown, and a toggle that must not appear when it has nothing to reveal.",
-      "ac": ["AC-10", "AC-11"],
-      "suites": ["sanity", "regression"],
-      "labels": ["megamenu", "mobile", "drawer"],
-      "fixtures": ["MEGAMENU-FX-03", "MEGAMENU-FX-04", "MEGAMENU-FX-01"],
+      "ac": [
+        "AC-10",
+        "AC-11"
+      ],
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "labels": [
+        "megamenu",
+        "mobile",
+        "drawer"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-03",
+        "MEGAMENU-FX-04",
+        "MEGAMENU-FX-01"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-03 at a mobile width and tap the hamburger.",
@@ -322,10 +573,22 @@
       "id": "MEGAMENU-TC-06",
       "summary": "Header: Megamenu - Mobile drawer - What replaces the desktop nav, and what the drawer deliberately leaves out",
       "scope": "The content decisions that make the drawer a different design rather than a narrower one: the desktop nav is replaced rather than reflowed, the editorial and promo tiles are dropped, and the drawer grows a footer the desktop panel never has.",
-      "ac": ["AC-9", "AC-12"],
-      "suites": ["regression"],
-      "labels": ["megamenu", "mobile", "drawer", "authoring"],
-      "fixtures": ["MEGAMENU-FX-01"],
+      "ac": [
+        "AC-9",
+        "AC-12"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "megamenu",
+        "mobile",
+        "drawer",
+        "authoring"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-01"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 below 1024px wide and look at the header before opening anything.",
@@ -353,16 +616,26 @@
     {
       "id": "MEGAMENU-TC-07",
       "summary": "Header: Megamenu - Right-to-left - What mirrors, what only rotates, and which edge the drawer uses",
-      "scope": "RTL is driven entirely by the direction on the document, with no separate authored content, so the test is that the same content reads correctly the other way — including the two cases where mirroring would be wrong.",
-      "ac": ["AC-13", "AC-14"],
-      "suites": ["regression"],
-      "labels": ["megamenu", "rtl"],
-      "fixtures": ["MEGAMENU-FX-06"],
+      "scope": "What mirrors and what only rotates when the page is right to left. The fixture is authored in Arabic throughout — bar labels, column headings and every submenu link — so the mirrored panel can be read rather than decoded. A panel of English links inside a mirrored frame tells you very little.",
+      "ac": [
+        "AC-13",
+        "AC-14"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "megamenu",
+        "rtl"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-06"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-06 at a desktop width and confirm the document direction before judging any layout.",
           "data": "FX-06, /drafts/qa/megamenu/rtl, viewport 1440x900",
-          "result": "The html element carries dir=\"rtl\". The nav row reads from the right, and the megamenu columns run right to left in the same order they run left to right in FX-01."
+          "result": "The html element carries dir=\"rtl\". The nav row reads from the right, and the megamenu columns run right to left in the same order they run left to right in FX-01. The panel's columns read right to left with Arabic headings — الفئات, then حسب المطبخ — and every link inside them is Arabic."
         },
         {
           "action": "Expand a menu and check the spacing and positioning against the same panel in FX-01.",
@@ -391,10 +664,25 @@
       "id": "MEGAMENU-TC-08",
       "summary": "Header: Megamenu - Accessibility - State, keyboard operation, names, and contrast in every context",
       "scope": "What assistive technology is told about the megamenu, whether the whole thing can be operated without a pointer, and whether it holds up to an automated audit in all three colour contexts.",
-      "ac": ["AC-15", "AC-16", "AC-17", "AC-18"],
-      "suites": ["regression"],
-      "labels": ["megamenu", "a11y"],
-      "fixtures": ["MEGAMENU-FX-01", "MEGAMENU-FX-03", "MEGAMENU-FX-07", "MEGAMENU-FX-08"],
+      "ac": [
+        "AC-15",
+        "AC-16",
+        "AC-17",
+        "AC-18"
+      ],
+      "suites": [
+        "regression"
+      ],
+      "labels": [
+        "megamenu",
+        "a11y"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-01",
+        "MEGAMENU-FX-03",
+        "MEGAMENU-FX-07",
+        "MEGAMENU-FX-08"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and Tab through the nav row without using the mouse.",
@@ -443,10 +731,22 @@
       "id": "MEGAMENU-TC-09",
       "summary": "Header: Megamenu - Viewport - The 1024px switch, and matching the approved design at both sizes",
       "scope": "The boundary itself. Desktop megamenu and mobile drawer are two designs, so crossing between them is a state change rather than a reflow, and the interesting failures are at the crossing: content lost, content duplicated, or a panel left stuck open.",
-      "ac": ["AC-19", "AC-20"],
-      "suites": ["sanity", "regression", "e2e"],
-      "labels": ["megamenu", "responsive"],
-      "fixtures": ["MEGAMENU-FX-01"],
+      "ac": [
+        "AC-19",
+        "AC-20"
+      ],
+      "suites": [
+        "sanity",
+        "regression",
+        "e2e"
+      ],
+      "labels": [
+        "megamenu",
+        "responsive"
+      ],
+      "fixtures": [
+        "MEGAMENU-FX-01"
+      ],
       "steps": [
         {
           "action": "Open fixture FX-01 at 1024px wide exactly.",

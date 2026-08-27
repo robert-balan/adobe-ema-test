@@ -107,12 +107,193 @@
     },
     {
       "id": "BRANDS-FX-06",
-      "title": "RTL",
-      "purpose": "Happy-path content on a page whose Language metadata is an RTL locale, so scripts.js sets html dir=rtl",
+      "title": "Right-to-left — the strip in Arabic",
+      "purpose": "The brand strip authored in Arabic under ar-MA, inside an Arabic megamenu. The label is deliberately long — longer than any English equivalent — so the expansion case is a fixture a step can cite rather than something the tester has to author.",
       "page": "/drafts/qa/brands/rtl",
       "metadata": {
-        "nav": "/drafts/qa/brands/nav-happy",
         "Language": "ar-MA"
+      },
+      "nav": {
+        "path": "/drafts/qa/brands/nav-rtl",
+        "from": "/nav",
+        "utility": {
+          "links": [
+            "من نحن|/ar/about-us",
+            "اتصل بنا|/ar/contact",
+            "الأسئلة الشائعة|/ar/faq"
+          ],
+          "trigger": ":globe: المغرب · AR",
+          "languages": [
+            "العربية · AR|/ar",
+            "Français · FR|/fr",
+            "English · EN|/"
+          ],
+          "note": "أنت تتصفح موقع المغرب",
+          "change": "تغيير البلد|/ar/change-country"
+        },
+        "tools": [
+          ":search: بحث|/ar/search",
+          ":fav: المفضلة|/ar/favorites",
+          ":cart: السلة (٣)|/ar/cart",
+          ":account: حسابي|/ar/account"
+        ],
+        "menus": {
+          "items": [
+            {
+              "label": "المنتجات",
+              "href": "/ar/products",
+              "columns": [
+                {
+                  "heading": "الصلصات والمتبلات",
+                  "links": [
+                    "الكاتشب|/ar/products/ketchup",
+                    "المايونيز|/ar/products/mayonnaise",
+                    "صلصات السلطة|/ar/products/dressings"
+                  ]
+                },
+                {
+                  "heading": "الألبان والدهون",
+                  "links": [
+                    "الزبدة|/ar/products/butter",
+                    "الكريمة|/ar/products/cream",
+                    "الزيوت|/ar/products/oils"
+                  ]
+                },
+                {
+                  "heading": "الأساسيات الطهوية",
+                  "links": [
+                    "المرق|/ar/products/bouillon",
+                    "الشوربات|/ar/products/soups",
+                    "التوابل|/ar/products/seasonings"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الوصفات",
+              "href": "/ar/recipes",
+              "columns": [
+                {
+                  "heading": "الوصفات",
+                  "links": [
+                    "كل الوصفات|/ar/recipes/all",
+                    "المقبلات والشوربات|/ar/recipes/starters",
+                    "الأطباق الرئيسية|/ar/recipes/mains",
+                    "الحلويات|/ar/recipes/desserts"
+                  ]
+                },
+                {
+                  "heading": "حسب المطبخ",
+                  "links": [
+                    "آسيوي|/ar/recipes/asian",
+                    "متوسطي|/ar/recipes/mediterranean",
+                    "أمريكا اللاتينية|/ar/recipes/latin",
+                    "أوروبي كلاسيكي|/ar/recipes/european"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "التدريب والإلهام",
+              "href": "/ar/training",
+              "columns": [
+                {
+                  "heading": "التدريب",
+                  "links": [
+                    "الدورات المتاحة|/ar/training/courses",
+                    "التطوير المهني|/ar/training/development",
+                    "الشهادات|/ar/training/certificates"
+                  ]
+                },
+                {
+                  "heading": "الإلهام",
+                  "links": [
+                    "اتجاهات القطاع|/ar/inspiration/trends",
+                    "أفكار القوائم|/ar/inspiration/menus",
+                    "قصص الطهاة|/ar/inspiration/stories"
+                  ]
+                },
+                {
+                  "heading": "المصادر",
+                  "links": [
+                    "أدلة الاستخدام|/ar/resources/guides",
+                    "الأدوات الحسابية|/ar/resources/tools",
+                    "التحميلات|/ar/resources/downloads"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الاستدامة",
+              "href": "/ar/sustainability",
+              "columns": [
+                {
+                  "heading": "العروض الحالية",
+                  "links": [
+                    "عروض الموسم|/ar/offers/seasonal",
+                    "خصومات الكميات|/ar/offers/bulk"
+                  ]
+                },
+                {
+                  "heading": "الولاء والمكافآت",
+                  "links": [
+                    "برنامج النقاط|/ar/loyalty/points",
+                    "المكافآت|/ar/loyalty/rewards"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "برنامج الولاء",
+              "href": "/ar/loyalty-program",
+              "plain": true
+            }
+          ]
+        },
+        "label": "تعرّف على علاماتنا التجارية العالمية:",
+        "links": [
+          {
+            "alt": "كنور"
+          },
+          {
+            "alt": "هيلمانز"
+          },
+          {
+            "alt": "ليبتون"
+          },
+          {
+            "alt": "كاريت دور"
+          }
+        ],
+        "promo": [
+          {
+            "menu": "المنتجات",
+            "eyebrow": "وصل حديثاً",
+            "title": "مرق كنور بروفيشنال متوفر الآن بعبوات سعة لتر واحد",
+            "cta": "استكشف التشكيلة|/ar/products/seasonal"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "feature",
+            "eyebrow": "اختيار الشيف",
+            "title": "وصفات سريعة في عشرين دقيقة",
+            "description": "أطباق بجودة احترافية من مكونات المخزن الأساسية، مع وصفات جديدة كل أسبوع.",
+            "cta": "تصفح الوصفات|/ar/recipes/all"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "promo",
+            "eyebrow": "الأكثر رواجاً",
+            "title": "إتقان الأومامي: وحدة تدريبية مجانية للطهاة",
+            "cta": "ابدأ التعلم|/ar/academy/umami"
+          },
+          {
+            "menu": "التدريب والإلهام",
+            "eyebrow": "وحدة مجانية",
+            "title": "دورة تدريبية جديدة في فنون الطهي الحديثة",
+            "cta": "سجّل الآن|/ar/training/enrol"
+          }
+        ]
       }
     },
     {
@@ -499,7 +680,7 @@
     {
       "id": "BRANDS-TC-07",
       "summary": "Header: Products Brand Carousel - Internationalization - RTL mirroring and text expansion",
-      "scope": "That the carousel works in a right-to-left locale and with longer translated text: the strip and its controls mirror, directional controls invert so \"next\" still means \"onward\", accessible names describe logical rather than visual direction, and an expanded label does not break the layout.",
+      "scope": "That the carousel works in a right-to-left locale and with longer translated text. The fixture is authored in Arabic rather than mirrored English, so what a reviewer sees is what an Arabic market would see; its strip label is also the longest of any locale we test, which covers expansion without asking anyone to edit content.",
       "ac": [],
       "suites": [
         "regression"
@@ -516,7 +697,7 @@
       "steps": [
         {
           "action": "Open fixture FX-06 on a right-to-left page at a desktop viewport and open the Products megamenu.",
-          "result": "The carousel mirrors: the label sits at the right-hand end of the strip and the logo row begins from the right."
+          "result": "The carousel mirrors: the label — \"تعرّف على علاماتنا التجارية العالمية:\" — sits at the right-hand end of the strip and the logo row begins from the right."
         },
         {
           "action": "Confirm the document direction is applied.",
@@ -532,12 +713,12 @@
         },
         {
           "action": "Inspect the accessible names of both arrows.",
-          "result": "The names describe logical direction — \"Previous brands\" and \"Next brands\" — rather than visual left and right."
+          "result": "The names describe logical direction rather than visual left and right — \"previous\" and \"next\", not \"left\" and \"right\". Record whether they are localised: if they read as English on an Arabic page they are hardcoded in the block and cannot be translated, which is a finding in itself."
         },
         {
-          "action": "Swap the label for a longer translation and reload.",
-          "data": "German is the reference for expansion, e.g. \"Unsere Marken:\"",
-          "result": "The longer label does not clip, wrap awkwardly, overlap the logo row, or push the strip into page-level horizontal scrolling."
+          "action": "Read the strip's label, which is the longest translation we hold, and check it against the logo row.",
+          "data": "BRANDS-FX-06",
+          "result": "The label renders in full. It does not clip, wrap awkwardly, overlap the logo row, or push the strip into page-level horizontal scrolling. The logos keep their size and spacing."
         }
       ]
     }

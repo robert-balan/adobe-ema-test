@@ -1,0 +1,109 @@
+{
+  "tests": {
+    "PROMO-TC-01": {
+      "issueId": "302841",
+      "key": "EC-181",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-1",
+        "AC-2",
+        "AC-4",
+        "AC-11",
+        "AC-12",
+        "AC-13",
+        "AC-16",
+        "AC-17",
+        "AC-31"
+      ]
+    },
+    "PROMO-TC-02": {
+      "issueId": "302842",
+      "key": "EC-182",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10",
+        "AC-29"
+      ]
+    },
+    "PROMO-TC-03": {
+      "issueId": "302843",
+      "key": "EC-183",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-5",
+        "AC-6",
+        "AC-12",
+        "AC-14",
+        "AC-27",
+        "AC-30",
+        "AC-34"
+      ]
+    },
+    "PROMO-TC-04": {
+      "issueId": "302844",
+      "key": "EC-184",
+      "suites": [
+        "sanity",
+        "regression"
+      ],
+      "ac": [
+        "AC-3",
+        "AC-27",
+        "AC-28",
+        "AC-32",
+        "AC-33"
+      ]
+    },
+    "PROMO-TC-05": {
+      "issueId": "302845",
+      "key": "EC-185",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-18",
+        "AC-19",
+        "AC-20",
+        "AC-21",
+        "AC-22",
+        "AC-23",
+        "AC-24",
+        "AC-25",
+        "AC-26"
+      ]
+    },
+    "PROMO-TC-06": {
+      "issueId": "302846",
+      "key": "EC-186",
+      "suites": [
+        "regression"
+      ],
+      "ac": [
+        "AC-15"
+      ]
+    }
+  },
+  "testSets": {
+    "sanity": {
+      "issueId": "301670",
+      "key": "EC-104",
+      "suite": "sanity"
+    },
+    "regression": {
+      "issueId": "301671",
+      "key": "EC-105",
+      "suite": "regression"
+    }
+  }
+}

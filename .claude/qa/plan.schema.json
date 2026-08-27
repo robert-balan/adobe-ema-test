@@ -130,6 +130,11 @@
                   "type": "object"
                 }
               },
+              "tools": {
+                "type": "array",
+                "description": "Replace the nav's tools row \u2014 Search, Favorites, Cart, Account. These live in the nav's LAST list, not its first, which is why `utility` does not reach them; an Arabic fixture needs them or the header keeps an English tools row. Entries keep their icon token: \":search: \u0628\u062d\u062b|/search\".",
+                "items": { "type": "string" }
+              },
               "utility": {
                 "type": "object",
                 "description": "Edits to the nav's utility bar \u2014 its first section, holding the author-defined links and the language block.",
@@ -200,6 +205,25 @@
                         "plain": {
                           "type": "boolean",
                           "description": "Drop the megamenu columns, leaving a link with nothing to open. That absence is what makes an item plain \u2014 there is no flag in the content model."
+                        },
+                        "columns": {
+                          "type": "array",
+                          "description": "Replace this item's labelled megamenu columns, positionally by kind \u2014 tiles and brand strips are left where they are, and live columns the list does not reach are left alone. Needed for an RTL or text-expansion fixture, where translating only the bar label leaves every submenu link in the source language.",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "heading": {
+                                "type": "string",
+                                "description": "The column heading. Authored as a plain paragraph, never bold \u2014 a <strong> here would reclassify the row as a promotional tile."
+                              },
+                              "links": {
+                                "type": "array",
+                                "description": "The column's links as \"Label|/href\".",
+                                "items": { "type": "string" }
+                              }
+                            }
+                          }
                         }
                       }
                     }

@@ -182,6 +182,39 @@ export function transformUtility(navHtml, spec = {}) {
 }
 
 /**
+ * Replace the nav's tools row — Search, Favorites, Cart, Account.
+ *
+ * These are author-defined links like any other, but they live in the nav's LAST list rather than
+ * its first, which is why `transformUtility` never touched them: it replaces the first `<ul>` and
+ * stops. That left an Arabic fixture with an Arabic utility bar, Arabic menus and an English tools
+ * row — visible English in a header that was supposed to be entirely translated.
+ *
+ * Each entry keeps its icon token, so an entry reads ":search: بحث|/search".
+ *
+ * @param {string} navHtml
+ * @param {string[]} tools  ["\:search\: Label|/href", …]
+ */
+export function transformTools(navHtml, tools) {
+  if (!tools) return navHtml;
+  const lists = [...navHtml.matchAll(/<ul>[\s\S]*?<\/ul>/g)];
+  // "The last list" is not good enough: a megamenu column can be authored as a list too, and on a
+  // nav shaped that way the last one is a submenu, not the tools. What actually distinguishes the
+  // tools row is that every item is an icon token plus a label — ":search: Search" — so that is what
+  // this looks for, taking the last such list.
+  const isTools = (u) => /<li>\s*<a\b[^>]*>\s*:[a-z0-9-]+:/i.test(u[0]);
+  const target = [...lists].reverse().find(isTools);
+  if (!target) {
+    throw new Error('no tools list found in the source nav — the tools row is a <ul> whose items are '
+      + 'icon tokens like ":search: Search", and no list here looks like that');
+  }
+  const items = tools.map((t) => {
+    const [label, href] = String(t).split('|');
+    return href ? `<li><a href="${esc(href)}">${esc(label)}</a></li>` : `<li>${esc(label)}</li>`;
+  }).join('\n');
+  return `${navHtml.slice(0, target.index)}<ul>\n${items}\n</ul>${navHtml.slice(target.index + target[0].length)}`;
+}
+
+/**
  * Match the `</div>` that closes the `<div` starting at `open`, and return the index just past it.
  * Nav regions nest divs several deep, so a non-greedy regex closes on the wrong tag every time.
  */
@@ -245,6 +278,43 @@ export function transformLogo(navHtml, spec = {}) {
  * @param {string} navHtml
  * @param {object} spec  { items: [{ label, href, plain }] }
  */
+/**
+ * One labelled column, in the shape the nav actually stores: the heading is a plain `<p>` in the
+ * row's first cell and the links are `<p><a>` in its second. No `<strong>` anywhere — that is what
+ * separates a column from a tile, so adding one here would silently reclassify the row.
+ */
+function columnRow(spec = {}) {
+  const heading = spec.heading === undefined ? '' : `<p>${esc(spec.heading)}</p>`;
+  const links = (spec.links || []).map((l) => {
+    const [label, href = '/'] = String(l).split('|');
+    return `<p><a href="${esc(href)}">${esc(label)}</a></p>`;
+  }).join('');
+  return `<div><div>${heading}</div><div>${links}</div></div>`;
+}
+
+/**
+ * Replace a panel's labelled columns, leaving everything else where it is.
+ *
+ * A panel is a mix of row kinds — Recipes ships a feature tile, two columns, then a promo tile — and
+ * only the columns are being replaced. So they are matched positionally by kind rather than by row
+ * number: the first spec entry replaces the first column, and tiles and brand strips are never
+ * touched. Extra spec entries are appended just after the last existing column, which keeps them
+ * inside the run of columns rather than after a trailing tile.
+ *
+ * Live columns the spec does not reach are left alone. That is deliberate: a fixture translating the
+ * two columns it asserts should not silently blank a third.
+ */
+function rebuildColumns(panelRows, specs) {
+  const at = panelRows.map((r, i) => (classifyPanelRow(r) === 'column' ? i : -1)).filter((i) => i >= 0);
+  const out = panelRows.slice();
+  specs.slice(0, at.length).forEach((spec, n) => { out[at[n]] = columnRow(spec); });
+  if (specs.length > at.length) {
+    const insertAt = at.length ? at[at.length - 1] + 1 : out.length;
+    out.splice(insertAt, 0, ...specs.slice(at.length).map(columnRow));
+  }
+  return out;
+}
+
 export function transformMenus(navHtml, spec = {}) {
   if (!spec.items) return navHtml;
   const MENU = /<div class="nav-menu[^"]*">/g;
@@ -274,8 +344,11 @@ export function transformMenus(navHtml, spec = {}) {
       // as `li > a`, so dropping it would style the fixture differently from production.
       first = `${first.slice(0, cellStart)}<div><p><a href="${href}">${label}</a></p></div>${first.slice(cellEnd)}`;
     }
-    const keep = item.plain ? [first] : [first, ...rows.slice(1)];
-    return `<div class="nav-menu">${keep.join('')}</div>`;
+    let panel = item.plain ? [] : rows.slice(1);
+    // Translating or replacing the panel's columns is what an RTL or expansion fixture needs: the
+    // bar label alone leaves every submenu link in the source language.
+    if (panel.length && item.columns) panel = rebuildColumns(panel, item.columns);
+    return `<div class="nav-menu">${[first, ...panel].join('')}</div>`;
   });
 
   return navHtml.slice(0, pool[0].start) + built.join('') + navHtml.slice(pool[pool.length - 1].end);
@@ -420,6 +493,9 @@ export function transformNav(navHtml, spec = {}) {
   // later brand-strip search reads the already-edited document rather than a stale copy of it.
   let src = navHtml;
   if (spec.utility) src = transformUtility(src, spec.utility);
+  // Tools before menus: both are found positionally, and rebuilding the menu blocks first would
+  // move the list this one looks for.
+  if (spec.tools) src = transformTools(src, spec.tools);
   if (spec.logo) src = transformLogo(src, spec.logo);
   if (spec.menus) src = transformMenus(src, spec.menus);
   if (spec.promo) src = transformPromo(src, spec.promo);
@@ -427,7 +503,7 @@ export function transformNav(navHtml, spec = {}) {
   // The brand strip is only touched when the spec actually asks for it. A fixture that edits the
   // utility bar of a nav whose Products megamenu was left alone must not go rummaging for a strip.
   const wantsStrip = ['count', 'label', 'removeLabel', 'links'].some((k) => spec[k] !== undefined);
-  if (!wantsStrip && (spec.utility || spec.logo || spec.menus || spec.promo)) return src;
+  if (!wantsStrip && (spec.utility || spec.tools || spec.logo || spec.menus || spec.promo)) return src;
 
   const navSrc = src;
   const strip = findBrandStrip(navSrc);

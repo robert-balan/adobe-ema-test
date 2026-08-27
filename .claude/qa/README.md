@@ -310,6 +310,44 @@ skipped unlink is caught on the next check rather than quietly rotting the cover
 
 Still commit `result.json` after a push. Adoption is the safety net, not the plan.
 
+### Moving a test to another plan
+
+A retired test does not have to be thrown away. When EC-8's megamenu turned out to need nine of
+the tests EC-14 had already retired, they were re-used rather than rewritten: the same nine Jira
+issues were relabelled `MEGAMENU-TC-01`…`09`, picked up by the megamenu plan's next push through
+the usual label adoption, and moved into `/Header/Megamenu` in the Test Repository. Execution
+history came with them, which is the whole reason to move an issue rather than create a new one.
+
+The Jira side takes care of itself — identity lives in the label, so relabelling *is* the move.
+The old plan's ledger is the part that does not, and the push will not fix it for you:
+
+```
+9   no longer in the plan — review manually, never auto-deleted
+REVIEW    EC-127  BRANDS-TC-08 — dropped from the plan; deprecate it or restore the entry
+```
+
+That is the push refusing to guess, and it is the right default — an entry with no test in the
+plan is usually a test somebody deleted by accident, and losing the mapping would mean losing the
+issue. Reuse is the one case where the mapping is genuinely not lost: it now lives in the new
+plan's ledger and in the labels on the issues themselves. `--adopt` will not clear it either — it
+merges into the existing ledger rather than replacing it, on purpose.
+
+So delete those entries from the old `<plan>.result.json` by hand, and check the move actually
+landed before you do:
+
+```sh
+# the issues answer to the new plan's ids, not the old ones
+node .claude/scripts/xray-push.mjs .claude/qa/plans/MEGAMENU.json --adopt
+
+# and neither story is counting the other's tests
+node .claude/scripts/qa-coverage.mjs EC-14      # 7 test(s)
+node .claude/scripts/qa-coverage.mjs EC-8       # 9 test(s)
+```
+
+Left in place the entries are not harmful, but they are not free: every push reports nine tests
+for review and three test sets in drift, so the one report that is supposed to tell you something
+is wrong tells you that every time. A clean run is what makes a dirty one worth reading.
+
 ### Revising tests when a spec changes
 
 The plan file is the master copy; Jira is the published copy. Re-run the same plan after editing

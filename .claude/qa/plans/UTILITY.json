@@ -118,12 +118,193 @@
     },
     {
       "id": "UTILITY-FX-05",
-      "title": "RTL",
-      "purpose": "The reference bar on a right-to-left page, so mirroring, the switcher's edge and the dropdown's anchoring can be checked together",
+      "title": "Right-to-left — the bar in Arabic",
+      "purpose": "The utility bar authored in Arabic under ar-MA: Arabic links, an Arabic switcher trigger and an Arabic country note, so mirroring, the switcher's edge and the dropdown's anchoring can be judged on real right-to-left text rather than reversed English.",
       "page": "/drafts/qa/utility/rtl",
       "metadata": {
-        "nav": "/drafts/qa/utility/nav-reference",
         "Language": "ar-MA"
+      },
+      "nav": {
+        "path": "/drafts/qa/utility/nav-rtl",
+        "from": "/nav",
+        "utility": {
+          "links": [
+            "من نحن|/ar/about-us",
+            "اتصل بنا|/ar/contact",
+            "الأسئلة الشائعة|/ar/faq"
+          ],
+          "trigger": ":globe: المغرب · AR",
+          "languages": [
+            "العربية · AR|/ar",
+            "Français · FR|/fr",
+            "English · EN|/"
+          ],
+          "note": "أنت تتصفح موقع المغرب",
+          "change": "تغيير البلد|/ar/change-country"
+        },
+        "tools": [
+          ":search: بحث|/ar/search",
+          ":fav: المفضلة|/ar/favorites",
+          ":cart: السلة (٣)|/ar/cart",
+          ":account: حسابي|/ar/account"
+        ],
+        "menus": {
+          "items": [
+            {
+              "label": "المنتجات",
+              "href": "/ar/products",
+              "columns": [
+                {
+                  "heading": "الصلصات والمتبلات",
+                  "links": [
+                    "الكاتشب|/ar/products/ketchup",
+                    "المايونيز|/ar/products/mayonnaise",
+                    "صلصات السلطة|/ar/products/dressings"
+                  ]
+                },
+                {
+                  "heading": "الألبان والدهون",
+                  "links": [
+                    "الزبدة|/ar/products/butter",
+                    "الكريمة|/ar/products/cream",
+                    "الزيوت|/ar/products/oils"
+                  ]
+                },
+                {
+                  "heading": "الأساسيات الطهوية",
+                  "links": [
+                    "المرق|/ar/products/bouillon",
+                    "الشوربات|/ar/products/soups",
+                    "التوابل|/ar/products/seasonings"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الوصفات",
+              "href": "/ar/recipes",
+              "columns": [
+                {
+                  "heading": "الوصفات",
+                  "links": [
+                    "كل الوصفات|/ar/recipes/all",
+                    "المقبلات والشوربات|/ar/recipes/starters",
+                    "الأطباق الرئيسية|/ar/recipes/mains",
+                    "الحلويات|/ar/recipes/desserts"
+                  ]
+                },
+                {
+                  "heading": "حسب المطبخ",
+                  "links": [
+                    "آسيوي|/ar/recipes/asian",
+                    "متوسطي|/ar/recipes/mediterranean",
+                    "أمريكا اللاتينية|/ar/recipes/latin",
+                    "أوروبي كلاسيكي|/ar/recipes/european"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "التدريب والإلهام",
+              "href": "/ar/training",
+              "columns": [
+                {
+                  "heading": "التدريب",
+                  "links": [
+                    "الدورات المتاحة|/ar/training/courses",
+                    "التطوير المهني|/ar/training/development",
+                    "الشهادات|/ar/training/certificates"
+                  ]
+                },
+                {
+                  "heading": "الإلهام",
+                  "links": [
+                    "اتجاهات القطاع|/ar/inspiration/trends",
+                    "أفكار القوائم|/ar/inspiration/menus",
+                    "قصص الطهاة|/ar/inspiration/stories"
+                  ]
+                },
+                {
+                  "heading": "المصادر",
+                  "links": [
+                    "أدلة الاستخدام|/ar/resources/guides",
+                    "الأدوات الحسابية|/ar/resources/tools",
+                    "التحميلات|/ar/resources/downloads"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الاستدامة",
+              "href": "/ar/sustainability",
+              "columns": [
+                {
+                  "heading": "العروض الحالية",
+                  "links": [
+                    "عروض الموسم|/ar/offers/seasonal",
+                    "خصومات الكميات|/ar/offers/bulk"
+                  ]
+                },
+                {
+                  "heading": "الولاء والمكافآت",
+                  "links": [
+                    "برنامج النقاط|/ar/loyalty/points",
+                    "المكافآت|/ar/loyalty/rewards"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "برنامج الولاء",
+              "href": "/ar/loyalty-program",
+              "plain": true
+            }
+          ]
+        },
+        "promo": [
+          {
+            "menu": "المنتجات",
+            "eyebrow": "وصل حديثاً",
+            "title": "مرق كنور بروفيشنال متوفر الآن بعبوات سعة لتر واحد",
+            "cta": "استكشف التشكيلة|/ar/products/seasonal"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "feature",
+            "eyebrow": "اختيار الشيف",
+            "title": "وصفات سريعة في عشرين دقيقة",
+            "description": "أطباق بجودة احترافية من مكونات المخزن الأساسية، مع وصفات جديدة كل أسبوع.",
+            "cta": "تصفح الوصفات|/ar/recipes/all"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "promo",
+            "eyebrow": "الأكثر رواجاً",
+            "title": "إتقان الأومامي: وحدة تدريبية مجانية للطهاة",
+            "cta": "ابدأ التعلم|/ar/academy/umami"
+          },
+          {
+            "menu": "التدريب والإلهام",
+            "eyebrow": "وحدة مجانية",
+            "title": "دورة تدريبية جديدة في فنون الطهي الحديثة",
+            "cta": "سجّل الآن|/ar/training/enrol"
+          }
+        ],
+        "label": "تعرّف على علاماتنا التجارية العالمية:",
+        "links": [
+          {
+            "alt": "كنور"
+          },
+          {
+            "alt": "هيلمانز"
+          },
+          {
+            "alt": "ليبتون"
+          },
+          {
+            "alt": "كاريت دور"
+          }
+        ]
       }
     },
     {
@@ -472,7 +653,7 @@
     {
       "id": "UTILITY-TC-07",
       "summary": "Header: [Megamenu]: Utility Bar - Internationalization - Mirroring and dropdown anchoring",
-      "scope": "That the bar works in a right-to-left locale: links and separators read right to left, the switcher moves to the mirrored edge, the mobile MORE label aligns correctly, and the dropdown anchors to the start edge without spilling off screen.",
+      "scope": "That the bar works in a right-to-left locale, authored in Arabic rather than reversed English: links and separators read right to left, the switcher moves to the mirrored edge, the mobile MORE label aligns correctly, and the dropdown anchors to the right side without leaving the screen.",
       "ac": [
         "AC-12",
         "AC-13"
@@ -495,11 +676,11 @@
         },
         {
           "action": "Read the utility links from the start edge.",
-          "result": "The links begin at the right-hand edge and read right to left, with the separators following the same order."
+          "result": "The links begin at the right-hand edge and read right to left — من نحن, then اتصل بنا, then الأسئلة الشائعة — with the separators following the same order."
         },
         {
           "action": "Locate the language switcher.",
-          "result": "It sits at the mirrored end edge — the left-hand side — rather than staying on the right."
+          "result": "It sits at the mirrored end edge — the left-hand side — rather than staying on the right, and its trigger reads \"المغرب · AR\"."
         },
         {
           "action": "Open the dropdown and observe where the panel is anchored.",

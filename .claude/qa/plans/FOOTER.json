@@ -173,12 +173,57 @@
     },
     {
       "id": "FOOTER-FX-06",
-      "title": "Right-to-left — the reference footer under ar-MA",
-      "purpose": "decorateLocale() puts lang and dir on <html> from the Language row, so RTL is reached by page metadata over the unchanged reference document — the layout is the only thing that changes.",
+      "title": "Arabic — real right-to-left copy in every slot",
+      "purpose": "The footer authored in Arabic under ar-MA, so a reviewer can judge whether it reads correctly rather than inferring it from mirrored English. Carries the mixed-direction cases too: Latin digits in the copyright year and an email address in an RTL field.",
       "page": "/drafts/qa/footer/rtl",
       "metadata": {
-        "footer": "/drafts/qa/footer/doc-reference",
         "Language": "ar-MA"
+      },
+      "footer": {
+        "path": "/drafts/qa/footer/doc-arabic",
+        "from": "/footer",
+        "newsletter": {
+          "heading": "ابقَ على اطلاع",
+          "subtext": "اشترك لتصلك أفكار الوصفات واتجاهات القطاع والعروض الخاصة والمزيد إلى بريدك الإلكتروني.",
+          "cta": "اشترك الآن|/ar/subscribe"
+        },
+        "brand": {
+          "tagline": "منتجات وخدمات صُممت|بأيدي الطهاة، من أجل الطهاة"
+        },
+        "columns": [
+          {
+            "heading": "الشركة",
+            "links": [
+              "من نحن|/ar/about",
+              "علاماتنا التجارية|/ar/brands",
+              "الاستدامة|/ar/sustainability",
+              "شروط التعامل|/ar/trade-terms",
+              "شركاؤنا|/ar/partners"
+            ]
+          },
+          {
+            "heading": "المساعدة والدعم",
+            "links": [
+              "تتبع طلبي|/ar/track-order",
+              "معلومات الشحن|/ar/shipping",
+              "الإرجاع والاستبدال|/ar/returns",
+              "الأسئلة الشائعة|/ar/faq",
+              "اتصل بنا|/ar/contact"
+            ]
+          },
+          {
+            "heading": "الشؤون القانونية",
+            "links": [
+              "سياسة الخصوصية|/ar/privacy",
+              "سياسة ملفات تعريف الارتباط|/ar/cookies",
+              "الشروط والأحكام|/ar/terms",
+              "إمكانية الوصول|/ar/accessibility"
+            ]
+          }
+        ],
+        "bottom": {
+          "copyright": "© 2027 يونيليفر فود سوليوشنز. جميع الحقوق محفوظة."
+        }
       }
     },
     {
@@ -712,7 +757,7 @@
     {
       "id": "FOOTER-TC-06",
       "summary": "Block: Footer - Internationalization - Right-to-left mirroring and German expansion",
-      "scope": "The footer in a language that reads right to left and in one that makes every word longer. Under Arabic the whole footer mirrors, with one deliberate exception the design calls out: the email field stays left-to-right, because an email address always is. Under German the compound labels are what decide whether a column wraps or overflows. RTL is not named by any acceptance criterion on this ticket — it is covered because every block is covered for it.",
+      "scope": "The footer in a language that reads right to left and in one that makes every word longer. The right-to-left fixture carries real Arabic copy rather than mirrored English, so a reviewer can judge whether it reads correctly instead of inferring it — and it is where the mixed-direction cases live: the email field the design pins to LTR because an address always is, and Latin digits inside an Arabic copyright line. Under German the compound labels decide whether a column wraps or overflows. RTL is not named by any acceptance criterion on this ticket.",
       "ac": [
         "AC-3",
         "AC-14",
@@ -730,68 +775,73 @@
         "FOOTER-FX-06",
         "FOOTER-FX-07"
       ],
-      "notes": "Right-to-left is a standing requirement for every block in this project, not something EC-6 asks for — the ticket's criteria never mention direction, mirroring or locale. The steps that cover it are listed under Coverage gaps so the absence is visible rather than implied. AC-15's \"translated text remains readable\" is the only criterion that reaches any of this, and it reaches the German half.",
+      "notes": "Right-to-left is a standing requirement for every block in this project, not something EC-6 asks for — the ticket's criteria never mention direction, mirroring or locale. The steps that cover it are listed under Coverage gaps so the absence is visible rather than implied. AC-15's \"translated text remains readable\" is the only criterion that reaches any of this, and it reaches the expansion half.",
       "precondition": "A desktop browser at 1440x900, repeating the layout steps at 375px. No browser language change is needed — each fixture sets its own locale through page metadata.",
       "steps": [
         {
           "action": "Open the Arabic fixture and inspect the page's root element.",
           "data": "FOOTER-FX-06",
-          "result": "The <html> element carries dir=\"rtl\" and a lang attribute of ar-MA."
+          "result": "The <html> element carries dir=\"rtl\" and lang=\"ar-MA\"."
         },
         {
           "action": "Scroll to the footer and read the dark area at 1440px.",
           "data": "FOOTER-FX-06",
-          "result": "The whole area mirrors: the brand column sits at the right edge, the three link columns run right to left after it, and each column's text is right-aligned. The column order is the authored order read from the right."
+          "result": "The area mirrors: the brand column sits at the right edge and the three link columns run right to left after it — الشركة, then المساعدة والدعم, then الشؤون القانونية. Each column's text is aligned to the right."
         },
         {
           "action": "Read the bottom bar at 1440px.",
           "data": "FOOTER-FX-06",
-          "result": "The copyright sits at the right edge and the social cluster at the left — the mirror image of the left-to-right layout. The five icons keep their authored order, read from the right."
+          "result": "The copyright sits at the right edge and the five social icons at the left. Reading the icons from the right they are in the authored order: Instagram, TikTok, Facebook, YouTube, LinkedIn. The copyright's \"© 2027\" stays together and reads left to right inside the Arabic sentence."
         },
         {
-          "action": "Read the newsletter band, then click into the email field and type an address.",
+          "action": "Read the newsletter band's heading and body copy.",
+          "data": "FOOTER-FX-06",
+          "result": "Both are centred and read right to left. The heading renders in the script display face — check the glyphs actually are the script face and not a system substitute, since a handwriting font built for Latin may carry no Arabic coverage and fall back silently."
+        },
+        {
+          "action": "Read the brand tagline's second line — the orange accent line — and look at the gap between it and the line above.",
+          "data": "FOOTER-FX-06",
+          "result": "The accent text is fully legible with clear space above and below it. If it wraps onto two lines, those lines must not touch or overlap each other. Record the rendered height: .text-ch-h5 sets a 34px font in a 28px line box, which is invisible in English because the label never wraps."
+        },
+        {
+          "action": "Click into the email field, read its placeholder, and type an address.",
           "data": "chef@example.com",
-          "result": "The band's heading and copy are centred and read right to left. The field itself stays left-to-right: the placeholder starts at the left of the field, and the typed address reads left to right with the cursor advancing rightwards. Record what you see — the design pins this field to LTR on purpose, because an address reversed is an address misread."
+          "result": "The placeholder is in Arabic, not English. The field itself stays left-to-right: the placeholder starts at the field's left edge and the typed address reads left to right with the cursor advancing rightwards. Record what you see — the design pins this one field to LTR on purpose, because an address reversed is an address misread."
         },
         {
           "action": "Compare the order of the email field and the Subscribe button against the left-to-right reference.",
           "data": "FOOTER-FX-06, FOOTER-FX-01",
-          "result": "The pair mirrors — the field and the button swap sides — while the field's own contents stay left to right."
+          "result": "The pair mirrors — the field takes the right-hand position and the button the left — while the field's own contents stay left to right."
         },
         {
-          "action": "Set the viewport to 375px and read the whole footer top to bottom.",
+          "action": "Set the Arabic fixture to 375px and read the whole footer top to bottom.",
           "data": "FOOTER-FX-06",
-          "result": "The stacked layout mirrors correctly: the brand column is centred with its rule beneath it, the two-up link columns fill right to left, and the social row above the copyright reads from the right. No horizontal scrollbar appears and nothing is clipped at either edge."
+          "result": "The stacked layout mirrors correctly: the brand column is centred with its hairline rule beneath it, the two-up link columns fill right to left, and the social row sits above the copyright."
+        },
+        {
+          "action": "At 375px and again at 1440px, check the page for sideways movement and for clipping at both edges.",
+          "data": "FOOTER-FX-06",
+          "result": "No horizontal scrollbar at either width, nothing clipped at the left or the right edge, and no label running underneath a neighbouring column."
         },
         {
           "action": "Hover and focus a column link and a social icon at both widths.",
           "data": "FOOTER-FX-06",
-          "result": "Hover and focus behave exactly as they do left to right — the same colour change, the same focus indicator, in the same place relative to the control."
+          "result": "Hover and focus behave exactly as they do left to right — the same colour change and the same focus indicator, in the same place relative to the control."
         },
         {
-          "action": "Open the German fixture at 1440px and read the three link columns.",
-          "data": "FOOTER-FX-07",
-          "result": "Every label is fully readable. Long compounds — \"Nachhaltigkeitsverpflichtungen\", \"Allgemeine Geschäftsbedingungen\", \"Barrierefreiheitserklärung\" — wrap inside their own column rather than overflowing it, running under the next column, or being cut off."
-        },
-        {
-          "action": "On the same fixture, read the band's heading, body copy and Subscribe button.",
-          "data": "FOOTER-FX-07",
-          "result": "\"Newsletter abonnieren\" fits its button without being clipped or forcing the button outside the band. The heading and copy wrap rather than overflow, and the field and button stay on one row at this width."
-        },
-        {
-          "action": "Set the German fixture to 375px and read the link columns and the band.",
-          "data": "FOOTER-FX-07",
-          "result": "The two-up columns still hold their labels without overlapping each other, the button label still fits, and no horizontal scrollbar appears."
-        },
-        {
-          "action": "Inspect the German fixture's root element and read a few labels with a screen reader.",
-          "data": "FOOTER-FX-07",
-          "result": "The <html> element carries lang=\"de\", so the screen reader pronounces the labels as German rather than as English."
-        },
-        {
-          "action": "On the Arabic fixture, ask the screen reader to read the social links.",
+          "action": "Ask a screen reader to read the social links and the email field.",
           "data": "FOOTER-FX-06",
-          "result": "Each is named for its network. No accessible name describes a position on screen — nothing is announced as \"left\", \"right\", \"first\" or \"last\", because those words invert under mirroring."
+          "result": "Each social link is named for its network. No accessible name describes a position on screen — nothing is announced as \"left\", \"right\", \"first\" or \"last\", because those words invert under mirroring. The email field's own name is in the page's language."
+        },
+        {
+          "action": "Open the German fixture at 1440px and read the three link columns and the Subscribe button.",
+          "data": "FOOTER-FX-07",
+          "result": "Every label is fully readable. Long compounds — \"Nachhaltigkeitsverpflichtungen\", \"Allgemeine Geschäftsbedingungen\", \"Barrierefreiheitserklärung\" — wrap inside their own column rather than overflowing it, running under the next column, or being cut off. \"Newsletter abonnieren\" fits its button without clipping."
+        },
+        {
+          "action": "Set the German fixture to 375px, then inspect its root element and read a few labels with a screen reader.",
+          "data": "FOOTER-FX-07",
+          "result": "The two-up columns hold their labels without overlapping, no horizontal scrollbar appears, and the <html> element carries lang=\"de\" so the labels are pronounced as German rather than English."
         }
       ]
     }

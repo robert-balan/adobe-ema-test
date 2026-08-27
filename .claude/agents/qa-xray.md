@@ -364,6 +364,13 @@ sorts every test into one of four outcomes:
 So a revised spec edits the existing tickets. Never renumber a plan id — it is the identity that
 makes this work.
 
+A dropped test is reported on every run until its entry leaves the ledger, and nothing removes it
+for you. When the test was moved to another plan rather than retired — relabelled in Jira, adopted
+by the new plan — the mapping is safe in the new ledger and the old entry is pure noise: delete it
+from the old `result.json` by hand. `--adopt` merges, so it will not clear it. Confirm the move
+with `qa-coverage.mjs` on both stories before deleting anything. See "Moving a test to another
+plan" in `.claude/qa/README.md`.
+
 `--unclaim ID:suite` acts on the other kind of suite drift: a test still sitting in a suite the
 plan no longer claims. That is reported on every run and never removed automatically, because
 silently dropping a test from a suite is how a test quietly stops being run — but once the user

@@ -282,27 +282,187 @@
     {
       "id": "PROMO-FX-06",
       "title": "RTL — the same two tiles in an Arabic locale, with a directional icon to check",
-      "purpose": "A Language row of ar-MA is read by decorateLocale, which sets lang and dir on the document. The CTAs carry the arrow icon so there is a directional control to check for inversion, not just mirrored boxes.",
+      "purpose": "The two tiles in an Arabic locale, now inside an Arabic panel rather than an English one, so the tile is judged against the columns beside it. The CTAs carry the arrow icon so there is a directional control to check for inversion, not just mirrored boxes.",
       "page": "/drafts/qa/promo/rtl",
       "nav": {
         "path": "/drafts/qa/promo/nav-rtl",
         "from": "/nav",
+        "utility": {
+          "links": [
+            "من نحن|/ar/about-us",
+            "اتصل بنا|/ar/contact",
+            "الأسئلة الشائعة|/ar/faq"
+          ],
+          "trigger": ":globe: المغرب · AR",
+          "languages": [
+            "العربية · AR|/ar",
+            "Français · FR|/fr",
+            "English · EN|/"
+          ],
+          "note": "أنت تتصفح موقع المغرب",
+          "change": "تغيير البلد|/ar/change-country"
+        },
+        "tools": [
+          ":search: بحث|/ar/search",
+          ":fav: المفضلة|/ar/favorites",
+          ":cart: السلة (٣)|/ar/cart",
+          ":account: حسابي|/ar/account"
+        ],
+        "menus": {
+          "items": [
+            {
+              "label": "المنتجات",
+              "href": "/ar/products",
+              "columns": [
+                {
+                  "heading": "الصلصات والمتبلات",
+                  "links": [
+                    "الكاتشب|/ar/products/ketchup",
+                    "المايونيز|/ar/products/mayonnaise",
+                    "صلصات السلطة|/ar/products/dressings"
+                  ]
+                },
+                {
+                  "heading": "الألبان والدهون",
+                  "links": [
+                    "الزبدة|/ar/products/butter",
+                    "الكريمة|/ar/products/cream",
+                    "الزيوت|/ar/products/oils"
+                  ]
+                },
+                {
+                  "heading": "الأساسيات الطهوية",
+                  "links": [
+                    "المرق|/ar/products/bouillon",
+                    "الشوربات|/ar/products/soups",
+                    "التوابل|/ar/products/seasonings"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الوصفات",
+              "href": "/ar/recipes",
+              "columns": [
+                {
+                  "heading": "الوصفات",
+                  "links": [
+                    "كل الوصفات|/ar/recipes/all",
+                    "المقبلات والشوربات|/ar/recipes/starters",
+                    "الأطباق الرئيسية|/ar/recipes/mains",
+                    "الحلويات|/ar/recipes/desserts"
+                  ]
+                },
+                {
+                  "heading": "حسب المطبخ",
+                  "links": [
+                    "آسيوي|/ar/recipes/asian",
+                    "متوسطي|/ar/recipes/mediterranean",
+                    "أمريكا اللاتينية|/ar/recipes/latin",
+                    "أوروبي كلاسيكي|/ar/recipes/european"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "التدريب والإلهام",
+              "href": "/ar/training",
+              "columns": [
+                {
+                  "heading": "التدريب",
+                  "links": [
+                    "الدورات المتاحة|/ar/training/courses",
+                    "التطوير المهني|/ar/training/development",
+                    "الشهادات|/ar/training/certificates"
+                  ]
+                },
+                {
+                  "heading": "الإلهام",
+                  "links": [
+                    "اتجاهات القطاع|/ar/inspiration/trends",
+                    "أفكار القوائم|/ar/inspiration/menus",
+                    "قصص الطهاة|/ar/inspiration/stories"
+                  ]
+                },
+                {
+                  "heading": "المصادر",
+                  "links": [
+                    "أدلة الاستخدام|/ar/resources/guides",
+                    "الأدوات الحسابية|/ar/resources/tools",
+                    "التحميلات|/ar/resources/downloads"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "الاستدامة",
+              "href": "/ar/sustainability",
+              "columns": [
+                {
+                  "heading": "العروض الحالية",
+                  "links": [
+                    "عروض الموسم|/ar/offers/seasonal",
+                    "خصومات الكميات|/ar/offers/bulk"
+                  ]
+                },
+                {
+                  "heading": "الولاء والمكافآت",
+                  "links": [
+                    "برنامج النقاط|/ar/loyalty/points",
+                    "المكافآت|/ar/loyalty/rewards"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "برنامج الولاء",
+              "href": "/ar/loyalty-program",
+              "plain": true
+            }
+          ]
+        },
         "promo": [
           {
-            "menu": "Products",
+            "menu": "المنتجات",
             "eyebrow": "وصل حديثاً",
-            "title": "تشكيلة الموسم متوفرة الآن بعبوات سعة لتر واحد",
-            "cta": "استكشف التشكيلة|/products/seasonal",
-            "ctaIcon": true
+            "title": "مرق كنور بروفيشنال متوفر الآن بعبوات سعة لتر واحد",
+            "cta": "استكشف التشكيلة|/ar/products/seasonal"
           },
           {
-            "menu": "Recipes",
+            "menu": "الوصفات",
             "target": "feature",
             "eyebrow": "اختيار الشيف",
             "title": "وصفات سريعة في عشرين دقيقة",
             "description": "أطباق بجودة احترافية من مكونات المخزن الأساسية، مع وصفات جديدة كل أسبوع.",
-            "cta": "تصفح الوصفات|/recipes/all",
-            "ctaIcon": true
+            "cta": "تصفح الوصفات|/ar/recipes/all"
+          },
+          {
+            "menu": "الوصفات",
+            "target": "promo",
+            "eyebrow": "الأكثر رواجاً",
+            "title": "إتقان الأومامي: وحدة تدريبية مجانية للطهاة",
+            "cta": "ابدأ التعلم|/ar/academy/umami"
+          },
+          {
+            "menu": "التدريب والإلهام",
+            "eyebrow": "وحدة مجانية",
+            "title": "دورة تدريبية جديدة في فنون الطهي الحديثة",
+            "cta": "سجّل الآن|/ar/training/enrol"
+          }
+        ],
+        "label": "تعرّف على علاماتنا التجارية العالمية:",
+        "links": [
+          {
+            "alt": "كنور"
+          },
+          {
+            "alt": "هيلمانز"
+          },
+          {
+            "alt": "ليبتون"
+          },
+          {
+            "alt": "كاريت دور"
           }
         ]
       },
@@ -317,8 +477,8 @@
           ],
           "rows": [
             [
-              "<p>Filler copy so the page is tall enough to scroll and the megamenu has a page to open over. The promotional tile is the thing under test; this section only exists to give the panel something to cover.</p>",
-              "<p>Filler copy so the page is tall enough to scroll and the megamenu has a page to open over. The promotional tile is the thing under test; this section only exists to give the panel something to cover.</p>"
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>",
+              "<p>نص بديل لجعل الصفحة طويلة بما يكفي للتمرير. العنصر الذي نختبره هو ما يهم هنا؛ هذا القسم موجود فقط ليمنحه محتوى يبقى مثبتاً فوقه.</p>"
             ]
           ]
         }
@@ -762,7 +922,7 @@
     {
       "id": "PROMO-TC-06",
       "summary": "Header: [Megamenu] Promotional tile - Internationalization - Right-to-left mirroring and a card that cannot get wider",
-      "scope": "The tile in a right-to-left locale and in a language that runs longer than English. The card is a fixed 260px column whatever the language, which makes text expansion a layout boundary rather than a translation question.",
+      "scope": "The tile in a right-to-left locale and in a language that runs longer than English. The card is a fixed 260px column whatever the language, which makes text expansion a layout boundary rather than a translation question. The panel around the tiles is Arabic too now, so the tile is judged against the columns beside it rather than against English ones.",
       "ac": [
         "AC-15"
       ],
