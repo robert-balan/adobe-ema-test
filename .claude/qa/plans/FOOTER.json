@@ -446,7 +446,7 @@
       "fixtures": [
         "FOOTER-FX-01"
       ],
-      "precondition": "A desktop browser at exactly 1440x900, at 100% zoom, with the developer tools available to read computed styles. Measure computed values rather than judging by eye.",
+      "precondition": "A desktop browser at exactly 1440x900, at 100% zoom, with the developer tools open. Measure the rendered box of an element, borders included, rather than reading a width out of the stylesheet — a rule states an intention and an element can still render a different size. Judging by eye is not enough either; several values below differ from the design by two pixels.",
       "steps": [
         {
           "action": "Scroll to the footer and read the newsletter band's background colour.",
@@ -459,9 +459,9 @@
           "result": "The heading renders in the script display face in white. The body copy is white, 14px, and is constrained to a readable measure rather than running the full width of the band. Both are centred."
         },
         {
-          "action": "Measure the email field.",
+          "action": "Measure the email field itself — the input, not the form around it.",
           "data": "FOOTER-FX-01",
-          "result": "476px wide and 54px tall, filled with mushroom-100 (#f5f3f4), with an 8px corner radius and no border. Its text colour is brand-dark (#221d37)."
+          "result": "The field is 476px wide and 54px tall, filled with mushroom-100 (#f5f3f4), with an 8px corner radius and no border. Its text colour is brand-dark (#221d37). Measure the input's own box: the form has a width of its own and holds the Subscribe button as well, so the field can be much narrower than any width you find in the stylesheet."
         },
         {
           "action": "Measure the Subscribe button.",
@@ -474,14 +474,14 @@
           "result": "The background is brand-dark, #221d37. The columns sit on a grid of four tracks: a fixed 303px brand column followed by three equal columns."
         },
         {
-          "action": "Measure the gap between the columns.",
+          "action": "Measure the gap between the columns, and between the rows.",
           "data": "FOOTER-FX-01",
-          "result": "80px, the design's --space-20."
+          "result": "80px in both directions — the design's --space-20."
         },
         {
-          "action": "Measure the brand logo and read the tagline's type.",
+          "action": "Measure the brand logo, then read the tagline's type.",
           "data": "FOOTER-FX-01",
-          "result": "The logo is 98px wide. The tagline is 18px at weight 600 in white, and the second line renders in the orange script accent (--color-brand-primary, #ff5a00)."
+          "result": "The logo renders 98px wide and about 44px tall. The tagline is 18px at weight 600 in white, and the second line renders in the orange script accent (--color-brand-primary, #ff5a00)."
         },
         {
           "action": "Read a column heading's type.",
@@ -499,9 +499,9 @@
           "result": "A 1px rule in white at 12% opacity runs the width of the bottom bar. The copyright renders at 14px in mushroom-700 (#989495)."
         },
         {
-          "action": "Measure one social button and its icon.",
+          "action": "Measure one social button's outer box, borders included, and then its icon.",
           "data": "FOOTER-FX-01",
-          "result": "A 48px circle filled with white at 5% opacity and outlined with 1px of white at 10%. The icon inside is 24px and renders solid white. On hover the fill goes to 12% and the outline to 20%."
+          "result": "48 by 48 — a circle filled with white at 5% opacity and outlined with 1px of white at 10%. The icon inside is 24px and renders solid white. On hover the fill goes to 12% and the outline to 20%. Measure the outer box rather than trusting the declared width: whether the border sits inside or outside it changes the rendered size by 2px, and that is the size a user sees."
         },
         {
           "action": "Read the bottom bar's arrangement.",

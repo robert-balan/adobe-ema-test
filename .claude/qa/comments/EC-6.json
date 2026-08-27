@@ -23,13 +23,14 @@
       "text": "The newsletter band now belongs to a different block, which puts five of this ticket's criteria outside it. The band was extracted into `blocks/newsletter`, which is EC-10's block — footer.js only tags its section now. So AC-5, AC-7, AC-24, AC-30 and AC-37 assert behaviour EC-6 no longer owns. Two gaps sit in that block today: the email input has no `dir=\"ltr\"`, which the handover flags as deliberate because an address rendered right-to-left in an Arabic locale is an address misread, and no `autocomplete=\"email\"`. Should those five criteria stay here or move to EC-10?"
     },
     {
-      "text": "Values that still differ from the handover, for AC-29, AC-32 and AC-36. Two of them the build arguably gets better than the design, so they are worth a decision rather than a fix.",
+      "text": "Values that still differ from the handover, for AC-5, AC-29, AC-32 and AC-36. These are measured in a browser rather than read off the stylesheets, which changed three of the numbers we would otherwise have given you. Two of them the build arguably gets better than the design, so they are worth a decision rather than a fix.",
       "bullets": [
+        "Newsletter input width: renders 346x54 against the design's 476x54, so AC-5's figure fails. The design gives the input itself 476px and lets the form be as wide as it needs; newsletter.css caps the whole form at 476px and lets the input flex inside it beside the Subscribe button. This one sits in blocks/newsletter, so it belongs with item 5 above.",
+        "Social buttons: 46x46 as rendered, against the design's 48x48 — and the difference is box-sizing rather than a chosen size. footer.css sets width: 44px on a content-box element with a 1px border, so it paints 46; the design sets 48px border-box, so it paints 48. Worth knowing before anyone changes the 44 to a 48, which would paint 50. The icon inside is 20px against the design's 24px. Note 44px is the AAA target size, so the built size has a case of its own.",
+        "Brand logo: renders 124x56 against the design's 98x44. footer.css pins height: 56px and the aspect ratio; the design pins width: 98px. So the built logo is wider as well as taller, not just scaled.",
         "Copyright colour: built --color-squid-100 (#d3d2d7), design --color-mushroom-700 (#989495). Both pass AA on the dark background, but the built one is far stronger — 10.75:1 against 5.39:1 — so moving it toward the design would lose contrast.",
-        "Social buttons: built 44px with a 20px icon, design 48px with a 24px icon. 44px is the AAA target size, so the built value also has a case.",
-        "Brand logo: built `height: 56px` with the aspect ratio pinned, design `width: 98px`.",
-        "Column gap: built 40px vertical and 24px horizontal, design --space-20 (80px).",
-        "Brand tagline: design is 18px/600 in white at both sizes; the build is 24px/600 white on mobile and 14px/400 squid-100 on desktop.",
+        "Column gap: 40px between rows and 24px between columns, against the design's 80px in both directions.",
+        "Brand tagline: design is 18px/600 in white at both sizes; the build is 24px/600 white on mobile and 14px/400 squid-100 on desktop. The column headings, by contrast, already match exactly at 18px/600 white — it is only their markup that differs, which is item 3.",
         "The hairline above the bottom bar: AC-6 says white at 12%, the handover says 8%. The build follows AC-6, so this one is a conflict inside the ticket rather than a build gap."
       ]
     },

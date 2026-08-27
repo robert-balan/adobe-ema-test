@@ -140,6 +140,23 @@ what actually ships.
   authored content model, including the authoring noise that makes good fixtures.
 - Where the implementation and the spec disagree, that is a finding — report it, do not quietly
   test whichever one you read last. The code tells you what the block does, not what it should do.
+- **Measure a rendered box; never infer one from a CSS declaration.** A stylesheet states rules,
+  not results, and a value read out of one is a guess about geometry. Every EDS block also rewrites
+  its own DOM in the browser, so `curl` shows you the input to `decorate()` and not the output.
+  Open the page and measure. Playwright is installed outside this repo (see the environment notes);
+  wait on the decorated selector rather than a delay, and read `getBoundingClientRect()` and
+  `getComputedStyle`.
+
+  Two real EC-6 errors, both from reading the CSS and stopping there. `.newsletter-form` is capped
+  at `476px`, so a step was written asserting a `476px` input — the input renders **346px**, because
+  the form holds the button too. And `.footer-social a` sets `width: 44px`, which was reported to
+  the team as 44 — it renders **46×46**, because the element is content-box and carries a 1px
+  border. The design's is `48px` *border-box*, so it really is 48. Three numbers, one of them in a
+  Jira comment to three people, none of them obtainable from the declaration.
+
+  This is also the only way to check what the code generates rather than what it is told: an
+  `aria-label` built at runtime, a heading level rewritten during decoration, an empty section the
+  pipeline dropped before the block ever saw it.
 
 - Pull the block out of `handover/full-page-preview-v0.2.html` and resolve its values through
   `handover/tokens.css`. `.claude/qa/design-sources.md` has the URLs and the extraction recipe.
@@ -149,6 +166,19 @@ what actually ships.
   naming is not the EDS `nav-*` naming the specs use.
 - Where the prototype and the spec disagree, that is a clarification for the REs, not a decision
   for you. The spec wins until they say otherwise; record the conflict in the plan.
+
+**A ticket's account of what is built is a snapshot, and it rots.** These specs carry a
+design-vs-repo table, or a section listing what is still outstanding. It was true on the day it was
+written and the branch has moved since. Re-derive every row from the code and the rendered page
+before you rely on one — and say so in the comment when rows have gone stale, because that is
+finished work the table is still asking someone to do.
+
+Not a marginal risk: **four of EC-6's eight delta rows were already built** when the tests were
+written, and **EC-8's table described the whole mobile drawer as still to build** when it was
+shipped and working. Both would have sent developers to redo completed work. It cuts the other way
+too — a row can be stale because something regressed, or because the feature moved to another
+block entirely, as EC-6's newsletter band did. Either way the answer is the same: check, then
+report the drift as its own finding rather than silently testing around it.
 
 ### 2. Extract the AC inventory
 Build an explicit list of every testable assertion, keyed by its AC id (`AC-1`, `AC-2`, …).
