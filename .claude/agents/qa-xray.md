@@ -268,6 +268,25 @@ step that opens one, so a tester working down the table never has to scroll back
   fixture path sits outside `/drafts/`, because that is the mistake that publishes test content to
   the client's live site. The fixture tooling calls the preview endpoint and **never** `/live/`.
 - **Ids are `<FEATURE>-FX-nn`**, stable like test ids, because tests cite them.
+- **Read the block library from the folder, never from `blocks.json`.** The authoring contract for
+  a block — its variants, and the content structure each expects — is a document under
+  `/docs/library/blocks/` in DA (`foodsolutions-04/ufs`, not the older `ufs-global-blocks`). Each
+  document holds one section per variant: the block as an author would place it, plus a
+  `library-metadata` table naming and describing that variant. `blocks.json` is only the index the
+  library UI reads, and blocks get taken out of it while the document stays — 13 of the 24 are
+  unlisted today. So enumerate the folder to learn what exists, and treat the index as nothing more
+  than "what an author can currently insert":
+
+  ```sh
+  curl -s -H "Authorization: Bearer $DA_TOKEN" \
+    https://admin.da.live/list/foodsolutions-04/ufs/docs/library/blocks
+  curl -s -H "Authorization: Bearer $DA_TOKEN" \
+    https://admin.da.live/source/foodsolutions-04/ufs/docs/library/blocks/<block>.html
+  ```
+
+  `da-probe.mjs` reports both counts and names the difference. Note the library covers blocks an
+  author *places*; the header family and the footer are site-wide fragments authored in `/nav` and
+  `/footer`, so their fixtures are still derived from those documents.
 - **Header-family blocks need a whole nav document, not a section.** The header, megamenu, utility
   bar and brand carousel are all authored in one site-wide `nav`. A fixture page therefore carries
   a `nav` metadata row pointing at its own nav document — `header.js` reads `getMetadata('nav')`

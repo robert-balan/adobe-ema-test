@@ -422,6 +422,32 @@ everything on a page, axe reports per page, stacked instances manufacture duplic
 violations that do not exist in production, and a block that throws during decoration can take out
 every block after it. Sections give separation, not isolation.
 
+### The block library is the authoring contract — read the folder, not the index
+
+A block's variants and the content structure each expects are documented in DA under
+`/docs/library/blocks/`, on **`foodsolutions-04/ufs`** (an older `foodsolutions-04/ufs-global-blocks`
+also exists and is out of date — 16 blocks against 24, none touched since mid-August). Each document
+holds one section per variant: the block as an author would place it, plus a `library-metadata`
+table naming and describing it.
+
+**`blocks.json` is not the list of blocks.** It is the index the library UI reads, and entries get
+removed from it — to keep a block out of authors' hands while it is being worked on, say — while the
+document stays exactly where it was. Today 13 of the 24 documents are unlisted. Build a fixture off
+the index and you are blind to whatever is not in it, so enumerate the folder:
+
+```sh
+curl -s -H "Authorization: Bearer $DA_TOKEN" \
+  https://admin.da.live/list/foodsolutions-04/ufs/docs/library/blocks
+curl -s -H "Authorization: Bearer $DA_TOKEN" \
+  https://admin.da.live/source/foodsolutions-04/ufs/docs/library/blocks/<block>.html
+```
+
+`da-probe.mjs` checks both and names the gap, so the difference is visible rather than assumed.
+
+The library covers blocks an author **places** on a page. The header family (nav, megamenu, utility
+bar, brand carousel, promo tile) and the footer are not there: they are site-wide fragments authored
+once in `/nav` and `/footer`, which is why their fixtures are derived from those documents instead.
+
 Check what the environment will allow before building against it:
 
 ```sh

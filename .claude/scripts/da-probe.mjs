@@ -68,21 +68,55 @@ if (nav.ok) {
   no(`preview ${REF} reachable`, `nav.plain.html returned ${nav.status}`);
 }
 
+// `blocks.json` is the index the DA library UI reads, and it is NOT the list of blocks. Entries
+// get taken out of it — to hide a block from authors while it is being worked on, say — while the
+// document stays right where it was. So the folder is the source of truth for what exists, and the
+// index only says what an author can currently insert. Reading blocks.json alone means building
+// fixtures blind to whatever is not listed.
 const lib = await get(`${PREVIEW}/docs/library/blocks.json`);
+let indexed = null;
 if (lib.ok) {
   try {
     const json = JSON.parse(lib.text);
     const entries = json.data || json;
-    ok('block library readable', `${entries.length} block(s) — the fixture template source`);
+    indexed = entries.map((e) => String(e.path || '').split('/').pop()).filter(Boolean);
+    ok('block library index', `blocks.json lists ${entries.length} block(s) — what authors can insert`);
     const external = entries.filter((e) => /^https?:/.test(e.path || '')).length;
     if (external) {
       skip('library paths', `${external}/${entries.length} point at content.da.live — reading them needs DA_TOKEN`);
     }
   } catch {
-    no('block library readable', 'response was not JSON');
+    no('block library index', 'blocks.json was not JSON');
   }
 } else {
-  no('block library readable', `blocks.json returned ${lib.status}`);
+  no('block library index', `blocks.json returned ${lib.status}`);
+}
+
+if (daToken) {
+  const folder = await get(`${DA_ADMIN}/list/${ORG}/${SITE}/docs/library/blocks`, daToken);
+  if (folder.ok) {
+    try {
+      const docs = JSON.parse(folder.text).filter((e) => e.ext === 'html').map((e) => e.name);
+      ok('block library documents', `${docs.length} block document(s) — the fixture template source`);
+      if (indexed) {
+        const unlisted = docs.filter((n) => !indexed.includes(n));
+        const orphaned = indexed.filter((n) => !docs.includes(n));
+        if (unlisted.length) {
+          skip('blocks not in the index', `${unlisted.length} document(s) absent from blocks.json — real blocks, `
+            + `just not offered in the library UI: ${unlisted.join(', ')}`);
+        }
+        if (orphaned.length) {
+          no('index entries with no document', `blocks.json names ${orphaned.join(', ')}, which do not exist`);
+        }
+      }
+    } catch {
+      no('block library documents', 'the folder listing was not JSON');
+    }
+  } else {
+    no('block library documents', `listing /docs/library/blocks returned ${folder.status}`);
+  }
+} else {
+  skip('block library documents', 'DA_TOKEN is not set — cannot list the folder, and blocks.json alone under-reports');
 }
 
 // The single most important capability for header fixtures: can a page point the header at a
