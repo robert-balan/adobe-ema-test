@@ -84,13 +84,12 @@ a `*all` field expansion returns no step, test-type, or Test Set field of any ki
 detail is that Xray exposes `addTestStep` as a GraphQL mutation at all; if steps were a Jira
 field, that mutation would not need to exist.
 
-### 2. Jira API token — for the three jobs MCP cannot do
+### 2. Jira API token — for the two jobs MCP cannot do
 
-Most Jira work goes through the MCP server. Three things do not, because the server cannot do them:
-deleting an issue link (`jira-unlink.mjs`), fetching a spec ticket to compare against a recorded
-digest (`spec-drift.mjs`), and editing a comment that is already posted (`qa-comment.mjs` — the MCP
-server can add a comment but not change one, and changing one is the point). All three need a Jira
-API token.
+Most Jira work goes through the MCP server. Two things do not, because the server cannot do them:
+deleting an issue link (`jira-unlink.mjs`) and fetching a spec ticket to compare against a recorded
+digest (`spec-drift.mjs`). Both need a Jira API token. (`qa-comment.mjs` needs one too, if you ever
+reach for it — see the note in the file table.)
 
 Unlike the Xray key, you can create this one yourself — no admin needed. Go to
 [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens),
@@ -199,30 +198,13 @@ The push emits missing links on every run now, not only when a test changes, and
 backwards link separately: those have to be deleted in the Jira UI, since the MCP tools cannot
 remove a link and adding a second one does not help.
 
-### After each push — post the discrepancy comment
-
-If writing the tests turned up gaps — the spec against the design, or the spec against what was
-built — one comment goes on the spec ticket carrying those and nothing else. It lives as a JSON
-file so it can be corrected and re-posted:
-
-```sh
-node .claude/scripts/qa-comment.mjs .claude/qa/comments/EC-7.json                    # preview
-QA_COMMENT_APPROVED=1 node .claude/scripts/qa-comment.mjs .claude/qa/comments/EC-7.json --post
-```
-
-The file lists the people to tag **by name**; the accountId comes from `environment.json`, so a
-misspelt name stops the run instead of producing a comment that notifies nobody. `commentId` in the
-file is the comment being rewritten — re-running edits that one comment rather than stacking
-another underneath it. `--new` posts the first one and writes the id back into the file.
-
-The format itself — greeting, numbered items, `Please review and advise.` — is fixed in the agent
-file and built by the script. If nothing came up, post nothing.
-
 ### Nothing reaches Jira unapproved
 
 `.claude/settings.json` registers a `PreToolUse` hook that blocks `xray-push.mjs`, `da-fixture.mjs`
 and `qa-comment.mjs --post` unless the run is read-only (`--dry-run`, `--adopt`, or a comment
-preview) or carries an explicit approval:
+preview) or carries an explicit approval. The comment script is no longer part of the workflow, but
+the guard still covers it — a script that can write to a live ticket keeps its safety whether or not
+anything calls it:
 
 ```sh
 XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json
@@ -509,12 +491,12 @@ is safe, and a key that is not a Test Plan is rejected before anything is writte
 | `.claude/qa/plan.schema.json` | Schema for a plan file — enforced on every push, not just documented |
 | `.claude/qa/environment.json` | Instance facts (issue types, coverage settings, environments), machine-checked |
 | `.claude/qa/plans/` | Plan files and their result ledgers — tracked; `*.jira-actions.json` is not |
-| `.claude/qa/comments/` | The discrepancy comment posted on each spec ticket, one file per ticket |
+| `.claude/qa/comments/` | Historical. The discrepancy comments posted on spec tickets before that step was dropped — kept as the record of what was reported |
 | `.claude/qa/testsets.json` | Shared registry of the three project-wide Test Sets (created on first push) |
 | `.claude/scripts/xray-push.mjs` | Validates a plan, creates Tests and Test Sets, idempotently |
 | `.claude/scripts/qa-coverage.mjs` | Asks Xray what it actually counts as covered — run after every push |
 | `.claude/scripts/spec-drift.mjs` | Flags a repurposed ticket or rewritten criteria — run before each sprint |
-| `.claude/scripts/qa-comment.mjs` | Builds and posts the discrepancy comment on a spec ticket, editable in place |
+| `.claude/scripts/qa-comment.mjs` | Builds and posts a comment on a spec ticket, editable in place. **Not part of the workflow** — posting a comment after writing test cases is no longer a step. Retained for the occasions someone wants it deliberately |
 | `.claude/scripts/verify-environment.mjs` | Re-checks `environment.json` against the live instance |
 | `.claude/scripts/guard-xray-push.sh` | PreToolUse hook: blocks an unapproved push, fixture write or comment |
 | `.claude/scripts/xray-api.sh` | Auth + raw GraphQL against Xray Cloud |
