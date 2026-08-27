@@ -90,15 +90,25 @@ authored specs and acceptance criteria in Jira into precise, traceable Xray test
    dozens of low-value cases. Quote the offending AC.
 
 **Write the tests against the spec regardless.** When a ticket is Ready for Testing, the spec is
-what was agreed, so the tests assert it and the missing behaviour shows up as a failure, explained
-in that test's own `notes` field. Do not quietly rewrite a test to match code that may be
-incomplete: that hides the gap instead of surfacing it, and a passing suite then means nothing.
+what was agreed, so the tests assert it and a step that the build cannot satisfy simply fails. Do
+not quietly rewrite a test to match code that may be incomplete: that hides the gap instead of
+surfacing it, and a passing suite then means nothing.
 
-`notes` is a field on the test in the plan file. It publishes into **that Test issue's own
-description** — the body of EC-169, say — and nowhere else. It is not a comment, it does not touch
-the spec ticket, and it notifies nobody. Its only job is to stop a tester re-raising a gap we
-already knew about. **Nothing in this workflow writes a comment to any ticket**, and until that is
-reintroduced deliberately, nothing should.
+**Do not tell the tester what to expect.** A test must not carry a prediction of its own result —
+no "step 6 is expected to fail", no record of the spec disagreeing with the design or with the
+code, no naming of a known defect. A tester meets the case cold, runs it, and raises a bug when it
+does not do what the step says. That is the whole mechanism, and pre-announcing the outcome breaks
+it twice over: a step flagged as a known failure tends not to get raised at all, and one that fails
+for a *new* reason gets waved through as the old one.
+
+Findings still matter — they are just not the test's to carry. Keep the analysis in the plan's
+`findings` field, which stays in git and never reaches Jira, and take anything that needs a decision
+to a person.
+
+`notes` survives for one job only: explaining why a test exists when it traces to no acceptance
+criterion — a standing requirement like RTL or WCAG. That is a statement about coverage, not about
+the result, so it primes nothing. `xray-push` refuses a test with no AC and no `notes`, which is why
+that use has to stay.
 
 A ticket that **never entered an in-progress status** is worth noticing while you write.
 EC-22 and EC-12 both went straight from To Do to Ready for Testing with no developer ever

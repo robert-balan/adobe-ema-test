@@ -438,7 +438,6 @@
     {
       "id": "MEGAMENU-TC-01",
       "summary": "Header: Megamenu - Authoring - Three layouts from one content model, and what an omitted slot leaves behind",
-      "scope": "What authored content produces in each of the three desktop panels: the grid each layout resolves to, which optional slots each one honours, and the fact that the layout follows from what was authored rather than from a variant the author picks. Also the minimum the content model allows.",
       "ac": [
         "AC-1",
         "AC-2",
@@ -452,11 +451,13 @@
         "megamenu",
         "authoring"
       ],
+      "scope": "What authored content produces in each of the three desktop panels: the grid each layout resolves to, which optional slots each one honours, and the fact that the layout follows from what was authored rather than from a variant the author picks. Also the minimum the content model allows.",
       "fixtures": [
         "MEGAMENU-FX-01",
         "MEGAMENU-FX-02",
         "MEGAMENU-FX-05"
       ],
+      "findings": "Steps assert the spec's class taxonomy (.mm-a / .mm-b / .mm-a2, .mm-col-label, .mm-link, .mm-promo, .mm-featured, .mm-brands). On develop today the header ships the .nav-* taxonomy and none of those classes exist, so the class half of every step above is expected to fail until the rename in section 8 lands. The geometry the classes are meant to produce is already correct: repeat(3, 1fr) 260px, 1.8fr 1fr 1fr 260px and repeat(2, 1fr) are all in header.css as specified.",
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and expand the Products menu.",
@@ -492,13 +493,11 @@
           ],
           "result": "The panel renders with one column of links under its overline label. The column keeps its normal width rather than stretching across the panel, and nothing is dropped or duplicated."
         }
-      ],
-      "notes": "Steps assert the spec's class taxonomy (.mm-a / .mm-b / .mm-a2, .mm-col-label, .mm-link, .mm-promo, .mm-featured, .mm-brands). On develop today the header ships the .nav-* taxonomy and none of those classes exist, so the class half of every step above is expected to fail until the rename in section 8 lands. The geometry the classes are meant to produce is already correct: repeat(3, 1fr) 260px, 1.8fr 1fr 1fr 260px and repeat(2, 1fr) are all in header.css as specified."
+      ]
     },
     {
       "id": "MEGAMENU-TC-02",
       "summary": "Header: Megamenu - Desktop - Opening, closing, and the rule that only one panel is open at a time",
-      "scope": "The desktop open model: what opens a panel, the three ways to close one, and the fact that opening a second closes the first. Covers the .is-open state hook and the chevron as its visible half.",
       "ac": [
         "AC-6",
         "AC-7"
@@ -513,9 +512,11 @@
         "desktop",
         "interaction"
       ],
+      "scope": "The desktop open model: what opens a panel, the three ways to close one, and the fact that opening a second closes the first. Covers the .is-open state hook and the chevron as its visible half.",
       "fixtures": [
         "MEGAMENU-FX-01"
       ],
+      "findings": "AC-6 and AC-7 name .is-open on both the panel and the trigger as the state hook. That class does not appear anywhere in develop's header.js — the open state is carried by aria-expanded on the section instead, which is the swap section 8 lists as outstanding. The .is-open half of these steps is expected to fail; the behaviour and the ARIA half should pass today.",
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width. Before touching anything, check the nav row.",
@@ -545,13 +546,11 @@
           "action": "Open any panel, then press Escape.",
           "result": "The panel closes, in the same state as the outside click left it."
         }
-      ],
-      "notes": "AC-6 and AC-7 name .is-open on both the panel and the trigger as the state hook. That class does not appear anywhere in develop's header.js — the open state is carried by aria-expanded on the section instead, which is the swap section 8 lists as outstanding. The .is-open half of these steps is expected to fail; the behaviour and the ARIA half should pass today."
+      ]
     },
     {
       "id": "MEGAMENU-TC-03",
       "summary": "Header: Megamenu - Presentation - The open panel's frame, and the three colour contexts over one markup",
-      "scope": "How an open panel presents itself regardless of layout — width, the border and shadow that separate it from the page, and the promise that it never makes the page scroll sideways. Then the same content in all three colour contexts, which the spec makes a modifier rather than a variant.",
       "ac": [
         "AC-4",
         "AC-5"
@@ -565,11 +564,13 @@
         "desktop",
         "design"
       ],
+      "scope": "How an open panel presents itself regardless of layout — width, the border and shadow that separate it from the page, and the promise that it never makes the page scroll sideways. Then the same content in all three colour contexts, which the spec makes a modifier rather than a variant.",
       "fixtures": [
         "MEGAMENU-FX-01",
         "MEGAMENU-FX-07",
         "MEGAMENU-FX-08"
       ],
+      "findings": "AC-4's dark and glass contexts are listed in section 8 as still to be built, and a search of develop's header.css finds no --dark or --glass modifier — the only 'dark' matches are colour values such as --color-brand-dark. Every step touching FX-07 and FX-08 is expected to fail until those contexts exist. The fixtures set the context through page metadata; if the implementation ends up selecting it another way, the fixtures need updating but the assertions do not.",
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and expand any menu.",
@@ -605,8 +606,7 @@
           ],
           "result": "The panels carry the --glass modifier. The chrome is translucent over the image behind it, and link text, labels and icons all stay readable against the busiest part of that image."
         }
-      ],
-      "notes": "AC-4's dark and glass contexts are listed in section 8 as still to be built, and a search of develop's header.css finds no --dark or --glass modifier — the only 'dark' matches are colour values such as --color-brand-dark. Every step touching FX-07 and FX-08 is expected to fail until those contexts exist. The fixtures set the context through page metadata; if the implementation ends up selecting it another way, the fixtures need updating but the assertions do not."
+      ]
     },
     {
       "id": "MEGAMENU-TC-04",
@@ -656,7 +656,6 @@
     {
       "id": "MEGAMENU-TC-05",
       "summary": "Header: Megamenu - Mobile drawer - Single-open accordion, and the links held back behind View more",
-      "scope": "The drawer's own model, which is not the desktop panel at a smaller size: one section open at a time, only the first four links of a section shown, and a toggle that must not appear when it has nothing to reveal.",
       "ac": [
         "AC-10",
         "AC-11"
@@ -670,11 +669,13 @@
         "mobile",
         "drawer"
       ],
+      "scope": "The drawer's own model, which is not the desktop panel at a smaller size: one section open at a time, only the first four links of a section shown, and a toggle that must not appear when it has nothing to reveal.",
       "fixtures": [
         "MEGAMENU-FX-03",
         "MEGAMENU-FX-04",
         "MEGAMENU-FX-01"
       ],
+      "findings": "The drawer, the single-open accordion and the View more toggle are all built and working on develop, with the cut-off set to four (DRAWER_VISIBLE_LINKS = 4) and .is-extra used as the spec names it. Section 8 of the ticket records the repo's mobile pattern as a 'simple stack' with all three still to build, which is out of date and worth correcting on the ticket.",
       "steps": [
         {
           "action": "Open fixture FX-03 at a mobile width and tap the hamburger.",
@@ -716,8 +717,7 @@
           "data": "viewport 390x844",
           "result": "A mini brands carousel appears in the panel. It scrolls by dragging and has no arrow buttons at either end."
         }
-      ],
-      "notes": "The drawer, the single-open accordion and the View more toggle are all built and working on develop, with the cut-off set to four (DRAWER_VISIBLE_LINKS = 4) and .is-extra used as the spec names it. Section 8 of the ticket records the repo's mobile pattern as a 'simple stack' with all three still to build, which is out of date and worth correcting on the ticket."
+      ]
     },
     {
       "id": "MEGAMENU-TC-06",
@@ -823,7 +823,6 @@
     {
       "id": "MEGAMENU-TC-08",
       "summary": "Header: Megamenu - Accessibility - State, keyboard operation, names, and contrast in every context",
-      "scope": "What assistive technology is told about the megamenu, whether the whole thing can be operated without a pointer, and whether it holds up to an automated audit in all three colour contexts.",
       "ac": [
         "AC-15",
         "AC-16",
@@ -837,12 +836,14 @@
         "megamenu",
         "a11y"
       ],
+      "scope": "What assistive technology is told about the megamenu, whether the whole thing can be operated without a pointer, and whether it holds up to an automated audit in all three colour contexts.",
       "fixtures": [
         "MEGAMENU-FX-01",
         "MEGAMENU-FX-03",
         "MEGAMENU-FX-07",
         "MEGAMENU-FX-08"
       ],
+      "findings": "Three things here are expected to fail on develop today. The View more button is built with aria-expanded but no aria-label, so its only accessible name is the literal text 'View more' — repeated identically for every category in the drawer, which is the ambiguity AC-17 is written to prevent. There is no focus trap: the drawer registers a keydown handler for Escape only, with no Tab handling and no focus return, so both halves of AC-16's trap requirement are unimplemented. And the contrast and axe steps cannot pass in the dark and glass contexts while those contexts do not exist.",
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width and Tab through the nav row without using the mouse.",
@@ -897,13 +898,11 @@
           ],
           "result": "The accessibility score is 100, allowing for issues that belong to other blocks on the page rather than the header."
         }
-      ],
-      "notes": "Three things here are expected to fail on develop today. The View more button is built with aria-expanded but no aria-label, so its only accessible name is the literal text 'View more' — repeated identically for every category in the drawer, which is the ambiguity AC-17 is written to prevent. There is no focus trap: the drawer registers a keydown handler for Escape only, with no Tab handling and no focus return, so both halves of AC-16's trap requirement are unimplemented. And the contrast and axe steps cannot pass in the dark and glass contexts while those contexts do not exist."
+      ]
     },
     {
       "id": "MEGAMENU-TC-09",
       "summary": "Header: Megamenu - Viewport - The 1024px switch, and matching the approved design at both sizes",
-      "scope": "The boundary itself. Desktop megamenu and mobile drawer are two designs, so crossing between them is a state change rather than a reflow, and the interesting failures are at the crossing: content lost, content duplicated, or a panel left stuck open.",
       "ac": [
         "AC-19",
         "AC-20"
@@ -917,9 +916,11 @@
         "megamenu",
         "responsive"
       ],
+      "scope": "The boundary itself. Desktop megamenu and mobile drawer are two designs, so crossing between them is a state change rather than a reflow, and the interesting failures are at the crossing: content lost, content duplicated, or a panel left stuck open.",
       "fixtures": [
         "MEGAMENU-FX-01"
       ],
+      "findings": "AC-19 and AC-20 both name 1024px and these steps assert it. develop currently switches at 1200px (matchMedia('(min-width: 1200px)') in header.js, with the matching desktop media block in header.css), while section 8 of the ticket records the repo as being on 900px. Three different numbers are in play — spec 1024, ticket's delta table 900, code 1200 — so this needs settling with the RE and the developer. The steps stay on the spec's 1024 and the boundary steps are expected to fail until the code matches.",
       "steps": [
         {
           "action": "Open fixture FX-01 at 1024px wide exactly.",
@@ -956,8 +957,7 @@
           "action": "Resize slowly back and forth across 1024px several times, then check the nav for duplicates.",
           "result": "Each link, icon and category appears exactly once. Nothing is duplicated by repeated crossings, and nothing is lost."
         }
-      ],
-      "notes": "AC-19 and AC-20 both name 1024px and these steps assert it. develop currently switches at 1200px (matchMedia('(min-width: 1200px)') in header.js, with the matching desktop media block in header.css), while section 8 of the ticket records the repo as being on 900px. Three different numbers are in play — spec 1024, ticket's delta table 900, code 1200 — so this needs settling with the RE and the developer. The steps stay on the spec's 1024 and the boundary steps are expected to fail until the code matches."
+      ]
     }
   ]
 }

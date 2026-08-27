@@ -322,7 +322,6 @@
     {
       "id": "UTILITY-TC-01",
       "summary": "Header: [Megamenu]: Utility Bar - Authoring - Links, separators and when the switcher appears",
-      "scope": "What authored content produces: at least one utility link always renders, a single link leaves no dangling separator, missing optional items leave no gap, and the language switcher appears only when the market actually offers a choice.",
       "ac": [
         "AC-3",
         "AC-6"
@@ -335,13 +334,14 @@
         "utility-bar",
         "authoring"
       ],
+      "scope": "What authored content produces: at least one utility link always renders, a single link leaves no dangling separator, missing optional items leave no gap, and the language switcher appears only when the market actually offers a choice.",
       "fixtures": [
         "UTILITY-FX-01",
         "UTILITY-FX-02",
         "UTILITY-FX-03",
         "UTILITY-FX-04"
       ],
-      "notes": "Step 4 is expected to fail on current code. blocks/language/language.js treats the first authored row as the trigger and every remaining row as an option, then builds the trigger button unconditionally — there is no check on how many options were found. A market with one language therefore still gets a switcher. Raise it as a product defect; the test asserts AC-6 as written.",
+      "findings": "Step 4 is expected to fail on current code. blocks/language/language.js treats the first authored row as the trigger and every remaining row as an option, then builds the trigger button unconditionally — there is no check on how many options were found. A market with one language therefore still gets a switcher. Raise it as a product defect; the test asserts AC-6 as written.",
       "steps": [
         {
           "action": "Open fixture FX-01 and look at the utility bar.",

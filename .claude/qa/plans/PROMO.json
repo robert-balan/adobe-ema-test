@@ -532,7 +532,6 @@
     {
       "id": "PROMO-TC-01",
       "summary": "Header: [Megamenu] Promotional tile - Authoring - What the document produces, and why position decides the variant",
-      "scope": "The document-to-DOM contract for the tile: the order of the slots, what an omitted optional slot leaves behind, and the rule that makes the same authored copy a light feature in one place and a dark promo in another. Also the authoring mistakes the model warns about and nothing prevents.",
       "ac": [
         "AC-1",
         "AC-2",
@@ -553,12 +552,14 @@
         "promo-tile",
         "authoring"
       ],
+      "scope": "The document-to-DOM contract for the tile: the order of the slots, what an omitted optional slot leaves behind, and the rule that makes the same authored copy a light feature in one place and a dark promo in another. Also the authoring mistakes the model warns about and nothing prevents.",
       "fixtures": [
         "PROMO-FX-01",
         "PROMO-FX-02",
         "PROMO-FX-03",
         "PROMO-FX-04"
       ],
+      "findings": "Steps 6, 8, 10 and 11 record behaviour the ticket does not describe, and step 3 records a delta the ticket already flags as AC-31.\n\nThe rule behind steps 7 and 8 is worth stating plainly, because section 2 of the ticket states it differently. The ticket says the feature is the 'first non-column child'. The implementation calls the panel's first child a feature and every later child a promo, counting the link columns. Those two rules only agree when the tile is authored above the columns. Author a feature below them — which is how a document usually reads, with the editorial note last — and it silently becomes a dark promo, gains a media band, and drops its description into an element with no styling.\n\nStep 10 is the sharper version of the same problem: the tile does not merely change variant, it stops being a tile. That row is classified by what its second cell holds, so a CTA authored one cell to the right costs the author the entire card with no error anywhere.",
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop width above the megamenu breakpoint and expand the Products menu.",
@@ -627,13 +628,11 @@
           ],
           "result": "No empty card, no stray coloured band and no leftover container appears where a tile is absent. A panel with nothing to render leaves nothing behind."
         }
-      ],
-      "notes": "Steps 6, 8, 10 and 11 record behaviour the ticket does not describe, and step 3 records a delta the ticket already flags as AC-31.\n\nThe rule behind steps 7 and 8 is worth stating plainly, because section 2 of the ticket states it differently. The ticket says the feature is the 'first non-column child'. The implementation calls the panel's first child a feature and every later child a promo, counting the link columns. Those two rules only agree when the tile is authored above the columns. Author a feature below them — which is how a document usually reads, with the editorial note last — and it silently becomes a dark promo, gains a media band, and drops its description into an element with no styling.\n\nStep 10 is the sharper version of the same problem: the tile does not merely change variant, it stops being a tile. That row is classified by what its second cell holds, so a CTA authored one cell to the right costs the author the entire card with no error anywhere."
+      ]
     },
     {
       "id": "PROMO-TC-02",
       "summary": "Header: [Megamenu] Promotional tile - Functionality - The call to action, and the hover and arrow the spec expects",
-      "scope": "Runtime behaviour on a pointer device: activating the call to action, what hovering it does and does not do, that interacting with it disturbs nothing around it, and that repeated opening of the panel does not accumulate state.",
       "ac": [
         "AC-7",
         "AC-8",
@@ -650,10 +649,12 @@
         "promo-tile",
         "functional"
       ],
+      "scope": "Runtime behaviour on a pointer device: activating the call to action, what hovering it does and does not do, that interacting with it disturbs nothing around it, and that repeated opening of the panel does not accumulate state.",
       "fixtures": [
         "PROMO-FX-01",
         "PROMO-FX-05"
       ],
+      "findings": "Steps 2, 3 and 5 are expected to fail as written, and all three are the same finding: the two affordances AC-7 describes are not in the code on the branch under test.\n\nThe hover is absent for BOTH tiles, not just the promo. The ticket's delta table and AC-29 flag the promo only, so the reconciliation is wider than it records.\n\nThe chevron is a different kind of absence. It used to be drawn by the stylesheet and is not any more — a comment in the code says the arrow is now an authored icon so it can be swapped or removed. That is a reasonable change, but AC-7 still describes the old behaviour, and none of the three tiles in the live nav authors an icon, so no arrow renders anywhere in production content today.",
       "steps": [
         {
           "action": "Open FX-01 above the megamenu breakpoint with the browser console visible, and expand and collapse each of the four menus that have a panel.",
@@ -705,13 +706,11 @@
           "action": "Click the promo's call to action.",
           "result": "The browser navigates to the authored href and the panel closes. Only that the navigation starts is under test here — where it lands is out of scope for this ticket."
         }
-      ],
-      "notes": "Steps 2, 3 and 5 are expected to fail as written, and all three are the same finding: the two affordances AC-7 describes are not in the code on the branch under test.\n\nThe hover is absent for BOTH tiles, not just the promo. The ticket's delta table and AC-29 flag the promo only, so the reconciliation is wider than it records.\n\nThe chevron is a different kind of absence. It used to be drawn by the stylesheet and is not any more — a comment in the code says the arrow is now an authored icon so it can be swapped or removed. That is a reasonable change, but AC-7 still describes the old behaviour, and none of the three tiles in the live nav authors an icon, so no arrow renders anywhere in production content today."
+      ]
     },
     {
       "id": "PROMO-TC-03",
       "summary": "Header: [Megamenu] Promotional tile - Visual - Tokens, type and spacing at one desktop viewport",
-      "scope": "What the two cards look like at a single reference viewport, measured against the design handover and the tokens it resolves through. Breakpoints belong to the compatibility test; this one asks only whether the tile looks right where it is fully styled.",
       "ac": [
         "AC-5",
         "AC-6",
@@ -729,10 +728,12 @@
         "promo-tile",
         "visual"
       ],
+      "scope": "What the two cards look like at a single reference viewport, measured against the design handover and the tokens it resolves through. Breakpoints belong to the compatibility test; this one asks only whether the tile looks right where it is fully styled.",
       "fixtures": [
         "PROMO-FX-01",
         "PROMO-FX-04"
       ],
+      "findings": "Step 8 is a contradiction inside the ticket rather than a defect in the code, and a tester should not raise it as one.\n\nAC-6 says the feature's eyebrow and CTA use accessible-orange, #d14900. AC-22 says the same text must meet AA contrast against the feature's #f5f3f4 background. Those two cannot both hold: #d14900 on #f5f3f4 is 4.08:1, below the 4.5:1 that normal-size text needs. The header defines its own #b23e00 for exactly this, which is 5.31:1 and passes, and the code says so in a comment.\n\nSo the implementation is right and AC-6 names a value that would fail AC-22. It needs correcting in the ticket, not in the code. Step 8 asserts the implemented colour so the test passes today and still catches a regression away from it.\n\nStep 5 records the AC-30 open question with real numbers rather than restating it.",
       "steps": [
         {
           "action": "Open FX-01 at the reference viewport and expand Products. Measure the promo card's width.",
@@ -789,13 +790,11 @@
           "action": "With each panel open in turn on both fixtures, check the page for a horizontal scrollbar.",
           "result": "None appears at any point. The panel and its tiles stay within the page's width even with the oversized content of FX-04."
         }
-      ],
-      "notes": "Step 8 is a contradiction inside the ticket rather than a defect in the code, and a tester should not raise it as one.\n\nAC-6 says the feature's eyebrow and CTA use accessible-orange, #d14900. AC-22 says the same text must meet AA contrast against the feature's #f5f3f4 background. Those two cannot both hold: #d14900 on #f5f3f4 is 4.08:1, below the 4.5:1 that normal-size text needs. The header defines its own #b23e00 for exactly this, which is 5.31:1 and passes, and the code says so in a comment.\n\nSo the implementation is right and AC-6 names a value that would fail AC-22. It needs correcting in the ticket, not in the code. Step 8 asserts the implemented colour so the test passes today and still catches a regression away from it.\n\nStep 5 records the AC-30 open question with real numbers rather than restating it."
+      ]
     },
     {
       "id": "PROMO-TC-04",
       "summary": "Header: [Megamenu] Promotional tile - Compatibility - Where the tile stops existing, and at exactly which width",
-      "scope": "Behaviour across viewport and input. The tile is a desktop-only element, so the question here is not how it reflows but where it disappears, whether that width is the one the spec names, and whether crossing it in either direction leaves anything behind.",
       "ac": [
         "AC-3",
         "AC-27",
@@ -812,10 +811,12 @@
         "promo-tile",
         "responsive"
       ],
+      "scope": "Behaviour across viewport and input. The tile is a desktop-only element, so the question here is not how it reflows but where it disappears, whether that width is the one the spec names, and whether crossing it in either direction leaves anything behind.",
       "fixtures": [
         "PROMO-FX-01",
         "PROMO-FX-02"
       ],
+      "findings": "Step 3 is the important one and it contradicts the ticket.\n\nThe ticket's source-of-truth table and AC-32 both say that below the breakpoint the promo's content is 'surfaced as plain stacked text and a link' inside the drawer. On develop it is not. The stylesheet hides the promo and the feature outright below 1200px, and only re-shows them inside the desktop block. Nothing is surfaced.\n\nThat matters beyond a wording correction. AC-32 asks Product and Design to decide between keeping the content surfaced, styling it, or omitting it, and marks the decision as required before development. The code has already taken the third option, which is also what the handover specifies. So the open question may be closed already — worth confirming rather than reopening.\n\nOne thing the ticket gets right that has since changed: it notes the JavaScript toggle sitting at 900px while the styling switched at 1200px. On the branch read for this plan both are 1200px, so that particular mismatch is gone and the remaining disagreement is with the handover and the project-wide rule.\n\nThis test is one test rather than a desktop and mobile pair. The two viewports are not two designs here — below the breakpoint there is no design at all, because there is no tile.",
       "steps": [
         {
           "action": "Open FX-01 at 1440px wide and expand Products, then Recipes.",
@@ -865,13 +866,11 @@
           "action": "At each of 360, 390, 768, 1024, 1200 and 1440px, with every panel opened in turn, check for a horizontal page scrollbar.",
           "result": "None appears at any width. Nothing in the panel forces the page wider than the viewport."
         }
-      ],
-      "notes": "Step 3 is the important one and it contradicts the ticket.\n\nThe ticket's source-of-truth table and AC-32 both say that below the breakpoint the promo's content is 'surfaced as plain stacked text and a link' inside the drawer. On develop it is not. The stylesheet hides the promo and the feature outright below 1200px, and only re-shows them inside the desktop block. Nothing is surfaced.\n\nThat matters beyond a wording correction. AC-32 asks Product and Design to decide between keeping the content surfaced, styling it, or omitting it, and marks the decision as required before development. The code has already taken the third option, which is also what the handover specifies. So the open question may be closed already — worth confirming rather than reopening.\n\nOne thing the ticket gets right that has since changed: it notes the JavaScript toggle sitting at 900px while the styling switched at 1200px. On the branch read for this plan both are 1200px, so that particular mismatch is gone and the remaining disagreement is with the handover and the project-wide rule.\n\nThis test is one test rather than a desktop and mobile pair. The two viewports are not two designs here — below the breakpoint there is no design at all, because there is no tile."
+      ]
     },
     {
       "id": "PROMO-TC-05",
       "summary": "Header: [Megamenu] Promotional tile - Accessibility - Keyboard, semantics and contrast on both surfaces",
-      "scope": "Reaching and operating the call to action by keyboard, what a screen reader is given, and whether every colour pair in both cards clears WCAG 2.1 AA. Runs on the accessibility fixture, which holds the two tiles and nothing else.",
       "ac": [
         "AC-18",
         "AC-19",
@@ -891,9 +890,11 @@
         "promo-tile",
         "a11y"
       ],
+      "scope": "Reaching and operating the call to action by keyboard, what a screen reader is given, and whether every colour pair in both cards clears WCAG 2.1 AA. Runs on the accessibility fixture, which holds the two tiles and nothing else.",
       "fixtures": [
         "PROMO-FX-05"
       ],
+      "findings": "Steps 5 and 6 are written to record rather than assert, and deliberately so. The header defines a focus-visible style for eight of its own controls and none of them is the tile's call to action, and the global stylesheet only styles focus on elements carrying a button class. So the indicator on these links is whatever the browser draws by default, which differs between browsers and is not something the project has chosen. It may well clear 3:1 in Chrome on both surfaces; that is not the same as the design having specified it. Section 2 of the ticket asserts a focus ring 'per header convention' of brand-primary at 2px with 2px offset — that convention is not applied here.\n\nSteps 7 to 10 all pass on the branch read for this plan, and are written as plain assertions with the measured figures in them rather than as things to go and find out.",
       "steps": [
         {
           "action": "Open FX-05 at a desktop width and, using only the keyboard, reach the Products menu and open its panel.",
@@ -955,13 +956,11 @@
           "action": "Run a Lighthouse accessibility audit on FX-05.",
           "result": "A score of 100, or the shortfall attributed to something outside the two tiles and recorded as such."
         }
-      ],
-      "notes": "Steps 5 and 6 are written to record rather than assert, and deliberately so. The header defines a focus-visible style for eight of its own controls and none of them is the tile's call to action, and the global stylesheet only styles focus on elements carrying a button class. So the indicator on these links is whatever the browser draws by default, which differs between browsers and is not something the project has chosen. It may well clear 3:1 in Chrome on both surfaces; that is not the same as the design having specified it. Section 2 of the ticket asserts a focus ring 'per header convention' of brand-primary at 2px with 2px offset — that convention is not applied here.\n\nSteps 7 to 10 all pass on the branch read for this plan, and are written as plain assertions with the measured figures in them rather than as things to go and find out."
+      ]
     },
     {
       "id": "PROMO-TC-06",
       "summary": "Header: [Megamenu] Promotional tile - Internationalization - Right-to-left mirroring and a card that cannot get wider",
-      "scope": "The tile in a right-to-left locale and in a language that runs longer than English. The card is a fixed 260px column whatever the language, which makes text expansion a layout boundary rather than a translation question. The panel around the tiles is Arabic too now, so the tile is judged against the columns beside it rather than against English ones.",
       "ac": [
         "AC-15"
       ],
@@ -973,10 +972,12 @@
         "promo-tile",
         "i18n"
       ],
+      "scope": "The tile in a right-to-left locale and in a language that runs longer than English. The card is a fixed 260px column whatever the language, which makes text expansion a layout boundary rather than a translation question. The panel around the tiles is Arabic too now, so the tile is judged against the columns beside it rather than against English ones.",
       "fixtures": [
         "PROMO-FX-06",
         "PROMO-FX-07"
       ],
+      "findings": "Right-to-left is mandatory coverage for every block in this project, and this ticket states no acceptance criterion for it — section 8 does not mention direction, mirroring or locale anywhere. Steps 1 to 6 therefore trace to nothing in the ticket and are listed under coverage gaps. Steps 7 to 9 cover the 'translated text' half of AC-15.\n\nStep 5 is the finding. The header stylesheet has no right-to-left rules at all; it relies entirely on logical properties, which is why the cards, dividers and padding in steps 2 to 4 mirror correctly without any. That approach works for boxes and fails for glyphs: an arrow is directional content, not a margin, and no logical property flips it. The handover names this icon explicitly in its own right-to-left rule, so the design has already decided it should mirror.\n\nThe practical scope of the finding is narrow today, because the stylesheet no longer draws an arrow and no live tile authors one — the same absence the functionality test records against AC-7. It becomes visible the moment an author adds the icon the CSS is still sized for.",
       "steps": [
         {
           "action": "Open FX-06, whose page metadata sets an Arabic locale, and inspect the document element.",
@@ -1021,8 +1022,7 @@
           "action": "Check the longest single word in the German copy against the card's width.",
           "result": "It fits, or wraps without overflowing the card. Record the longest word that fits, so a translator has a real number to work to rather than a guess."
         }
-      ],
-      "notes": "Right-to-left is mandatory coverage for every block in this project, and this ticket states no acceptance criterion for it — section 8 does not mention direction, mirroring or locale anywhere. Steps 1 to 6 therefore trace to nothing in the ticket and are listed under coverage gaps. Steps 7 to 9 cover the 'translated text' half of AC-15.\n\nStep 5 is the finding. The header stylesheet has no right-to-left rules at all; it relies entirely on logical properties, which is why the cards, dividers and padding in steps 2 to 4 mirror correctly without any. That approach works for boxes and fails for glyphs: an arrow is directional content, not a margin, and no logical property flips it. The handover names this icon explicitly in its own right-to-left rule, so the design has already decided it should mirror.\n\nThe practical scope of the finding is narrow today, because the stylesheet no longer draws an arrow and no live tile authors one — the same absence the functionality test records against AC-7. It becomes visible the moment an author adds the icon the CSS is still sized for."
+      ]
     }
   ]
 }

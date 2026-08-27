@@ -497,7 +497,6 @@
     {
       "id": "NAV-TC-01",
       "summary": "Header: Navigation - Authoring - The logo, the links, and what makes an item a dropdown",
-      "scope": "What authored content produces on the bar: the logo and its text fallback, at least one link, and the fact that an item becomes a dropdown purely because content was authored under it — there is no switch to set.",
       "ac": [
         "AC-1",
         "AC-8"
@@ -510,6 +509,7 @@
         "navigation",
         "authoring"
       ],
+      "scope": "What authored content produces on the bar: the logo and its text fallback, at least one link, and the fact that an item becomes a dropdown purely because content was authored under it — there is no switch to set.",
       "fixtures": [
         "NAV-FX-01",
         "NAV-FX-02",
@@ -517,6 +517,7 @@
         "NAV-FX-04",
         "NAV-FX-05"
       ],
+      "findings": "Step 5 is expected to fail. The text logo works — the brand name renders and is still a link — but it is 280px wide where the image is 107px, and the extra 173px pushes the last nav item underneath the search field. Confirmed in a browser on FX-04 with the production five items. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable.",
       "steps": [
         {
           "action": "Open fixture FX-01 and look at the nav bar.",
@@ -557,8 +558,7 @@
           ],
           "result": "All eight render, in the authored order, with none dropped or merged. Each label stays on one line."
         }
-      ],
-      "notes": "Step 5 is expected to fail. The text logo works — the brand name renders and is still a link — but it is 280px wide where the image is 107px, and the extra 173px pushes the last nav item underneath the search field. Confirmed in a browser on FX-04 with the production five items. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable."
+      ]
     },
     {
       "id": "NAV-TC-02",
@@ -632,7 +632,6 @@
     {
       "id": "NAV-TC-03",
       "summary": "Header: Navigation - Visual - Height, colour contexts, the open state, and no clipping",
-      "scope": "How the bar looks against the approved design: its height and typography, the three colour contexts, what an open dropdown does to the trigger, and that a crowded bar never clips or spills off the page.",
       "ac": [
         "AC-1",
         "AC-2",
@@ -647,11 +646,12 @@
         "navigation",
         "visual"
       ],
+      "scope": "How the bar looks against the approved design: its height and typography, the three colour contexts, what an open dropdown does to the trigger, and that a crowded bar never clips or spills off the page.",
       "fixtures": [
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "Several steps are expected to fail on current code, all of them named in the ticket's own section 8 as work still to do. (a) The nav row measures 70px, not 68px — styles.css sets --nav-h: 70px where the design system sets 68px. (b) The dark and glass contexts do not exist: header.css defines the light treatment only, there is no modifier for the other two and no way for an author to select one, so steps 4, 5 and 7 have nothing to check. (c) The hover/active label colour is #B23E00, from a header-local --hdr-cta-orange, where the design system says --color-orange-700 = #D14900. The repo's own styles.css already defines that token. #B23E00 is the higher-contrast of the two, so raise it as a fidelity question rather than letting anyone 'fix' it back to something that fails AA. (d) Step 8 is expected to fail. On FX-03 at 1440px the fourth label is cut off by the search field and the last three items render behind the tools, off the right edge of the window. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Answered 26 Aug by Gianluca Volpe: follow the designs unless doing so breaks an accessibility rule. So 68px and #D14900 stand as the expected values — but #B23E00 is the higher-contrast of the two, so check the design value still meets AA at the label's size before anyone changes the code to it.",
+      "findings": "Several steps are expected to fail on current code, all of them named in the ticket's own section 8 as work still to do. (a) The nav row measures 70px, not 68px — styles.css sets --nav-h: 70px where the design system sets 68px. (b) The dark and glass contexts do not exist: header.css defines the light treatment only, there is no modifier for the other two and no way for an author to select one, so steps 4, 5 and 7 have nothing to check. (c) The hover/active label colour is #B23E00, from a header-local --hdr-cta-orange, where the design system says --color-orange-700 = #D14900. The repo's own styles.css already defines that token. #B23E00 is the higher-contrast of the two, so raise it as a fidelity question rather than letting anyone 'fix' it back to something that fails AA. (d) Step 8 is expected to fail. On FX-03 at 1440px the fourth label is cut off by the search field and the last three items render behind the tools, off the right edge of the window. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Answered 26 Aug by Gianluca Volpe: follow the designs unless doing so breaks an accessibility rule. So 68px and #D14900 stand as the expected values — but #B23E00 is the higher-contrast of the two, so check the design value still meets AA at the label's size before anyone changes the code to it.",
       "steps": [
         {
           "action": "On FX-01 at 1440px wide, measure the nav row.",
@@ -696,7 +696,6 @@
     {
       "id": "NAV-TC-04",
       "summary": "Header: Navigation - Compatibility, desktop - The full bar from 900px up",
-      "scope": "The desktop arrangement across the widths it is supposed to cover, including 900px itself, which the 26 Aug clarification makes the lowest desktop width.",
       "ac": [
         "AC-1",
         "AC-6",
@@ -711,11 +710,12 @@
         "compatibility",
         "desktop"
       ],
+      "scope": "The desktop arrangement across the widths it is supposed to cover, including 900px itself, which the 26 Aug clarification makes the lowest desktop width.",
       "fixtures": [
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "The desktop/mobile switch is 900px. Gianluca Volpe answered this on EC-7 on 26 Aug 2026, against the three values that were in play; AC-7 and AC-15 still say 1024px and need correcting to match. header.css switches at 1200px, so steps 3 to 8 are expected to fail from 1199px down to 900px: the hamburger bar shows where the spec calls for the full desktop nav.",
+      "findings": "The desktop/mobile switch is 900px. Gianluca Volpe answered this on EC-7 on 26 Aug 2026, against the three values that were in play; AC-7 and AC-15 still say 1024px and need correcting to match. header.css switches at 1200px, so steps 3 to 8 are expected to fail from 1199px down to 900px: the hamburger bar shows where the spec calls for the full desktop nav.",
       "steps": [
         {
           "action": "Open FX-01 at 1440px.",
@@ -760,7 +760,6 @@
     {
       "id": "NAV-TC-05",
       "summary": "Header: Navigation - Compatibility, mobile - The hamburger bar below 900px",
-      "scope": "The mobile arrangement, which is a different bar rather than the same one squeezed: the links go away and a hamburger and logo take their place. Also the switch between the two.",
       "ac": [
         "AC-7",
         "AC-15"
@@ -774,11 +773,12 @@
         "compatibility",
         "mobile"
       ],
+      "scope": "The mobile arrangement, which is a different bar rather than the same one squeezed: the links go away and a hamburger and logo take their place. Also the switch between the two.",
       "fixtures": [
         "NAV-FX-01",
         "NAV-FX-03"
       ],
-      "notes": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not the 900px Gianluca Volpe confirmed on EC-7 on 26 Aug 2026 — so the mobile bar starts 300px too early. Steps 1 to 5 pass; the mobile bar itself is correct. AC-7 and AC-15 still say 1024px and need correcting to match.",
+      "findings": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not the 900px Gianluca Volpe confirmed on EC-7 on 26 Aug 2026 — so the mobile bar starts 300px too early. Steps 1 to 5 pass; the mobile bar itself is correct. AC-7 and AC-15 still say 1024px and need correcting to match.",
       "steps": [
         {
           "action": "Open FX-01 at 899px, one pixel below the breakpoint.",
@@ -823,7 +823,6 @@
     {
       "id": "NAV-TC-06",
       "summary": "Header: Navigation - Accessibility - Keyboard, focus, and what a screen reader hears",
-      "scope": "Whether the bar can be used and understood without a mouse: tab order, one stop per item, keys that open and close a dropdown, a focus ring you can actually see, and semantics that describe the bar honestly.",
       "ac": [
         "AC-10",
         "AC-11",
@@ -837,11 +836,12 @@
         "navigation",
         "accessibility"
       ],
+      "scope": "Whether the bar can be used and understood without a mouse: tab order, one stop per item, keys that open and close a dropdown, a focus ring you can actually see, and semantics that describe the bar honestly.",
       "fixtures": [
         "NAV-FX-07",
         "NAV-FX-01"
       ],
-      "notes": "Four steps are expected to fail, and all four are real barriers rather than pedantry. (a) Step 1 — tab order is logo, then the tools on the right, then the nav links, so focus jumps to the far right of the bar and back. (b) Step 2 — every dropdown item takes two Tab stops: the <li> carries tabindex=\"0\" and its <a> is focusable too, and the <li> has no role, so its accessible name is the entire flattened contents of its dropdown. (c) Steps 7 and 8 — there is no focus rule for the top-level links at all, so what you see is Chrome's default blue outline, not --color-accessible-orange. (d) Steps 9 and 10 — aria-expanded is set on the <li>, which is a listitem and does not support it, so it never reaches assistive technology; the focusable <a> has neither aria-expanded nor aria-haspopup. On top of that the whole bar sits inside .nav-drawer, which carries role=\"dialog\" aria-label=\"Main menu\" and display: contents — so at desktop widths a screen reader announces the entire primary navigation as a dialog that visually is not there. Confirmed from the browser's accessibility tree.",
+      "findings": "Four steps are expected to fail, and all four are real barriers rather than pedantry. (a) Step 1 — tab order is logo, then the tools on the right, then the nav links, so focus jumps to the far right of the bar and back. (b) Step 2 — every dropdown item takes two Tab stops: the <li> carries tabindex=\"0\" and its <a> is focusable too, and the <li> has no role, so its accessible name is the entire flattened contents of its dropdown. (c) Steps 7 and 8 — there is no focus rule for the top-level links at all, so what you see is Chrome's default blue outline, not --color-accessible-orange. (d) Steps 9 and 10 — aria-expanded is set on the <li>, which is a listitem and does not support it, so it never reaches assistive technology; the focusable <a> has neither aria-expanded nor aria-haspopup. On top of that the whole bar sits inside .nav-drawer, which carries role=\"dialog\" aria-label=\"Main menu\" and display: contents — so at desktop widths a screen reader announces the entire primary navigation as a dialog that visually is not there. Confirmed from the browser's accessibility tree.",
       "steps": [
         {
           "action": "Open FX-07, click once in the address bar, then press Tab repeatedly through the header.",
@@ -899,7 +899,6 @@
     {
       "id": "NAV-TC-07",
       "summary": "Header: Navigation - Internationalization - Right-to-left and long labels",
-      "scope": "The bar in a right-to-left market, authored in Arabic rather than reversed English: everything mirrors except the chevrons, which the spec deliberately leaves alone. Also that labels longer than English ones do not break the row.",
       "ac": [
         "AC-9",
         "AC-4"
@@ -912,12 +911,13 @@
         "i18n",
         "rtl"
       ],
+      "scope": "The bar in a right-to-left market, authored in Arabic rather than reversed English: everything mirrors except the chevrons, which the spec deliberately leaves alone. Also that labels longer than English ones do not break the row.",
       "fixtures": [
         "NAV-FX-06",
         "NAV-FX-03",
         "NAV-FX-01"
       ],
-      "notes": "Step 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
+      "findings": "Step 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
       "steps": [
         {
           "action": "Open fixture FX-06, which sets the page language to Arabic.",

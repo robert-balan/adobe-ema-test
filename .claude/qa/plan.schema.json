@@ -465,6 +465,10 @@
             "type": "string",
             "description": "Environment state required before step 1, beyond opening a fixture."
           },
+          "findings": {
+            "type": "string",
+            "description": "QA's own analysis of this test: a spec that disagrees with the design or with the build, a step that today's code cannot satisfy, a contradiction inside the ticket. **Never published.** It stays in the plan file, in git, and no part of it reaches Jira. A tester must meet the case cold — a step pre-announced as a known failure tends not to get raised, and one that later fails for a new reason gets waved through as the old one. Findings that need a decision go to a person, not into the test."
+          },
           "notes": {
             "type": "string"
           },

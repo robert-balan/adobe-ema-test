@@ -311,7 +311,6 @@
     {
       "id": "BRANDS-TC-01",
       "summary": "Header: Products Brand Carousel - Authoring - Content model and classification",
-      "scope": "Whether the authored content produces a carousel at all: the label and tile row, the rule that classifies a strip of two or more image-only links as a brand carousel rather than featured products, and how the block degrades when an author omits the label or supplies a broken or oddly shaped image.",
       "ac": [
         "AC-1",
         "AC-4",
@@ -327,6 +326,7 @@
         "brand-carousel",
         "authoring"
       ],
+      "scope": "Whether the authored content produces a carousel at all: the label and tile row, the rule that classifies a strip of two or more image-only links as a brand carousel rather than featured products, and how the block degrades when an author omits the label or supplies a broken or oddly shaped image.",
       "fixtures": [
         "BRANDS-FX-01",
         "BRANDS-FX-02",
@@ -334,6 +334,7 @@
         "BRANDS-FX-04",
         "BRANDS-FX-05"
       ],
+      "findings": "Step 6 is expected to fail. Gianluca Volpe clarified on 26 Aug 2026 that the label is required and that the code treating it as optional is a code issue; on develop FX-05 renders a carousel with no label at all. Two things still need writing down: AC-4 and AC-13 say the label can be left out, which now contradicts the answer, and nothing defines what should happen when an author omits a required slot. The step therefore asserts only that a labelless carousel is not presented as valid.",
       "steps": [
         {
           "action": "Open fixture FX-01 and open the Products megamenu.",
@@ -387,13 +388,11 @@
           "action": "In FX-05, find the tile with very long alt text, and scroll the strip to its end.",
           "result": "The long alt text does not widen the tile or break the row, and 24 logos scroll horizontally without breaking the panel or introducing page-level horizontal scrolling."
         }
-      ],
-      "notes": "Step 6 is expected to fail. Gianluca Volpe clarified on 26 Aug 2026 that the label is required and that the code treating it as optional is a code issue; on develop FX-05 renders a carousel with no label at all. Two things still need writing down: AC-4 and AC-13 say the label can be left out, which now contradicts the answer, and nothing defines what should happen when an author omits a required slot. The step therefore asserts only that a labelless carousel is not presented as valid."
+      ]
     },
     {
       "id": "BRANDS-TC-02",
       "summary": "Header: Products Brand Carousel - Functionality - Scrolling, arrows and megamenu stability",
-      "scope": "The carousel's runtime behaviour on a pointer device: arrow scrolling and the edge states that hide each arrow, wheel and trackpad scrolling, that operating the control never closes the megamenu, and that a tile navigates to its brand destination.",
       "ac": [
         "AC-6",
         "AC-8",
@@ -411,10 +410,12 @@
         "functional",
         "desktop"
       ],
+      "scope": "The carousel's runtime behaviour on a pointer device: arrow scrolling and the edge states that hide each arrow, wheel and trackpad scrolling, that operating the control never closes the megamenu, and that a tile navigates to its brand destination.",
       "fixtures": [
         "BRANDS-FX-01",
         "BRANDS-FX-02"
       ],
+      "findings": "AC-12 and AC-8 read as contradicting each other: AC-12 says changing the number of logos changes no behaviour, AC-8 says the arrows appear and disappear with overflow. Gianluca Volpe settled it on 26 Aug 2026 — keep AC-8. Step 10 asserts AC-12 as narrowed by that answer, and AC-12's own wording needs correcting to match.",
       "steps": [
         {
           "action": "Open fixture FX-01 on a desktop viewport and open the Products megamenu.",
@@ -465,8 +466,7 @@
           "action": "Compare the behaviour observed on FX-01 and FX-02.",
           "result": "The structure, controls and interaction model are identical in both. The one thing the number of logos changes is arrow visibility, which follows overflow as AC-8 requires."
         }
-      ],
-      "notes": "AC-12 and AC-8 read as contradicting each other: AC-12 says changing the number of logos changes no behaviour, AC-8 says the arrows appear and disappear with overflow. Gianluca Volpe settled it on 26 Aug 2026 — keep AC-8. Step 10 asserts AC-12 as narrowed by that answer, and AC-12's own wording needs correcting to match."
+      ]
     },
     {
       "id": "BRANDS-TC-03",
@@ -541,7 +541,6 @@
     {
       "id": "BRANDS-TC-04",
       "summary": "Header: Products Brand Carousel - Compatibility - Desktop layout and arrow behaviour",
-      "scope": "The desktop half of a block that is designed differently per viewport: where the carousel sits in the panel, that arrows exist and behave at the edges, and that crossing the breakpoint switches into and out of this layout without losing logos.",
       "ac": [
         "AC-2",
         "AC-8",
@@ -557,10 +556,11 @@
         "desktop",
         "responsive"
       ],
+      "scope": "The desktop half of a block that is designed differently per viewport: where the carousel sits in the panel, that arrows exist and behave at the edges, and that crossing the breakpoint switches into and out of this layout without losing logos.",
       "fixtures": [
         "BRANDS-FX-01"
       ],
-      "notes": "Steps 5 and 6 are expected to fail on develop. The header there switches layout at 1200px where the spec specifies 900px, so the desktop layout persists between 900px and 1199px. That is a defect in develop's header.css, not a fault in this test — raise it rather than re-running for a pass.",
+      "findings": "Steps 5 and 6 are expected to fail on develop. The header there switches layout at 1200px where the spec specifies 900px, so the desktop layout persists between 900px and 1199px. That is a defect in develop's header.css, not a fault in this test — raise it rather than re-running for a pass.",
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop viewport above the breakpoint and open the Products megamenu.",
@@ -595,7 +595,6 @@
     {
       "id": "BRANDS-TC-05",
       "summary": "Header: Products Brand Carousel - Compatibility - Mobile layout and swipe behaviour",
-      "scope": "The mobile half of the same block, which is a different design rather than a smaller one: the carousel moves above the category columns, loses its band and arrows entirely, and is driven by swipe alone.",
       "ac": [
         "AC-3",
         "AC-6",
@@ -612,10 +611,11 @@
         "mobile",
         "responsive"
       ],
+      "scope": "The mobile half of the same block, which is a different design rather than a smaller one: the carousel moves above the category columns, loses its band and arrows entirely, and is driven by swipe alone.",
       "fixtures": [
         "BRANDS-FX-01"
       ],
-      "notes": "Step 6 shares the breakpoint defect described on BRANDS-TC-04 — on develop the switch happens at 1200px rather than the specified 900px. Step 2 asserts the separator below the strip rather than above it as AC-3 says: Gianluca Volpe's answer of 26 Aug 2026 is to follow the designs, and the handover prototype draws it below. AC-3 needs correcting to match.",
+      "findings": "Step 6 shares the breakpoint defect described on BRANDS-TC-04 — on develop the switch happens at 1200px rather than the specified 900px. Step 2 asserts the separator below the strip rather than above it as AC-3 says: Gianluca Volpe's answer of 26 Aug 2026 is to follow the designs, and the handover prototype draws it below. AC-3 needs correcting to match.",
       "steps": [
         {
           "action": "Open fixture FX-01 on a mobile viewport, open the navigation drawer and expand the Products section.",
@@ -649,7 +649,6 @@
     {
       "id": "BRANDS-TC-06",
       "summary": "Header: Products Brand Carousel - Accessibility - Keyboard, semantics and contrast",
-      "scope": "WCAG 2.1 AA for the carousel: that a keyboard user can enter, operate and leave it without trapping, that every control is reachable and named, and that the label, arrow border and chevron meet contrast against the band they sit on.",
       "ac": [
         "AC-14",
         "AC-15",
@@ -664,10 +663,11 @@
         "brand-carousel",
         "a11y"
       ],
+      "scope": "WCAG 2.1 AA for the carousel: that a keyboard user can enter, operate and leave it without trapping, that every control is reachable and named, and that the label, arrow border and chevron meet contrast against the band they sit on.",
       "fixtures": [
         "BRANDS-FX-07"
       ],
-      "notes": "Step 8 is expected to fail on current code. The label measures #d14900 on #f5f3f4 at 12px weight 600, which computes to 4.08:1 against the 4.5:1 required for normal text. Raise it as a defect rather than re-running. Step 4 is a known risk area: the focus indicator on a tile, and the behaviour of an arrow that hides while it holds focus.",
+      "findings": "Step 8 is expected to fail on current code. The label measures #d14900 on #f5f3f4 at 12px weight 600, which computes to 4.08:1 against the 4.5:1 required for normal text. Raise it as a defect rather than re-running. Step 4 is a known risk area: the focus indicator on a tile, and the behaviour of an arrow that hides while it holds focus.",
       "steps": [
         {
           "action": "Open fixture FX-07 on a desktop viewport, open the Products megamenu, and Tab forward until focus enters the carousel.",
@@ -719,7 +719,6 @@
     {
       "id": "BRANDS-TC-07",
       "summary": "Header: Products Brand Carousel - Internationalization - RTL mirroring and text expansion",
-      "scope": "That the carousel works in a right-to-left locale and with longer translated text. The fixture is authored in Arabic rather than mirrored English, so what a reviewer sees is what an Arabic market would see; its strip label is also the longest of any locale we test, which covers expansion without asking anyone to edit content.",
       "ac": [],
       "suites": [
         "regression"
@@ -729,10 +728,12 @@
         "i18n",
         "rtl"
       ],
+      "scope": "That the carousel works in a right-to-left locale and with longer translated text. The fixture is authored in Arabic rather than mirrored English, so what a reviewer sees is what an Arabic market would see; its strip label is also the longest of any locale we test, which covers expansion without asking anyone to edit content.",
       "fixtures": [
         "BRANDS-FX-06"
       ],
-      "notes": "EC-14 states no acceptance criterion for RTL or localisation. This test exists under the agent's mandatory-coverage rule, not derived from the ticket — see Coverage gaps.\n\nRTL is reached by page metadata: decorateLocale() in scripts.js reads a Language or Locale row and sets lang and dir on <html>, so FX-06 carries Language: ar-MA. header.css is written with logical properties throughout (inset-inline, margin-inline, padding-inline, border-inline) and no physical margin-left/right, so most mirroring should happen by construction. The residual risk is 4 left: and 3 right: declarations that remain physical — step 3 targets those.",
+      "notes": "EC-14 states no acceptance criterion for RTL or localisation. This test exists under the agent's mandatory-coverage rule, not derived from the ticket — see Coverage gaps.",
+      "findings": "RTL is reached by page metadata: decorateLocale() in scripts.js reads a Language or Locale row and sets lang and dir on <html>, so FX-06 carries Language: ar-MA. header.css is written with logical properties throughout (inset-inline, margin-inline, padding-inline, border-inline) and no physical margin-left/right, so most mirroring should happen by construction. The residual risk is 4 left: and 3 right: declarations that remain physical — step 3 targets those.",
       "steps": [
         {
           "action": "Open fixture FX-06 on a right-to-left page at a desktop viewport and open the Products megamenu.",

@@ -121,6 +121,15 @@ export function planProblems(plan) {
     for (const fx of t.fixtures || []) {
       if (!fixtureIds.has(fx)) problems.push(`tests (${t.id}): cites unknown fixture "${fx}"`);
     }
+    // A test must not predict its own result. `notes` is published into the Test's description, so
+    // a prediction there reaches the tester and stops the bug being raised — the failure reads as
+    // expected, and a step that later fails for a NEW reason is waved through as the old one.
+    // Analysis belongs in `findings`, which never leaves the plan file.
+    const predicts = /expected to fail|will fail|known (defect|issue|bug)|fails on (current )?code|not implemented/i;
+    if (t.notes && predicts.test(t.notes)) {
+      problems.push(`tests (${t.id}): "notes" predicts the result, and notes are published to the tester. `
+        + 'Move the analysis to "findings", which stays in the plan');
+    }
     // A step that opens a page must name the fixture, and the test must own that fixture. Both
     // halves matter: the id is what resolves to a URL in the step's data, and the test's own list
     // is what puts that URL in the description. A step reaching past its test's fixtures would

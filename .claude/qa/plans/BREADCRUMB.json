@@ -205,7 +205,6 @@
     {
       "id": "BREADCRUMB-TC-02",
       "summary": "Block: Breadcrumb - Functionality - Navigation, the current crumb, and the mobile control",
-      "scope": "What happens when someone uses it: ancestor crumbs navigate, the current page does not, hovering a link responds, and on mobile the collapse control reveals the hidden ancestors without glitching when used repeatedly.",
       "ac": [
         "AC-5",
         "AC-6",
@@ -220,11 +219,12 @@
         "breadcrumb",
         "functional"
       ],
+      "scope": "What happens when someone uses it: ancestor crumbs navigate, the current page does not, hovering a link responds, and on mobile the collapse control reveals the hidden ancestors without glitching when used repeatedly.",
       "fixtures": [
         "BREADCRUMB-FX-01",
         "BREADCRUMB-FX-06"
       ],
-      "notes": "Steps 4 to 6 are expected to fail on current code. The mobile collapse control the spec describes is not implemented on any branch — see the note on BREADCRUMB-TC-04, which carries the evidence. They are written against the spec because the ticket is Ready for Testing; raise them as product defects.",
+      "findings": "Steps 4 to 6 are expected to fail on current code. The mobile collapse control the spec describes is not implemented on any branch — see the note on BREADCRUMB-TC-04, which carries the evidence. They are written against the spec because the ticket is Ready for Testing; raise them as product defects.",
       "steps": [
         {
           "action": "Open fixture FX-01 on a desktop viewport and click an ancestor crumb.",
@@ -329,7 +329,6 @@
     {
       "id": "BREADCRUMB-TC-04",
       "summary": "Block: Breadcrumb - Compatibility - Full trail on desktop, collapsed on mobile",
-      "scope": "The same trail at both ends of the range: every crumb shown on desktop, the shortened Home-ellipsis-current form on mobile, the mobile padding, and that resizing across the breakpoint switches between the two without losing or duplicating a crumb.",
       "ac": [
         "AC-2",
         "AC-3",
@@ -343,10 +342,11 @@
         "breadcrumb",
         "responsive"
       ],
+      "scope": "The same trail at both ends of the range: every crumb shown on desktop, the shortened Home-ellipsis-current form on mobile, the mobile padding, and that resizing across the breakpoint switches between the two without losing or duplicating a crumb.",
       "fixtures": [
         "BREADCRUMB-FX-01"
       ],
-      "notes": "Steps 3 to 6 are expected to fail on current code, and this is the most significant finding on this ticket.\n\nThe mobile collapse the spec describes — Home, an ellipsis control, current page — does not exist in the implementation. Verified on develop, main and stage: blocks/breadcrumb/breadcrumb.js builds one flat ordered list containing every crumb, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep. There is no button, no aria-expanded and no ellipsis anywhere in the block or in the auto-block builder in scripts.js.\n\nWhat mobile does instead is make the trail horizontally scrollable at 600px and below, with the scrollbar hidden. That is a different design decision, not a partial implementation of this one.\n\nA second, smaller mismatch: the spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the scroll treatment starts at 600px — so between 601px and 899px the block behaves like neither.\n\nThese steps are written against the spec because the ticket is Ready for Testing. Raise them as product defects rather than re-running for a pass.",
+      "findings": "Steps 3 to 6 are expected to fail on current code, and this is the most significant finding on this ticket.\n\nThe mobile collapse the spec describes — Home, an ellipsis control, current page — does not exist in the implementation. Verified on develop, main and stage: blocks/breadcrumb/breadcrumb.js builds one flat ordered list containing every crumb, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep. There is no button, no aria-expanded and no ellipsis anywhere in the block or in the auto-block builder in scripts.js.\n\nWhat mobile does instead is make the trail horizontally scrollable at 600px and below, with the scrollbar hidden. That is a different design decision, not a partial implementation of this one.\n\nA second, smaller mismatch: the spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the scroll treatment starts at 600px — so between 601px and 899px the block behaves like neither.\n\nThese steps are written against the spec because the ticket is Ready for Testing. Raise them as product defects rather than re-running for a pass.",
       "steps": [
         {
           "action": "Open fixture FX-01 at a desktop viewport of 1440px.",
@@ -382,7 +382,6 @@
     {
       "id": "BREADCRUMB-TC-05",
       "summary": "Block: Breadcrumb - Accessibility - Landmark, semantics, keyboard and contrast",
-      "scope": "WCAG 2.1 AA for the trail: that it is a labelled navigation landmark containing an ordered list, that the current page is marked, that decorative separators are hidden from assistive technology, that every control is reachable and operable by keyboard, and that the colours meet contrast.",
       "ac": [
         "AC-13",
         "AC-14",
@@ -396,10 +395,11 @@
         "breadcrumb",
         "a11y"
       ],
+      "scope": "WCAG 2.1 AA for the trail: that it is a labelled navigation landmark containing an ordered list, that the current page is marked, that decorative separators are hidden from assistive technology, that every control is reachable and operable by keyboard, and that the colours meet contrast.",
       "fixtures": [
         "BREADCRUMB-FX-08"
       ],
-      "notes": "Steps 6 and 7 concern the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04 for the evidence. They are expected to fail and should be raised with that defect rather than separately.",
+      "findings": "Steps 6 and 7 concern the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04 for the evidence. They are expected to fail and should be raised with that defect rather than separately.",
       "steps": [
         {
           "action": "Open fixture FX-08 and inspect the element wrapping the trail.",
@@ -447,7 +447,6 @@
     {
       "id": "BREADCRUMB-TC-06",
       "summary": "Block: Breadcrumb - Internationalization - RTL direction, mirroring and collapse",
-      "scope": "That the trail works in a right-to-left locale with real Arabic labels: it reads right to left from the start edge, the chevrons point the other way, and the mobile shortening behaves the same way without clipping or pushing the page sideways.",
       "ac": [
         "AC-11",
         "AC-12"
@@ -460,10 +459,11 @@
         "i18n",
         "rtl"
       ],
+      "scope": "That the trail works in a right-to-left locale with real Arabic labels: it reads right to left from the start edge, the chevrons point the other way, and the mobile shortening behaves the same way without clipping or pushing the page sideways.",
       "fixtures": [
         "BREADCRUMB-FX-07"
       ],
-      "notes": "Step 5 concerns the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04. Expected to fail, and part of that same defect.",
+      "findings": "Step 5 concerns the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04. Expected to fail, and part of that same defect.",
       "steps": [
         {
           "action": "Open fixture FX-07 on a desktop viewport and confirm the document direction.",

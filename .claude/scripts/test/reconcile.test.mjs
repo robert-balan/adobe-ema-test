@@ -440,6 +440,24 @@ test('planProblems: a test citing an unknown fixture is rejected', () => {
   assert.match(planProblems(p).join(), /cites unknown fixture "BRANDS-FX-99"/);
 });
 
+// findings is QA's own record. If any of it reached the description the tester would be primed,
+// which is the whole thing the field exists to prevent.
+test('describeTest: findings never reaches the published description', () => {
+  const t = aTest({ findings: 'Step 6 is expected to fail: develop switches at 1200px.' });
+  const out = describeTest(PLAN, t);
+  assert.doesNotMatch(out, /expected to fail/);
+  assert.doesNotMatch(out, /1200px/);
+});
+
+test('planProblems: notes that predict the result are rejected', () => {
+  const p = planOf({ tests: [aTest({ notes: 'Step 6 is expected to fail on current code.' })] });
+  assert.match(planProblems(p).join(), /predicts the result/);
+
+  // The one thing notes still exist for: why a test with no AC is here at all.
+  const ok = planOf({ tests: [aTest({ ac: [], notes: 'Standing RTL requirement; EC-14 states none.' })] });
+  assert.deepEqual(planProblems(ok), []);
+});
+
 // A step's fixture id is what becomes the URL a tester pastes, so a wrong one sends them nowhere.
 test('planProblems: a step opening an unknown fixture is rejected', () => {
   const p = planOf({
