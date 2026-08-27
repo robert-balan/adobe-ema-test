@@ -67,7 +67,8 @@ and that makes excellent `authoring` fixtures.
 ## Extracting values
 
 `WebFetch` summarises and drops exact numbers, which is the opposite of what you need. Download and
-parse instead:
+parse instead. That gets you the value the design *intends*; the next section is how you find out
+what either side actually renders, which is what a test step asserts:
 
 ```sh
 cd "$(mktemp -d)"
@@ -96,6 +97,68 @@ for m in re.finditer(r'([^{}]+)\{([^{}]*)\}', css):
 
 Read the inline JS too. Interaction ACs ("scrolls toward the end smoothly") are usually vague in the
 ticket and exact in the prototype.
+
+## Then measure it in a browser — parsing is where the mistakes come from
+
+Everything above gets you the **rules**. A test step asserts a **result**, and the two are not the
+same number often enough to matter. Finish here, not at the stylesheet.
+
+Three ways parsing misleads, all of them real:
+
+- **A rule on the wrong element.** `.newsletter-form` is capped at `476px`, so a footer step was
+  written asserting a `476px` input. The input renders **346px** — the form holds the Subscribe
+  button too. The 476 was in the file; it was never the field's width.
+- **Box model.** `.footer-social a` sets `width: 44px`, reported to the team as "44". It renders
+  **46×46**: content-box, plus a `1px` border each side. The design's is `48px` *border-box*, so
+  that one really is 48. Whoever changes the 44 to a 48 without changing the box model gets 50.
+- **Anything the code generates.** An `aria-label` built at runtime from a URL's hostname, a heading
+  promoted from `h3` to `h2` during decoration, a section the pipeline dropped before the block saw
+  it. None of it is in any file you can `curl`.
+
+Playwright is installed **outside this repo** — the QA tooling is deliberately dependency-free, so
+write the script in `/tmp` and import by absolute path. It is CommonJS, so a named import fails:
+
+```js
+import pw from '/Users/<you>/node_modules/playwright/index.js';
+const { chromium } = pw;
+```
+
+Point the same probe at the prototype and at the branch under test, and print them side by side —
+a difference you can read off one screen is worth more than two lists of numbers:
+
+```js
+const probe = async (url, rootSel, waitFor) => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
+  await page.goto(url, { waitUntil: 'networkidle' });
+  await page.waitForSelector(waitFor);        // the DECORATED selector, never a fixed delay
+  return page.evaluate((s) => {
+    const root = document.querySelector(s);
+    const box = (el) => { const r = el.getBoundingClientRect(); return `${Math.round(r.width)}x${Math.round(r.height)}`; };
+    /* box() for geometry, getComputedStyle() for colour and type */
+  }, rootSel);
+};
+```
+
+Collect `console` and `pageerror` events while you are there: "no console errors" is a real
+assertion in every Functionality test, and this is the only place to check it.
+
+Worked comparison, footer at 1440px, 2026-08-27 — the rows that parsing got wrong are the first
+three:
+
+| | Design prototype | `develop` |
+|---|---|---|
+| newsletter input | `476x54` border-box | **`346x54`** |
+| social button | `48x48` border-box | **`46x46`** (44 content-box + 1px border) |
+| brand logo | `98x44` | **`124x56`** |
+| social icon | `24x24` | `20x20` |
+| column gap | `80px / 80px` | `40px / 24px` |
+| brand tagline | 18px / 600 / `#fff` | 14px / 400 / `#d3d2d7` |
+| column heading | 18px / 600 / `#fff` | 18px / 600 / `#fff` — **identical** |
+| copyright | `#989495` mushroom-700 | `#d3d2d7` squid-100 |
+
+That last-but-one row is the argument for doing this at all: the column headings match the design
+exactly, so the only thing wrong with them is their markup. Reading the two stylesheets would have
+left it looking like one more spacing delta.
 
 ## Two warnings
 

@@ -143,9 +143,10 @@ what actually ships.
 - **Measure a rendered box; never infer one from a CSS declaration.** A stylesheet states rules,
   not results, and a value read out of one is a guess about geometry. Every EDS block also rewrites
   its own DOM in the browser, so `curl` shows you the input to `decorate()` and not the output.
-  Open the page and measure. Playwright is installed outside this repo (see the environment notes);
-  wait on the decorated selector rather than a delay, and read `getBoundingClientRect()` and
-  `getComputedStyle`.
+  Open the page and measure. The recipe — where Playwright is installed, the side-by-side probe that
+  reads the prototype and the branch at once, and a worked comparison — is in
+  `.claude/qa/design-sources.md`. Wait on the decorated selector rather than a delay, and read
+  `getBoundingClientRect()` for geometry and `getComputedStyle` for colour and type.
 
   Two real EC-6 errors, both from reading the CSS and stopping there. `.newsletter-form` is capped
   at `476px`, so a step was written asserting a `476px` input — the input renders **346px**, because
