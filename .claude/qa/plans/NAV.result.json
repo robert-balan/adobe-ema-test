@@ -48,20 +48,9 @@
       ],
       "ac": [
         "AC-1",
+        "AC-15",
         "AC-6",
-        "AC-15"
-      ]
-    },
-    "NAV-TC-05": {
-      "issueId": "302474",
-      "key": "EC-167",
-      "suites": [
-        "sanity",
-        "regression"
-      ],
-      "ac": [
-        "AC-7",
-        "AC-15"
+        "AC-7"
       ]
     },
     "NAV-TC-06": {

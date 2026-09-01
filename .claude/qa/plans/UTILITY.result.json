@@ -48,20 +48,9 @@
       "ac": [
         "AC-1",
         "AC-10",
-        "AC-18"
-      ]
-    },
-    "UTILITY-TC-05": {
-      "issueId": "302467",
-      "key": "EC-160",
-      "suites": [
-        "sanity",
-        "regression"
-      ],
-      "ac": [
+        "AC-18",
         "AC-2",
-        "AC-8",
-        "AC-18"
+        "AC-8"
       ]
     },
     "UTILITY-TC-06": {

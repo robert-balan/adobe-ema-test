@@ -52,25 +52,13 @@
         "regression"
       ],
       "ac": [
-        "AC-2",
-        "AC-8",
         "AC-19",
-        "AC-20"
-      ]
-    },
-    "BRANDS-TC-05": {
-      "issueId": "302003",
-      "key": "EC-124",
-      "suites": [
-        "sanity",
-        "regression"
-      ],
-      "ac": [
+        "AC-2",
+        "AC-20",
         "AC-3",
         "AC-6",
         "AC-7",
-        "AC-19",
-        "AC-20"
+        "AC-8"
       ]
     },
     "BRANDS-TC-06": {
