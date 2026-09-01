@@ -158,6 +158,29 @@ Created keys are recorded in `.claude/qa/plans/EC-18.result.json`, and each Test
 with its plan id in Jira. Re-running reconciles against both, so the push is safe to repeat after
 a partial failure — and safe to run from a clone that has never seen the result file.
 
+### Where the project stands
+
+```sh
+node .claude/scripts/qa-status.mjs              # every plan, every test, every open finding
+node .claude/scripts/qa-status.mjs --findings    # just the things somebody has to decide
+node .claude/scripts/qa-status.mjs BRANDS NAV    # named plans only
+```
+
+No credentials, no network, so it works from a cold clone. It reads the plans and the result
+ledgers and prints each plan's source ticket, its breakpoint, its design reference, and every test
+with the live Jira key, step count, suites and category — plus any ledger entry with no test behind
+it, which is how a retired or moved test shows up.
+
+It is generated rather than written down because a hand-maintained STATE.md is accurate on the day
+it is committed and quietly wrong a week later, and a document that might be wrong is worse than
+none: you cannot tell which kind you are reading.
+
+**The findings section is the part that earns it.** `findings` is deliberately never published to
+Jira — a tester has to meet each case cold — but unpublished became invisible: around nineteen
+thousand characters of real analysis reachable only by opening seven JSON files and reading past the
+steps. Those are open questions, several of them needing a decision from a requirements engineer,
+and this is the one place they are all visible at once.
+
 ### Before each sprint — check for drift
 
 ```sh
@@ -222,6 +245,24 @@ asterisk at the end of the line.
 
 `editJiraIssue` over MCP is still the right tool for one or two edits. The script is for the case
 where a change to `describeTest` touches all forty-eight tests at once.
+
+### Two messages that look like failures and are not
+
+**"Cannot update this protected ref"** on a push to `main`. The push succeeded — look for the
+`abc123..def456  main -> main` line underneath it. `main` carries a ruleset requiring pull requests,
+and an admin bypass reports the rule it ignored. It is noise, not a rejection.
+
+**A credential that was correct a minute ago.** Each shell here starts fresh from the user's
+profile, so a token exported into one terminal is not visible to the next command, and a variable
+refreshed mid-session is not picked up. Read the keychain in the same command that uses it rather
+than trusting an inherited variable:
+
+```sh
+export JIRA_API_TOKEN="$(security find-generic-password -a "$USER" -s jira-api-token -w)"
+node .claude/scripts/spec-drift.mjs
+```
+
+A 401 that makes no sense is almost always this, not a bad token.
 
 ### Nothing reaches Jira unapproved
 
@@ -547,6 +588,7 @@ is safe, and a key that is not a Test Plan is rejected before anything is writte
 | `.claude/scripts/xray-push.mjs` | Validates a plan, creates Tests and Test Sets, idempotently |
 | `.claude/scripts/qa-coverage.mjs` | Asks Xray what it actually counts as covered — run after every push |
 | `.claude/scripts/spec-drift.mjs` | Flags a repurposed ticket or rewritten criteria — run before each sprint |
+| `.claude/scripts/qa-status.mjs` | Where the project stands — every plan, test, live key and open finding. No credentials, works from a cold clone |
 | `.claude/scripts/jira-apply.mjs` | Applies a plan's `jira-actions.json` field edits — summary, description, labels — and reads each description back to check what Jira stored |
 | `.claude/scripts/lib/adf.mjs` | Description text into Jira's document tree. Tested on its own, because a mangled tree renders badly rather than failing, and the push cannot see it |
 | `.claude/scripts/qa-comment.mjs` | Builds and posts a comment on a spec ticket, editable in place. **Not part of the workflow** — posting a comment after writing test cases is no longer a step. Retained for the occasions someone wants it deliberately |

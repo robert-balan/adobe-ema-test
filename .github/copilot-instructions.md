@@ -36,6 +36,32 @@ Each script also checks its own variable, so the rule holds whatever is driving 
 terminal, or CI. There is a `PreToolUse` hook that enforces the same thing a step earlier, but that
 hook is Claude Code's and does not run here, which is exactly why the checks are in the scripts too.
 
+## Start here, in this order
+
+```sh
+node .claude/scripts/qa-status.mjs
+```
+
+No credentials, no network. It prints every plan, every test with its live Jira key, and every open
+finding — which is the fastest way to understand where the project actually is. Then:
+
+1. [`AGENTS.md`](../AGENTS.md) — what this repository is, and the parts of Edge Delivery that change
+   what a test should assert.
+2. [`.claude/qa/README.md`](../.claude/qa/README.md) — setup, how a push reconciles rather than
+   recreates, and the conventions the tooling enforces.
+3. [`.claude/agents/qa-xray.md`](../.claude/agents/qa-xray.md) — the doctrine: how a test case is
+   designed, and the hard rules. Written for Claude Code, but the body is prose and applies to
+   anyone. Most of it exists because something went wrong once.
+4. `.claude/qa/how-the-agent-works.html` and `onboarding.html` — the same ground for a reader who
+   prefers a walkthrough.
+
+Two things that will otherwise cost you an hour:
+
+- **"Cannot update this protected ref"** on a push to `main` is not a failure. Look for the
+  `abc123..def456  main -> main` line under it. It is an admin bypass reporting the rule it ignored.
+- **A 401 from a script whose token you just set** is almost always the shell, not the token. Read
+  the keychain in the same command that uses it rather than relying on an inherited variable.
+
 ## Working here
 
 - Node ES modules, no build step, no transpiling, no framework.
