@@ -12,6 +12,14 @@
   },
   "folder": "/Blocks/Breadcrumb",
   "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "designRef": {
+    "name": "Breadcrumb",
+    "url": "https://felipecastro92.github.io/ufs-design-system/handover/breadcrumb-spec.html#overview"
+  },
+  "breakpoint": {
+    "value": 1024,
+    "setOn": "2026-09-01"
+  },
   "fixtures": [
     {
       "id": "BREADCRUMB-FX-01",
@@ -328,7 +336,7 @@
     },
     {
       "id": "BREADCRUMB-TC-04",
-      "summary": "Block: Breadcrumb - Compatibility - Full trail on desktop, collapsed on mobile",
+      "summary": "Block: Breadcrumb - Compatibility - Devices and browsers",
       "ac": [
         "AC-2",
         "AC-3",
@@ -342,40 +350,46 @@
         "breadcrumb",
         "responsive"
       ],
-      "scope": "The same trail at both ends of the range: every crumb shown on desktop, the shortened Home-ellipsis-current form on mobile, the mobile padding, and that resizing across the breakpoint switches between the two without losing or duplicating a crumb.",
+      "scope": "The component across the device classes and browsers we support, and at the 1024px breakpoint itself.",
       "fixtures": [
         "BREADCRUMB-FX-01"
       ],
       "findings": "Steps 3 to 6 are expected to fail on current code, and this is the most significant finding on this ticket.\n\nThe mobile collapse the spec describes — Home, an ellipsis control, current page — does not exist in the implementation. Verified on develop, main and stage: blocks/breadcrumb/breadcrumb.js builds one flat ordered list containing every crumb, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep. There is no button, no aria-expanded and no ellipsis anywhere in the block or in the auto-block builder in scripts.js.\n\nWhat mobile does instead is make the trail horizontally scrollable at 600px and below, with the scrollbar hidden. That is a different design decision, not a partial implementation of this one.\n\nA second, smaller mismatch: the spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the scroll treatment starts at 600px — so between 601px and 899px the block behaves like neither.\n\nThese steps are written against the spec because the ticket is Ready for Testing. Raise them as product defects rather than re-running for a pass.",
       "steps": [
         {
-          "action": "Open fixture FX-01 at a desktop viewport of 1440px.",
+          "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
             "BREADCRUMB-FX-01"
           ],
-          "result": "Every crumb in the trail is shown, ancestors as links and the last as the current page."
+          "result": "Desktop treatment in all four browsers — every crumb in the trail is shown in full — matching the design reference. Nothing clipped or overlapping, and no sideways scroll. No difference between browsers."
         },
         {
-          "action": "Confirm the current crumb's markup.",
-          "result": "It is not a link and carries aria-current=\"page\"."
+          "action": "BrowserStack — large desktop, 2560 wide or more — Chrome, Edge, Firefox and Safari.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
+          "result": "As on the small desktop. Text and images scale cleanly: nothing blurred, mis-aligned, or stranded by the extra width. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Resize down to a mobile viewport of 390px.",
-          "data": "The spec places the switch at 900px",
-          "result": "The trail shortens to Home, a collapse control, and the current page. Home and the current page are always visible."
+          "action": "Small desktop at 1023 wide, then at 1024 wide.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
         },
         {
-          "action": "Inspect the block's horizontal padding at 390px.",
-          "data": "Expected --space-6 below 900px",
-          "result": "The padding matches the mobile token."
+          "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
+          "result": "Portrait sits below 1024, so the mobile treatment applies — the trail takes its shortened form as the design shows, and every ancestor is still reachable. Landscape sits above it, so the desktop treatment applies — every crumb in the trail is shown in full. Both match the design reference, and everything stays operable by touch. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Resize slowly up through 900px and watch the trail.",
-          "result": "At 900px it switches back to the full trail, with every crumb present, none lost and none duplicated."
-        },
-        {
-          "action": "Resize back down through 900px.",
-          "result": "It returns to the collapsed form, and the current-page marker is still on the last crumb."
+          "action": "BrowserStack — phones — the smallest current iPhone in Safari and in Chrome, and the latest Galaxy S in Chrome.",
+          "fixtures": [
+            "BREADCRUMB-FX-01"
+          ],
+          "result": "The mobile treatment applies — the trail takes its shortened form as the design shows, and every ancestor is still reachable — matching the design reference. Everything is reachable and operable by touch. The smallest iPhone is the narrowest screen we support, so this is where clipping shows first. Nothing clipped or overlapping, and no sideways scroll."
         }
       ]
     },
@@ -466,33 +480,32 @@
       "findings": "Step 5 concerns the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04. Expected to fail, and part of that same defect.",
       "steps": [
         {
-          "action": "Open fixture FX-07 on a desktop viewport and confirm the document direction.",
+          "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and look at the breadcrumb.",
           "fixtures": [
             "BREADCRUMB-FX-07"
           ],
-          "result": "The page carries dir=\"rtl\" and the Arabic locale in its lang attribute."
+          "result": "The page is in Arabic and reads right to left — dir=\"rtl\" and the Arabic locale in lang."
         },
         {
-          "action": "Read the trail from the start edge.",
-          "result": "The home crumb sits at the right-hand edge and the trail reads right to left — المنتجات, then الصلصات والمتبلات — ending with the current page, الكاتشب, on the left."
+          "action": "Compare it against the RTL section of the design reference.",
+          "result": "Mirrored as the design shows, and anything that section says must NOT mirror keeps its left-to-right treatment."
         },
         {
-          "action": "Inspect a chevron separator.",
-          "result": "It points in the mirrored direction, following the reading order rather than staying pointed right."
+          "action": "Repeat on large desktop, on both tablets in both orientations, and on both phones.",
+          "fixtures": [
+            "BREADCRUMB-FX-07"
+          ],
+          "result": "It mirrors correctly at every size, with the correct treatment either side of 1024. Nothing clipped at either edge, and no sideways scroll."
         },
         {
-          "action": "Check the block's alignment and padding against the page's start edge.",
-          "result": "The trail is flush to the right-hand start edge, with the same spacing the left edge has in a left-to-right locale."
-        },
-        {
-          "action": "Switch to a mobile viewport and open the collapsed trail.",
-          "result": "The shortened form and its control appear in mirrored order, and expanding it reveals the ancestors in the correct right-to-left sequence."
-        },
-        {
-          "action": "At both viewports, check the document for horizontal overflow.",
-          "result": "Nothing is clipped and the page never scrolls horizontally in either direction."
+          "action": "On a phone, open the shortened trail.",
+          "result": "It opens and the ancestors are listed in the correct right-to-left order."
         }
-      ]
+      ],
+      "designRef": {
+        "name": "Breadcrumb — i18n & RTL",
+        "url": "https://felipecastro92.github.io/ufs-design-system/handover/breadcrumb-spec.html#rtl"
+      }
     }
   ]
 }

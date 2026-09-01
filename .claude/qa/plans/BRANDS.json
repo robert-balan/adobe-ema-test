@@ -12,6 +12,14 @@
   },
   "folder": "/Header/Megamenu/Brands Carousel",
   "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "designRef": {
+    "name": "Brands Carousel",
+    "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#brands-carousel"
+  },
+  "breakpoint": {
+    "value": 1024,
+    "setOn": "2026-09-01"
+  },
   "fixtures": [
     {
       "id": "BRANDS-FX-01",
@@ -540,7 +548,7 @@
     },
     {
       "id": "BRANDS-TC-04",
-      "summary": "Header: Products Brand Carousel - Compatibility - Desktop layout and arrow behaviour",
+      "summary": "Header: Products Brand Carousel - Compatibility, desktop - Desktop widths and browsers",
       "ac": [
         "AC-2",
         "AC-8",
@@ -556,45 +564,38 @@
         "desktop",
         "responsive"
       ],
-      "scope": "The desktop half of a block that is designed differently per viewport: where the carousel sits in the panel, that arrows exist and behave at the edges, and that crossing the breakpoint switches into and out of this layout without losing logos.",
+      "scope": "The component on the desktop side of the 1024px breakpoint, in every browser we support, plus the breakpoint itself.",
       "fixtures": [
         "BRANDS-FX-01"
       ],
       "findings": "Steps 5 and 6 are expected to fail on develop. The header there switches layout at 1200px where the spec specifies 900px, so the desktop layout persists between 900px and 1199px. That is a defect in develop's header.css, not a fault in this test — raise it rather than re-running for a pass.",
       "steps": [
         {
-          "action": "Open fixture FX-01 at a desktop viewport above the breakpoint and open the Products megamenu.",
+          "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
             "BRANDS-FX-01"
           ],
-          "result": "The carousel renders at the bottom of the panel, below the category columns, as a full-width tinted band."
+          "result": "Desktop treatment in all four browsers — the carousel sits in the panel with its label band, the logos in a row, and an arrow control at each end — matching the design reference. Nothing clipped or overlapping, and no sideways scroll. No difference between browsers."
         },
         {
-          "action": "Confirm the arrow controls are present.",
-          "result": "Previous and next arrows render at the ends of the strip."
+          "action": "BrowserStack — large desktop, 2560 wide or more — Chrome, Edge, Firefox and Safari.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
+          "result": "As on the small desktop. Text and images scale cleanly: nothing blurred, mis-aligned, or stranded by the extra width. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Operate both arrows to each end of the strip.",
-          "result": "Each arrow hides at the end it would scroll past, and the opposite arrow remains available."
-        },
-        {
-          "action": "Compare position, spacing, typography and tile styling against the approved handover design for desktop.",
-          "result": "All match the handover for the desktop layout."
-        },
-        {
-          "action": "Slowly resize the viewport downward across 900px with the megamenu open.",
-          "data": "The spec names 900px as the switch point",
-          "result": "At 900px the carousel switches to the mobile layout — moving to the top of the Products section and dropping its arrows — with every logo preserved, none lost and none duplicated."
-        },
-        {
-          "action": "Resize back upward across 900px.",
-          "result": "The desktop layout returns, the band and arrows reappear, and arrow visibility is recomputed correctly for the current scroll position."
+          "action": "Small desktop at 1023 wide, then at 1024 wide.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
         }
       ]
     },
     {
       "id": "BRANDS-TC-05",
-      "summary": "Header: Products Brand Carousel - Compatibility - Mobile layout and swipe behaviour",
+      "summary": "Header: Products Brand Carousel - Compatibility, mobile - Tablets and phones",
       "ac": [
         "AC-3",
         "AC-6",
@@ -611,38 +612,25 @@
         "mobile",
         "responsive"
       ],
-      "scope": "The mobile half of the same block, which is a different design rather than a smaller one: the carousel moves above the category columns, loses its band and arrows entirely, and is driven by swipe alone.",
+      "scope": "The component on tablets and phones, on the real devices we support rather than a resized desktop window.",
       "fixtures": [
         "BRANDS-FX-01"
       ],
       "findings": "Step 6 shares the breakpoint defect described on BRANDS-TC-04 — on develop the switch happens at 1200px rather than the specified 900px. Step 2 asserts the separator below the strip rather than above it as AC-3 says: Gianluca Volpe's answer of 26 Aug 2026 is to follow the designs, and the handover prototype draws it below. AC-3 needs correcting to match.",
       "steps": [
         {
-          "action": "Open fixture FX-01 on a mobile viewport, open the navigation drawer and expand the Products section.",
+          "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
           "fixtures": [
             "BRANDS-FX-01"
           ],
-          "result": "The brand carousel appears at the top of the Products section, above the category columns."
+          "result": "Portrait sits below 1024, so the mobile treatment applies — the carousel sits above the category columns in the drawer with no band and no arrows, driven by swipe alone. Landscape sits above it, so the desktop treatment applies — the carousel sits in the panel with its label band, the logos in a row, and an arrow control at each end. Both match the design reference, and everything stays operable by touch. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Inspect the label and the separator.",
-          "result": "The \"Our brands:\" label sits on top of the logo row, with a hairline separator below the strip and a transparent background — no tinted band."
-        },
-        {
-          "action": "Look for arrow controls.",
-          "result": "No arrow buttons are present anywhere in the mobile carousel."
-        },
-        {
-          "action": "Swipe the logo row horizontally.",
-          "result": "The row scrolls with the swipe, and no scrollbar is visible."
-        },
-        {
-          "action": "Compare position, spacing, typography and tile styling against the approved handover design for mobile.",
-          "result": "All match the handover for the mobile layout."
-        },
-        {
-          "action": "Resize the viewport upward across 900px with the drawer open.",
-          "result": "The layout switches to desktop — the carousel moves to the bottom of the panel, gains its tinted band and arrows — with every logo preserved."
+          "action": "BrowserStack — phones — the smallest current iPhone in Safari and in Chrome, and the latest Galaxy S in Chrome.",
+          "fixtures": [
+            "BRANDS-FX-01"
+          ],
+          "result": "The mobile treatment applies — the carousel sits above the category columns in the drawer with no band and no arrows, driven by swipe alone — matching the design reference. Everything is reachable and operable by touch. The smallest iPhone is the narrowest screen we support, so this is where clipping shows first. Nothing clipped or overlapping, and no sideways scroll."
         }
       ]
     },
@@ -736,33 +724,32 @@
       "findings": "RTL is reached by page metadata: decorateLocale() in scripts.js reads a Language or Locale row and sets lang and dir on <html>, so FX-06 carries Language: ar-MA. header.css is written with logical properties throughout (inset-inline, margin-inline, padding-inline, border-inline) and no physical margin-left/right, so most mirroring should happen by construction. The residual risk is 4 left: and 3 right: declarations that remain physical — step 3 targets those.",
       "steps": [
         {
-          "action": "Open fixture FX-06 on a right-to-left page at a desktop viewport and open the Products megamenu.",
+          "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and open the Products megamenu.",
           "fixtures": [
             "BRANDS-FX-06"
           ],
-          "result": "The carousel mirrors: the label — \"تعرّف على علاماتنا التجارية العالمية:\" — sits at the right-hand end of the strip and the logo row begins from the right."
+          "result": "The page is in Arabic and reads right to left — dir=\"rtl\" and the Arabic locale in lang."
         },
         {
-          "action": "Confirm the document direction is applied.",
-          "result": "The page carries dir=\"rtl\" and the corresponding lang attribute for the locale."
+          "action": "Compare it against the RTL section of the design reference.",
+          "result": "Mirrored as the design shows, and anything that section says must NOT mirror keeps its left-to-right treatment."
         },
         {
-          "action": "Locate the previous and next arrows.",
-          "result": "The arrows are mirrored: the control that advances through the logos sits on the left, and its chevron points left."
+          "action": "Repeat on large desktop, on both tablets in both orientations, and on both phones.",
+          "fixtures": [
+            "BRANDS-FX-06"
+          ],
+          "result": "It mirrors correctly at every size, with the correct treatment either side of 1024. Nothing clipped at either edge, and no sideways scroll."
         },
         {
           "action": "Operate the arrow that advances through the strip.",
-          "result": "The row scrolls toward the logical end of the list, not toward the visual right."
-        },
-        {
-          "action": "Inspect the accessible names of both arrows.",
-          "result": "The names describe logical direction rather than visual left and right — \"previous\" and \"next\", not \"left\" and \"right\". Record whether they are localised: if they read as English on an Arabic page they are hardcoded in the block and cannot be translated, which is a finding in itself."
-        },
-        {
-          "action": "Read the strip's label, which is the longest translation we hold, and check it against the logo row.",
-          "result": "The label renders in full. It does not clip, wrap awkwardly, overlap the logo row, or push the strip into page-level horizontal scrolling. The logos keep their size and spacing."
+          "result": "The row scrolls toward the logical end of the list rather than toward the visual right, and both arrows keep working."
         }
-      ]
+      ],
+      "designRef": {
+        "name": "RTL Adaptation (Arabic)",
+        "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#rtl"
+      }
     }
   ]
 }

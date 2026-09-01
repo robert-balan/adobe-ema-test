@@ -46,6 +46,32 @@
       "type": "string",
       "description": "Default Xray Test Repository folder path, e.g. \"/Header/Megamenu\"."
     },
+    "breakpoint": {
+      "type": "object",
+      "description": "The project-wide desktop/mobile boundary, stated once and published into every test. It exists because the tickets disagree \u2014 EC-18 says 900, EC-8 says 1024, an RE ruled 900 on EC-7, the code does 1200 \u2014 and a tester needs one number. QA sets it; it overrides the ticket on this one value only, and everything else in the ticket stays the source of truth.",
+      "additionalProperties": false,
+      "required": ["value", "setOn"],
+      "properties": {
+        "value": { "type": "integer", "description": "Width in px at which desktop begins, inclusive." },
+        "setOn": { "type": "string", "description": "ISO date the rule was set, so a stale override is visible as such." }
+      }
+    },
+    "designRef": {
+      "type": "object",
+      "description": "The component's page in the design handover, so a tester can see what it should look like without hunting for it. Deep-link it: nav-header-spec.html is one page covering seventeen sections, and a bare link lands nowhere useful. REFERENCE ONLY \u2014 the spec ticket is what a test asserts. Where the ticket states no value, the design's value is what is expected.",
+      "additionalProperties": false,
+      "required": ["name", "url"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The section as it reads in the handover, e.g. \"Utility Bar & Language Dropdown\"."
+        },
+        "url": {
+          "type": "string",
+          "description": "Full URL including the anchor, e.g. \u2026/handover/nav-header-spec.html#util-bar."
+        }
+      }
+    },
     "previewBase": {
       "type": "string",
       "description": "Origin the fixture paths are opened from, e.g. https://develop--ufs--foodsolutions-04.aem.page. Branch-specific by nature, so it is stated once here rather than baked into a step \u2014 the Test Execution's environment records which branch a result belongs to."
@@ -464,6 +490,16 @@
           "precondition": {
             "type": "string",
             "description": "Environment state required before step 1, beyond opening a fixture."
+          },
+          "designRef": {
+            "type": "object",
+            "description": "Overrides the plan's `designRef` for this test \u2014 an RTL test points at the spec's own i18n section rather than the component overview.",
+            "additionalProperties": false,
+            "required": ["name", "url"],
+            "properties": {
+              "name": { "type": "string" },
+              "url": { "type": "string" }
+            }
           },
           "findings": {
             "type": "string",

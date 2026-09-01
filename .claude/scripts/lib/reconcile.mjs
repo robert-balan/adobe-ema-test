@@ -87,6 +87,21 @@ export function describeTest(plan, t, { previewBase } = {}) {
   }
 
   if (plan.source?.key) parts.push(`*Source:* ${plan.source.key}${plan.source.summary ? ` — ${plan.source.summary}` : ''}`);
+
+  // Two standing lines, generated rather than authored, so they read identically on all 48 tests
+  // and cannot drift into forty-eight slightly different wordings.
+  const design = t.designRef || plan.designRef;
+  if (design) {
+    parts.push(`*Design reference:* ${design.name} — to see what it should look like.`
+      + `${plan.source?.key ? ` Reference only: ${plan.source.key} is what this test asserts, and where it states no` : ''}`
+      + `${plan.source?.key ? ' value the design\'s value is what is expected.' : ''}\n  ${design.url}`);
+  }
+  if (plan.breakpoint) {
+    parts.push(`*Breakpoint:* ${plan.breakpoint.value}px project-wide — ${plan.breakpoint.value} and above is`
+      + ` desktop, below it is mobile. Set by QA on ${plan.breakpoint.setOn}, and it overrides any other`
+      + ' figure in the ticket until the ticket is updated to match.');
+  }
+
   if (t.notes) parts.push(t.notes);
   return parts.join('\n\n');
 }

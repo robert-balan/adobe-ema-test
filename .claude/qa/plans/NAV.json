@@ -12,6 +12,14 @@
   },
   "folder": "/Header/Navigation",
   "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "designRef": {
+    "name": "Primary Nav",
+    "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#main-nav"
+  },
+  "breakpoint": {
+    "value": 1024,
+    "setOn": "2026-09-01"
+  },
   "fixtures": [
     {
       "id": "NAV-FX-01",
@@ -695,7 +703,7 @@
     },
     {
       "id": "NAV-TC-04",
-      "summary": "Header: Navigation - Compatibility, desktop - The full bar from 900px up",
+      "summary": "Header: Navigation - Compatibility, desktop - Desktop widths and browsers",
       "ac": [
         "AC-1",
         "AC-6",
@@ -710,56 +718,38 @@
         "compatibility",
         "desktop"
       ],
-      "scope": "The desktop arrangement across the widths it is supposed to cover, including 900px itself, which the 26 Aug clarification makes the lowest desktop width.",
+      "scope": "The component on the desktop side of the 1024px breakpoint, in every browser we support, plus the breakpoint itself.",
       "fixtures": [
-        "NAV-FX-01",
-        "NAV-FX-03"
+        "NAV-FX-01"
       ],
       "findings": "The desktop/mobile switch is 900px. Gianluca Volpe answered this on EC-7 on 26 Aug 2026, against the three values that were in play; AC-7 and AC-15 still say 1024px and need correcting to match. header.css switches at 1200px, so steps 3 to 8 are expected to fail from 1199px down to 900px: the hamburger bar shows where the spec calls for the full desktop nav.",
       "steps": [
         {
-          "action": "Open FX-01 at 1440px.",
+          "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
             "NAV-FX-01"
           ],
-          "result": "The full bar shows: logo, then the horizontal row of links, then the tools. No hamburger anywhere."
+          "result": "Desktop treatment in all four browsers — the full bar: logo, every authored link, and the tools cluster — matching the design reference. Nothing clipped or overlapping, and no sideways scroll. No difference between browsers."
         },
         {
-          "action": "Resize to 1280px.",
-          "result": "Same arrangement. Everything still fits on one row."
-        },
-        {
-          "action": "Resize to 1100px.",
-          "result": "Still the desktop bar — the horizontal links are there and no hamburger has appeared."
-        },
-        {
-          "action": "Resize to 1024px.",
-          "result": "Still the desktop bar, with every link readable and no horizontal page scrolling."
-        },
-        {
-          "action": "Resize to 900px, the lowest width the spec calls desktop.",
-          "result": "Still the desktop bar — the horizontal links are all there, every label is readable, and no hamburger has appeared."
-        },
-        {
-          "action": "At 900px, scroll down two screens.",
-          "result": "The bar stays pinned at the top, exactly as it does at 1440px."
-        },
-        {
-          "action": "Open FX-03 and step through 1440, 1280, 1100, 1024 and 900.",
+          "action": "BrowserStack — large desktop, 2560 wide or more — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
-            "NAV-FX-03"
+            "NAV-FX-01"
           ],
-          "result": "The crowded bar keeps all eight items on one row at each width, with no clipping and no sideways page scroll."
+          "result": "As on the small desktop. Text and images scale cleanly: nothing blurred, mis-aligned, or stranded by the extra width. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Resize slowly from 1440px down to 900px and back up.",
-          "result": "The bar reflows smoothly. No link disappears, nothing is drawn twice, and the layout never breaks mid-resize."
+          "action": "Small desktop at 1023 wide, then at 1024 wide.",
+          "fixtures": [
+            "NAV-FX-01"
+          ],
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
         }
       ]
     },
     {
       "id": "NAV-TC-05",
-      "summary": "Header: Navigation - Compatibility, mobile - The hamburger bar below 900px",
+      "summary": "Header: Navigation - Compatibility, mobile - Tablets and phones",
       "ac": [
         "AC-7",
         "AC-15"
@@ -773,50 +763,25 @@
         "compatibility",
         "mobile"
       ],
-      "scope": "The mobile arrangement, which is a different bar rather than the same one squeezed: the links go away and a hamburger and logo take their place. Also the switch between the two.",
+      "scope": "The component on tablets and phones, on the real devices we support rather than a resized desktop window.",
       "fixtures": [
-        "NAV-FX-01",
-        "NAV-FX-03"
+        "NAV-FX-01"
       ],
       "findings": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not the 900px Gianluca Volpe confirmed on EC-7 on 26 Aug 2026 — so the mobile bar starts 300px too early. Steps 1 to 5 pass; the mobile bar itself is correct. AC-7 and AC-15 still say 1024px and need correcting to match.",
       "steps": [
         {
-          "action": "Open FX-01 at 899px, one pixel below the breakpoint.",
+          "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
           "fixtures": [
             "NAV-FX-01"
           ],
-          "result": "The horizontal links are gone and the mobile bar has taken over: a hamburger at the start edge and the logo beside it."
+          "result": "Portrait sits below 1024, so the mobile treatment applies — the hamburger and the logo, with the links behind the drawer. Landscape sits above it, so the desktop treatment applies — the full bar: logo, every authored link, and the tools cluster. Both match the design reference, and everything stays operable by touch. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Look at the rest of the mobile bar.",
-          "result": "The persistent cart, favourites and account icons are present. Their look and behaviour belong to other tickets — here they only need to not break the row."
-        },
-        {
-          "action": "Resize to 768px, then to 390px.",
-          "result": "The mobile bar holds its arrangement at both. The logo and hamburger stay fully visible and nothing overlaps."
-        },
-        {
-          "action": "At 390px and again at 320px, try to scroll the page sideways.",
-          "result": "It will not scroll sideways — the bar fits the screen at both widths."
-        },
-        {
-          "action": "Tap the hamburger.",
-          "result": "The navigation drawer opens. What is inside it belongs to another ticket; here it only matters that the hamburger opens something."
-        },
-        {
-          "action": "Resize slowly upward from 899px through 900px.",
-          "result": "At 900px the mobile bar is replaced by the desktop bar in one clean switch — the hamburger goes away, the links appear, and neither is shown twice."
-        },
-        {
-          "action": "Resize back down through 900px to 899px.",
-          "result": "The reverse switch is just as clean, with no leftover links and no broken layout."
-        },
-        {
-          "action": "Open FX-03 at 390px.",
+          "action": "BrowserStack — phones — the smallest current iPhone in Safari and in Chrome, and the latest Galaxy S in Chrome.",
           "fixtures": [
-            "NAV-FX-03"
+            "NAV-FX-01"
           ],
-          "result": "Eight long top-level labels make no difference on mobile — they are not on the bar, so the mobile bar looks the same as it does on FX-01."
+          "result": "The mobile treatment applies — the hamburger and the logo, with the links behind the drawer — matching the design reference. Everything is reachable and operable by touch. The smallest iPhone is the narrowest screen we support, so this is where clipping shows first. Nothing clipped or overlapping, and no sideways scroll."
         }
       ]
     },
@@ -914,56 +879,44 @@
       "scope": "The bar in a right-to-left market, authored in Arabic rather than reversed English: everything mirrors except the chevrons, which the spec deliberately leaves alone. Also that labels longer than English ones do not break the row.",
       "fixtures": [
         "NAV-FX-06",
-        "NAV-FX-03",
-        "NAV-FX-01"
+        "NAV-FX-03"
       ],
       "findings": "Step 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
       "steps": [
         {
-          "action": "Open fixture FX-06, which sets the page language to Arabic.",
+          "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and look at the nav bar.",
           "fixtures": [
             "NAV-FX-06"
           ],
-          "result": "The whole bar mirrors: the logo is now at the right-hand start edge and the links run from right to left, still in the authored order — المنتجات, then الوصفات, then التدريب والإلهام, then الاستدامة, then برنامج الولاء."
+          "result": "The page is in Arabic and reads right to left — dir=\"rtl\" and the Arabic locale in lang."
         },
         {
-          "action": "Look at the chevrons next to the dropdown items.",
-          "result": "They point the same way they do in English. The spec mirrors the layout but deliberately does not flip the chevrons."
+          "action": "Compare it against the RTL section of the design reference.",
+          "result": "Mirrored as the design shows, and anything that section says must NOT mirror keeps its left-to-right treatment."
         },
         {
-          "action": "Open a dropdown in right-to-left.",
-          "result": "It opens the same way, the trigger gets the same 2px line and hover colour, and the panel is anchored to the mirrored bar rather than hanging off the wrong edge."
+          "action": "Repeat on large desktop, on both tablets in both orientations, and on both phones.",
+          "fixtures": [
+            "NAV-FX-06"
+          ],
+          "result": "It mirrors correctly at every size, with the correct treatment either side of 1024. Nothing clipped at either edge, and no sideways scroll."
         },
         {
-          "action": "Check the bar at 1440px and 900px in right-to-left.",
-          "result": "No label is clipped, nothing overlaps the tools, and the page never scrolls sideways."
+          "action": "Open a dropdown.",
+          "result": "It anchors to the mirrored bar and stays on screen. The chevrons keep their unmirrored rotation, which AC-9 asks for deliberately."
         },
         {
-          "action": "Scroll down on FX-06.",
-          "result": "The bar stays pinned at the top exactly as it does in English."
-        },
-        {
-          "action": "Open FX-03 and find the long German label, Nachhaltigkeitsverpflichtungen.",
+          "action": "Open the long-label fixture on small desktop and on a phone.",
           "fixtures": [
             "NAV-FX-03"
           ],
-          "result": "It renders in full on one line. It does not wrap, and it does not get cut off or replaced by an ellipsis."
-        },
-        {
-          "action": "Compare the crowded bar's spacing with FX-01's.",
-          "fixtures": [
-            "NAV-FX-01"
-          ],
-          "result": "Longer labels change how much room each item takes, but not the padding around it or the height of the row."
-        },
-        {
-          "action": "View FX-06 at 390px.",
-          "fixtures": [
-            "NAV-FX-06"
-          ],
-          "result": "The mobile bar mirrors too — the hamburger is at the right-hand start edge with the logo beside it."
+          "result": "Every label is fully readable at both sizes. Longer words wrap or truncate as the design shows rather than clipping, overlapping a neighbour, or forcing the page sideways."
         }
-      ]
+      ],
+      "designRef": {
+        "name": "RTL Adaptation (Arabic)",
+        "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#rtl"
+      }
     }
   ]
 }

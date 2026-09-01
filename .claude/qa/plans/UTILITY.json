@@ -12,6 +12,14 @@
   },
   "folder": "/Header/Utility Bar",
   "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "designRef": {
+    "name": "Utility Bar & Language Dropdown",
+    "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#util-bar"
+  },
+  "breakpoint": {
+    "value": 1024,
+    "setOn": "2026-09-01"
+  },
   "fixtures": [
     {
       "id": "UTILITY-FX-01",
@@ -389,7 +397,7 @@
     {
       "id": "UTILITY-TC-02",
       "summary": "Header: [Megamenu]: Utility Bar - Functionality - Links, the switcher dropdown and scroll behaviour",
-      "scope": "How the bar behaves in use: links navigate and respond to hover, the switcher opens and closes by click, outside click and Escape, choosing a language performs the locale action and marks the active one, and repeated interaction causes no glitch.",
+      "scope": "How the bar behaves in use: links navigate and respond to hover, the switcher opens and closes by click, outside click and Escape, choosing a language performs the locale action and marks the active one, and repeated interaction causes no glitch, and the bar sliding away on scroll on desktop while staying put on a phone.",
       "ac": [
         "AC-7",
         "AC-9",
@@ -446,6 +454,21 @@
         {
           "action": "Open and close the dropdown rapidly several times, and hover across the links while doing so.",
           "result": "No stuck-open panel, no duplicated dropdown, and nothing in the bar shifts out of alignment."
+        },
+        {
+          "action": "Scroll the page down slowly, then back up.",
+          "result": "The utility bar slides up out of view in step with the scroll while the main nav row stays pinned, and it returns smoothly with no jump or overshoot."
+        },
+        {
+          "action": "Scroll up and down rapidly several times.",
+          "result": "The bar tracks the scroll without flickering, sticking part-way, or leaving a gap under the header."
+        },
+        {
+          "action": "On a phone, scroll the page down.",
+          "fixtures": [
+            "UTILITY-FX-01"
+          ],
+          "result": "The bar does not slide away. Scroll-away is desktop-only by design, so staying put is correct here."
         }
       ]
     },
@@ -510,8 +533,8 @@
     },
     {
       "id": "UTILITY-TC-04",
-      "summary": "Header: [Megamenu]: Utility Bar - Compatibility - Desktop strip and scroll-away",
-      "scope": "The desktop half of a bar that is placed differently per viewport: a thin strip at the top of the header, the switcher shown as label plus caret, and the bar sliding away on scroll while the main nav row stays put.",
+      "summary": "Header: [Megamenu]: Utility Bar - Compatibility, desktop - Desktop widths and browsers",
+      "scope": "The component on the desktop side of the 1024px breakpoint, in every browser we support, plus the breakpoint itself.",
       "ac": [
         "AC-1",
         "AC-10",
@@ -531,42 +554,32 @@
       ],
       "steps": [
         {
-          "action": "Open fixture FX-01 at a desktop viewport above 900px.",
+          "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
             "UTILITY-FX-01"
           ],
-          "result": "The utility bar sits at the top of the header, above the main navigation row, as a thin strip."
+          "result": "Desktop treatment in all four browsers — the thin strip at the top of the header above the main nav, links pipe-separated from the start edge, switcher at the end edge with its label and caret — matching the design reference. Nothing clipped or overlapping, and no sideways scroll. No difference between browsers."
         },
         {
-          "action": "Inspect the switcher's presentation at this viewport.",
-          "result": "It shows a globe icon, the current country and language as text, and a caret."
+          "action": "BrowserStack — large desktop, 2560 wide or more — Chrome, Edge, Firefox and Safari.",
+          "fixtures": [
+            "UTILITY-FX-01"
+          ],
+          "result": "As on the small desktop. Text and images scale cleanly: nothing blurred, mis-aligned, or stranded by the extra width. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Scroll the page down slowly.",
-          "result": "The utility bar slides up out of view in step with the scroll, while the main nav row stays pinned in place."
-        },
-        {
-          "action": "Scroll back up.",
-          "result": "The utility bar returns smoothly, with no jump or overshoot as it reappears."
-        },
-        {
-          "action": "Scroll up and down rapidly several times.",
-          "result": "The bar tracks the scroll without flickering, sticking part-way, or leaving a gap under the header."
-        },
-        {
-          "action": "Resize the viewport down across 900px.",
-          "result": "The bar moves to the mobile position with every authored link and the switcher's languages preserved — none lost, none duplicated."
-        },
-        {
-          "action": "Resize back up across 900px.",
-          "result": "The desktop strip returns at the top of the header, and scroll-away works again."
+          "action": "Small desktop at 1023 wide, then at 1024 wide.",
+          "fixtures": [
+            "UTILITY-FX-01"
+          ],
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
         }
       ]
     },
     {
       "id": "UTILITY-TC-05",
-      "summary": "Header: [Megamenu]: Utility Bar - Compatibility - Mobile placement and the MORE label",
-      "scope": "The mobile half, which is a different arrangement rather than a smaller one: the bar moves below the main nav, gains a MORE label above it, the switcher becomes an icon-only trigger, and there is deliberately no scroll-away.",
+      "summary": "Header: [Megamenu]: Utility Bar - Compatibility, mobile - Tablets and phones",
+      "scope": "The component on tablets and phones, on the real devices we support rather than a resized desktop window.",
       "ac": [
         "AC-2",
         "AC-8",
@@ -586,35 +599,18 @@
       ],
       "steps": [
         {
-          "action": "Open fixture FX-01 on a mobile viewport below 900px and open the header.",
+          "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
           "fixtures": [
             "UTILITY-FX-01"
           ],
-          "result": "The utility bar sits at the bottom of the header area, below the main navigation rather than above it."
+          "result": "Portrait sits below 1024, so the mobile treatment applies — the bar below the main nav with the MORE label above it, and the switcher as an icon-only trigger. Landscape sits above it, so the desktop treatment applies — the thin strip at the top of the header above the main nav, links pipe-separated from the start edge, switcher at the end edge with its label and caret. Both match the design reference, and everything stays operable by touch. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "Look immediately above the bar.",
-          "result": "A \"MORE\" label introduces it, positioned on top of the bar."
-        },
-        {
-          "action": "Inspect the language switcher at this viewport.",
-          "result": "It is presented as a globe icon trigger alone — no country/language text and no caret."
-        },
-        {
-          "action": "Tap the globe icon.",
-          "result": "The same language dropdown opens, listing every authored language."
-        },
-        {
-          "action": "Select a language from it.",
-          "result": "The active locale updates as expected."
-        },
-        {
-          "action": "Scroll the page down.",
-          "result": "The utility bar does not slide away — scroll-away is desktop-only by design."
-        },
-        {
-          "action": "Resize up across 900px and back down.",
-          "result": "Placement, the MORE label and the switcher's presentation switch between the two layouts each time, with no link or language lost or duplicated."
+          "action": "BrowserStack — phones — the smallest current iPhone in Safari and in Chrome, and the latest Galaxy S in Chrome.",
+          "fixtures": [
+            "UTILITY-FX-01"
+          ],
+          "result": "The mobile treatment applies — the bar below the main nav with the MORE label above it, and the switcher as an icon-only trigger — matching the design reference. Everything is reachable and operable by touch. The smallest iPhone is the narrowest screen we support, so this is where clipping shows first. Nothing clipped or overlapping, and no sideways scroll."
         }
       ]
     },
@@ -706,33 +702,32 @@
       ],
       "steps": [
         {
-          "action": "Open fixture FX-05 on a desktop viewport and confirm the document direction.",
+          "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and look at the utility bar.",
           "fixtures": [
             "UTILITY-FX-05"
           ],
-          "result": "The page carries dir=\"rtl\" and the Arabic locale in its lang attribute."
+          "result": "The page is in Arabic and reads right to left — dir=\"rtl\" and the Arabic locale in lang."
         },
         {
-          "action": "Read the utility links from the start edge.",
-          "result": "The links begin at the right-hand edge and read right to left — من نحن, then اتصل بنا, then الأسئلة الشائعة — with the separators following the same order."
+          "action": "Compare it against the RTL section of the design reference.",
+          "result": "Mirrored as the design shows, and anything that section says must NOT mirror keeps its left-to-right treatment."
         },
         {
-          "action": "Locate the language switcher.",
-          "result": "It sits at the mirrored end edge — the left-hand side — rather than staying on the right, and its trigger reads \"المغرب · AR\"."
+          "action": "Repeat on large desktop, on both tablets in both orientations, and on both phones.",
+          "fixtures": [
+            "UTILITY-FX-05"
+          ],
+          "result": "It mirrors correctly at every size, with the correct treatment either side of 1024. Nothing clipped at either edge, and no sideways scroll."
         },
         {
-          "action": "Open the dropdown and observe where the panel is anchored.",
-          "result": "The panel anchors to the start edge of its trigger and stays fully on screen, with nothing clipped at either edge."
-        },
-        {
-          "action": "Check the document for horizontal overflow with the dropdown both closed and open.",
-          "result": "The page never scrolls horizontally in either state."
-        },
-        {
-          "action": "Switch to a mobile viewport and look at the MORE label.",
-          "result": "The label aligns to the mirrored start edge, above the bar, matching the rest of the right-to-left layout."
+          "action": "Open and close the language switcher.",
+          "result": "It opens by tap and by click, anchors to the mirrored edge, and the panel stays fully on screen."
         }
-      ]
+      ],
+      "designRef": {
+        "name": "RTL Adaptation (Arabic)",
+        "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#rtl"
+      }
     }
   ]
 }

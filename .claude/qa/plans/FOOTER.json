@@ -2,8 +2,6 @@
   "project": "EC",
   "feature": "FOOTER",
   "projectId": "11590",
-  "folder": "/Blocks/Footer",
-  "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
   "assignee": "712020:543dd2f2-c9ed-422b-822d-d75634813a18",
   "source": {
     "key": "EC-6",
@@ -11,6 +9,16 @@
     "url": "https://unileverfoodsolutions.atlassian.net/browse/EC-6",
     "acDigest": "sha256:f5459fcc102bc197",
     "acCheckedOn": "2026-08-26"
+  },
+  "folder": "/Blocks/Footer",
+  "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "designRef": {
+    "name": "Footer",
+    "url": "https://felipecastro92.github.io/ufs-design-system/handover/footer-spec.html#overview"
+  },
+  "breakpoint": {
+    "value": 1024,
+    "setOn": "2026-09-01"
   },
   "fixtures": [
     {
@@ -551,8 +559,8 @@
     },
     {
       "id": "FOOTER-TC-04",
-      "summary": "Block: Footer - Compatibility - The 1024px switch, and crossing it in both directions",
-      "scope": "Where the footer's layout changes and what it changes into. The design names one breakpoint, 1024px: above it the four-track grid and the single-row bottom bar, at and below it a stacked form, a two-up grid with the brand column spanning the full width, and a bottom bar whose social row moves above the copyright. This checks each side of that line, the extremes beyond it, and that nothing is lost or duplicated crossing it.",
+      "summary": "Block: Footer - Compatibility - Devices and browsers",
+      "scope": "The component across the device classes and browsers we support, and at the 1024px breakpoint itself.",
       "ac": [
         "AC-1",
         "AC-3",
@@ -579,58 +587,39 @@
       "precondition": "A browser whose window can be set to an exact width. Set the width precisely — the whole point of several steps is which side of a boundary the layout falls on.",
       "steps": [
         {
-          "action": "Open the reference fixture at 1440px wide and scroll to the footer.",
+          "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
             "FOOTER-FX-01"
           ],
-          "result": "Desktop layout: the email field and Subscribe button sit side by side on one row; the columns are a four-track grid with the brand column first; the bottom bar is a single row with the copyright at the left and the social cluster at the right."
+          "result": "Desktop treatment in all four browsers — the four-track grid and the single-row bottom bar — matching the design reference. Nothing clipped or overlapping, and no sideways scroll. No difference between browsers."
         },
         {
-          "action": "Set the viewport to exactly 1025px.",
-          "result": "Still the desktop layout in every respect — the form is on one row, the grid still has four tracks, the bottom bar is still a single row."
-        },
-        {
-          "action": "Set the viewport to exactly 1024px.",
-          "result": "The mobile layout takes over: the field and button stack full-width, the link columns become a two-up grid with the brand column spanning the full width above them, and the bottom bar puts the social row above the copyright. Record which layout you actually see — the design's breakpoint is 1024px."
-        },
-        {
-          "action": "Set the viewport to exactly 901px.",
-          "result": "Still the mobile layout, unchanged from the previous step. Nothing about the footer should differ between 1024px and 901px."
-        },
-        {
-          "action": "Set the viewport to exactly 899px.",
-          "result": "Still the mobile layout, and still identical to the two steps above. Crossing 900px should change nothing, because the design places its only breakpoint at 1024px."
-        },
-        {
-          "action": "Set the viewport to 375px and read the dark area.",
-          "result": "The brand column runs the full width, centred, with a hairline rule beneath it separating it from the link columns. Below it the link columns sit two per row."
-        },
-        {
-          "action": "At 375px, read the newsletter band and the bottom bar.",
-          "result": "The email field and the Subscribe button are each full width and stacked, the field above the button. In the bottom bar the five social icons form a row above the copyright, spread across the full width, with the copyright centred beneath them."
-        },
-        {
-          "action": "At 375px, check the page for sideways movement, then repeat at 320px.",
-          "result": "At both widths no horizontal scrollbar appears, nothing is clipped at either edge, and every link label is readable rather than running under a neighbour."
-        },
-        {
-          "action": "Count the links, the copyright and the social icons at 1440px. Then drag the window slowly down to 375px and count them again, then drag it slowly back up to 1440px and count once more.",
-          "result": "The same fourteen column links, the same copyright line and the same five social icons are present at every count. Nothing disappears, nothing appears twice, and the footer does not end up in a broken intermediate state at any width along the way."
-        },
-        {
-          "action": "At 1440px, check that none of the mobile-only rules are in force.",
-          "result": "The brand column occupies its own track rather than spanning the row, it has no hairline rule beneath it, it is left-aligned rather than centred, and the bottom bar is not reversed."
-        },
-        {
-          "action": "At 375px, check that none of the desktop-only rules are in force.",
-          "result": "The form is not on one row, the grid does not have four tracks, and the copyright and social row are not on the same line."
-        },
-        {
-          "action": "Open the same fixture on a touch device or with touch emulation on, at a mobile width, and use the footer with taps only.",
+          "action": "BrowserStack — large desktop, 2560 wide or more — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
             "FOOTER-FX-01"
           ],
-          "result": "Every column link and every social icon can be tapped and activates on the first tap. Nothing is only reachable by hovering, and no control is too small or too close to its neighbour to hit reliably."
+          "result": "As on the small desktop. Text and images scale cleanly: nothing blurred, mis-aligned, or stranded by the extra width. Nothing clipped or overlapping, and no sideways scroll."
+        },
+        {
+          "action": "Small desktop at 1023 wide, then at 1024 wide.",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
+        },
+        {
+          "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
+          "result": "Portrait sits below 1024, so the mobile treatment applies — the stacked form: the two-up link grid with the brand column spanning the full width, and the social row above the copyright. Landscape sits above it, so the desktop treatment applies — the four-track grid and the single-row bottom bar. Both match the design reference, and everything stays operable by touch. Nothing clipped or overlapping, and no sideways scroll."
+        },
+        {
+          "action": "BrowserStack — phones — the smallest current iPhone in Safari and in Chrome, and the latest Galaxy S in Chrome.",
+          "fixtures": [
+            "FOOTER-FX-01"
+          ],
+          "result": "The mobile treatment applies — the stacked form: the two-up link grid with the brand column spanning the full width, and the social row above the copyright — matching the design reference. Everything is reachable and operable by touch. The smallest iPhone is the narrowest screen we support, so this is where clipping shows first. Nothing clipped or overlapping, and no sideways scroll."
         }
       ]
     },
@@ -747,78 +736,44 @@
       "scope": "The footer in a language that reads right to left and in one that makes every word longer. The right-to-left fixture carries real Arabic copy rather than mirrored English, so a reviewer can judge whether it reads correctly instead of inferring it — and it is where the mixed-direction cases live: the email field the design pins to LTR because an address always is, and Latin digits inside an Arabic copyright line. Under German the compound labels decide whether a column wraps or overflows. RTL is not named by any acceptance criterion on this ticket.",
       "fixtures": [
         "FOOTER-FX-06",
-        "FOOTER-FX-07",
-        "FOOTER-FX-01"
+        "FOOTER-FX-07"
       ],
       "findings": "Right-to-left is a standing requirement for every block in this project, not something EC-6 asks for — the ticket's criteria never mention direction, mirroring or locale. The steps that cover it are listed under Coverage gaps so the absence is visible rather than implied. AC-15's \"translated text remains readable\" is the only criterion that reaches any of this, and it reaches the expansion half.",
       "steps": [
         {
-          "action": "Open the Arabic fixture and inspect the page's root element.",
+          "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and scroll to the footer.",
           "fixtures": [
             "FOOTER-FX-06"
           ],
-          "result": "The <html> element carries dir=\"rtl\" and lang=\"ar-MA\"."
+          "result": "The page is in Arabic and reads right to left — dir=\"rtl\" and the Arabic locale in lang."
         },
         {
-          "action": "Scroll to the footer and read the dark area at 1440px.",
-          "result": "The area mirrors: the brand column sits at the right edge and the three link columns run right to left after it — الشركة, then المساعدة والدعم, then الشؤون القانونية. Each column's text is aligned to the right."
+          "action": "Compare it against the RTL section of the design reference.",
+          "result": "Mirrored as the design shows, and anything that section says must NOT mirror keeps its left-to-right treatment."
         },
         {
-          "action": "Read the bottom bar at 1440px.",
-          "result": "The copyright sits at the right edge and the five social icons at the left. Reading the icons from the right they are in the authored order: Instagram, TikTok, Facebook, YouTube, LinkedIn. The copyright's \"© 2027\" stays together and reads left to right inside the Arabic sentence."
-        },
-        {
-          "action": "Read the newsletter band's heading and body copy.",
-          "result": "Both are centred and read right to left. The heading renders in the script display face — check the glyphs actually are the script face and not a system substitute, since a handwriting font built for Latin may carry no Arabic coverage and fall back silently."
-        },
-        {
-          "action": "Read the brand tagline's second line — the orange accent line — and look at the gap between it and the line above.",
-          "result": "The accent text is fully legible with clear space above and below it. If it wraps onto two lines, those lines must not touch or overlap each other. Record the rendered height: .text-ch-h5 sets a 34px font in a 28px line box, which is invisible in English because the label never wraps."
-        },
-        {
-          "action": "Click into the email field, read its placeholder, and type an address.",
-          "data": "chef@example.com",
-          "result": "The placeholder is in Arabic, not English. The field itself stays left-to-right: the placeholder starts at the field's left edge and the typed address reads left to right with the cursor advancing rightwards. Record what you see — the design pins this one field to LTR on purpose, because an address reversed is an address misread."
-        },
-        {
-          "action": "Compare the order of the email field and the Subscribe button against the left-to-right reference.",
-          "fixtures": [
-            "FOOTER-FX-06",
-            "FOOTER-FX-01"
-          ],
-          "result": "The pair mirrors — the field takes the right-hand position and the button the left — while the field's own contents stay left to right."
-        },
-        {
-          "action": "Set the Arabic fixture to 375px and read the whole footer top to bottom.",
+          "action": "Repeat on large desktop, on both tablets in both orientations, and on both phones.",
           "fixtures": [
             "FOOTER-FX-06"
           ],
-          "result": "The stacked layout mirrors correctly: the brand column is centred with its hairline rule beneath it, the two-up link columns fill right to left, and the social row sits above the copyright."
+          "result": "It mirrors correctly at every size, with the correct treatment either side of 1024. Nothing clipped at either edge, and no sideways scroll."
         },
         {
-          "action": "At 375px and again at 1440px, check the page for sideways movement and for clipping at both edges.",
-          "result": "No horizontal scrollbar at either width, nothing clipped at the left or the right edge, and no label running underneath a neighbouring column."
+          "action": "Click into the email field and type an address.",
+          "result": "The field itself stays left to right — an address always is — while the copy around it reads right to left."
         },
         {
-          "action": "Hover and focus a column link and a social icon at both widths.",
-          "result": "Hover and focus behave exactly as they do left to right — the same colour change and the same focus indicator, in the same place relative to the control."
-        },
-        {
-          "action": "Ask a screen reader to read the social links and the email field.",
-          "result": "Each social link is named for its network. No accessible name describes a position on screen — nothing is announced as \"left\", \"right\", \"first\" or \"last\", because those words invert under mirroring. The email field's own name is in the page's language."
-        },
-        {
-          "action": "Open the German fixture at 1440px and read the three link columns and the Subscribe button.",
+          "action": "Open the German fixture on small desktop and on a phone.",
           "fixtures": [
             "FOOTER-FX-07"
           ],
-          "result": "Every label is fully readable. Long compounds — \"Nachhaltigkeitsverpflichtungen\", \"Allgemeine Geschäftsbedingungen\", \"Barrierefreiheitserklärung\" — wrap inside their own column rather than overflowing it, running under the next column, or being cut off. \"Newsletter abonnieren\" fits its button without clipping."
-        },
-        {
-          "action": "Set the German fixture to 375px, then inspect its root element and read a few labels with a screen reader.",
-          "result": "The two-up columns hold their labels without overlapping, no horizontal scrollbar appears, and the <html> element carries lang=\"de\" so the labels are pronounced as German rather than English."
+          "result": "Every label is fully readable at both sizes. Longer words wrap or truncate as the design shows rather than clipping, overlapping a neighbour, or forcing the page sideways."
         }
-      ]
+      ],
+      "designRef": {
+        "name": "Footer — i18n & RTL",
+        "url": "https://felipecastro92.github.io/ufs-design-system/handover/footer-spec.html#i18n"
+      }
     }
   ]
 }

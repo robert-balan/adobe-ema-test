@@ -12,6 +12,14 @@
   },
   "folder": "/Header/Megamenu Promotional Tile",
   "previewBase": "https://develop--ufs--foodsolutions-04.aem.page",
+  "designRef": {
+    "name": "Megamenu — Layouts A and B",
+    "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#megamenu-a"
+  },
+  "breakpoint": {
+    "value": 1024,
+    "setOn": "2026-09-01"
+  },
   "fixtures": [
     {
       "id": "PROMO-FX-01",
@@ -794,7 +802,7 @@
     },
     {
       "id": "PROMO-TC-04",
-      "summary": "Header: [Megamenu] Promotional tile - Compatibility - Where the tile stops existing, and at exactly which width",
+      "summary": "Header: [Megamenu] Promotional tile - Compatibility - Devices and browsers",
       "ac": [
         "AC-3",
         "AC-27",
@@ -811,60 +819,46 @@
         "promo-tile",
         "responsive"
       ],
-      "scope": "Behaviour across viewport and input. The tile is a desktop-only element, so the question here is not how it reflows but where it disappears, whether that width is the one the spec names, and whether crossing it in either direction leaves anything behind.",
+      "scope": "The component across the device classes and browsers we support, and at the 1024px breakpoint itself.",
       "fixtures": [
-        "PROMO-FX-01",
-        "PROMO-FX-02"
+        "PROMO-FX-01"
       ],
       "findings": "Step 3 is the important one and it contradicts the ticket.\n\nThe ticket's source-of-truth table and AC-32 both say that below the breakpoint the promo's content is 'surfaced as plain stacked text and a link' inside the drawer. On develop it is not. The stylesheet hides the promo and the feature outright below 1200px, and only re-shows them inside the desktop block. Nothing is surfaced.\n\nThat matters beyond a wording correction. AC-32 asks Product and Design to decide between keeping the content surfaced, styling it, or omitting it, and marks the decision as required before development. The code has already taken the third option, which is also what the handover specifies. So the open question may be closed already — worth confirming rather than reopening.\n\nOne thing the ticket gets right that has since changed: it notes the JavaScript toggle sitting at 900px while the styling switched at 1200px. On the branch read for this plan both are 1200px, so that particular mismatch is gone and the remaining disagreement is with the handover and the project-wide rule.\n\nThis test is one test rather than a desktop and mobile pair. The two viewports are not two designs here — below the breakpoint there is no design at all, because there is no tile.",
       "steps": [
         {
-          "action": "Open FX-01 at 1440px wide and expand Products, then Recipes.",
+          "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
             "PROMO-FX-01"
           ],
-          "data": "widths 1440, 1200, 1199, 1024, 900, 390",
-          "result": "Both tiles render as fully styled cards — the dark promo in the right rail, the light feature leading the Recipes panel."
+          "result": "Desktop treatment in all four browsers — the promo tile as the panel's last column at its fixed width, and the editorial feature leading the Recipes panel — matching the design reference. Nothing clipped or overlapping, and no sideways scroll. No difference between browsers."
         },
         {
-          "action": "Narrow the window to exactly 1200px and expand the same two menus.",
-          "result": "Both tiles are still fully styled cards. 1200px is inside the desktop treatment, not the first width outside it."
-        },
-        {
-          "action": "Narrow to 1199px — one pixel below — and expand the menus again.",
-          "result": "EXPECTED, AND NOT WHAT THE TICKET DESCRIBES. Both tiles are gone from the rendered page entirely. The panel shows only the flattened link columns. The tiles are not restyled, not stacked and not surfaced as plain text — they are hidden outright. Record the exact behaviour; see the note."
-        },
-        {
-          "action": "At 1024px — the width the design handover names as its own breakpoint — expand the menus.",
-          "result": "The tiles are absent, having already gone at 1200px. Record against AC-33: the implementation switches at 1200px, the handover at 1024px."
-        },
-        {
-          "action": "At 900px — the width the project's own global stylesheet treats as the desktop boundary — expand the menus.",
-          "result": "The tiles are still absent. Three different numbers are now in play for one boundary: 1200 in the header, 1024 in the handover, 900 in the project rule and the global stylesheet. Record all three."
-        },
-        {
-          "action": "At 390px, open the hamburger drawer and expand a submenu inside it.",
-          "data": "viewport 390x844",
-          "result": "The submenu lists the column links. Neither tile appears in any form, and there is no empty card, stray coloured band or blank gap where one would have been."
-        },
-        {
-          "action": "Resize slowly from 1199px up to 1200px and back down again, three times, with a panel left open throughout.",
-          "result": "The tiles appear and disappear cleanly on each crossing. On the way back up they render exactly once — never with a second coloured band or a duplicated title — and no leftover of the desktop layout survives on the way down."
-        },
-        {
-          "action": "At 1440px operate the tile's call to action with a mouse; then at 390px look for any equivalent control in the drawer.",
-          "result": "At 1440px the CTA is hoverable and clickable. At 390px there is no CTA to operate, because the whole tile is absent — so no control is left in a state where it can be reached but not used."
-        },
-        {
-          "action": "Repeat step 1 and step 6 on FX-02, whose tiles have missing optional slots.",
+          "action": "BrowserStack — large desktop, 2560 wide or more — Chrome, Edge, Firefox and Safari.",
           "fixtures": [
-            "PROMO-FX-02"
+            "PROMO-FX-01"
           ],
-          "result": "The same holds regardless of which slots were authored: fully styled above the breakpoint, entirely absent below it, nothing left behind either way."
+          "result": "As on the small desktop. Text and images scale cleanly: nothing blurred, mis-aligned, or stranded by the extra width. Nothing clipped or overlapping, and no sideways scroll."
         },
         {
-          "action": "At each of 360, 390, 768, 1024, 1200 and 1440px, with every panel opened in turn, check for a horizontal page scrollbar.",
-          "result": "None appears at any width. Nothing in the panel forces the page wider than the viewport."
+          "action": "Small desktop at 1023 wide, then at 1024 wide.",
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
+        },
+        {
+          "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
+          "result": "Portrait sits below 1024, so the mobile treatment applies — the tile's content as AC-32 describes it for the drawer. Landscape sits above it, so the desktop treatment applies — the promo tile as the panel's last column at its fixed width, and the editorial feature leading the Recipes panel. Both match the design reference, and everything stays operable by touch. Nothing clipped or overlapping, and no sideways scroll."
+        },
+        {
+          "action": "BrowserStack — phones — the smallest current iPhone in Safari and in Chrome, and the latest Galaxy S in Chrome.",
+          "fixtures": [
+            "PROMO-FX-01"
+          ],
+          "result": "The mobile treatment applies — the tile's content as AC-32 describes it for the drawer — matching the design reference. Everything is reachable and operable by touch. The smallest iPhone is the narrowest screen we support, so this is where clipping shows first. Nothing clipped or overlapping, and no sideways scroll."
         }
       ]
     },
@@ -980,49 +974,39 @@
       "findings": "Right-to-left is mandatory coverage for every block in this project, and this ticket states no acceptance criterion for it — section 8 does not mention direction, mirroring or locale anywhere. Steps 1 to 6 therefore trace to nothing in the ticket and are listed under coverage gaps. Steps 7 to 9 cover the 'translated text' half of AC-15.\n\nStep 5 is the finding. The header stylesheet has no right-to-left rules at all; it relies entirely on logical properties, which is why the cards, dividers and padding in steps 2 to 4 mirror correctly without any. That approach works for boxes and fails for glyphs: an arrow is directional content, not a margin, and no logical property flips it. The handover names this icon explicitly in its own right-to-left rule, so the design has already decided it should mirror.\n\nThe practical scope of the finding is narrow today, because the stylesheet no longer draws an arrow and no live tile authors one — the same absence the functionality test records against AC-7. It becomes visible the moment an author adds the icon the CSS is still sized for.",
       "steps": [
         {
-          "action": "Open FX-06, whose page metadata sets an Arabic locale, and inspect the document element.",
+          "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and expand the Products and Recipes menus.",
           "fixtures": [
             "PROMO-FX-06"
           ],
-          "data": "viewport 1440x900",
-          "result": "It carries lang=\"ar-MA\" and dir=\"rtl\". The locale row is what produces both; there is no separate switch."
+          "result": "The page is in Arabic and reads right to left — dir=\"rtl\" and the Arabic locale in lang."
         },
         {
-          "action": "Expand Products and look at where the promo card sits in the panel.",
-          "result": "The card has moved to the panel's left edge and the link columns run to its right — the whole panel is mirrored, and the promo is still the last column in reading order."
+          "action": "Compare it against the RTL section of the design reference.",
+          "result": "Mirrored as the design shows, and anything that section says must NOT mirror keeps its left-to-right treatment."
         },
         {
-          "action": "Expand Recipes and look at the feature card.",
-          "result": "It leads the panel from the right, and its hairline divider has moved to its left side. The divider follows the reading direction rather than staying pinned to one physical edge."
+          "action": "Repeat on large desktop, on both tablets in both orientations, and on both phones.",
+          "fixtures": [
+            "PROMO-FX-06"
+          ],
+          "result": "It mirrors correctly at every size, with the correct treatment either side of 1024. Nothing clipped at either edge, and no sideways scroll."
         },
         {
-          "action": "Read the eyebrow, title, description and call to action in both cards.",
-          "result": "The Arabic text is right-aligned and renders right to left. The four parts stay in the same order top to bottom as in English, and the padding inside the card is mirrored rather than lopsided."
+          "action": "Look at the call to action on each card.",
+          "result": "Text and padding are mirrored, and any directional icon on the CTA points the way the design's RTL section says it should."
         },
         {
-          "action": "Look at the arrow icon on each call to action. Both fixtures author one.",
-          "result": "EXPECTED TO FAIL. The arrow still points to the right — the direction the reader has just come from — because the header stylesheet contains no right-to-left rule for it. The design handover mirrors this exact icon in right-to-left, so the intended behaviour is that it points left. See the note."
-        },
-        {
-          "action": "With each panel open in turn on FX-06, check for a horizontal page scrollbar.",
-          "result": "None appears. Mirroring does not push anything past the page's edge."
-        },
-        {
-          "action": "Open FX-07, whose locale is German and whose copy uses the long compounds German produces, and inspect the document element.",
+          "action": "Open the German fixture on small desktop and on a phone.",
           "fixtures": [
             "PROMO-FX-07"
           ],
-          "result": "It carries lang=\"de-DE\" and dir=\"ltr\"."
-        },
-        {
-          "action": "Expand Products and Recipes and look at both cards.",
-          "result": "The card is still 260px wide — it does not grow for the longer language. Every label wraps inside it, nothing is clipped or truncated mid-word, no text escapes the card, and both calls to action remain fully visible and clickable. The cards grow taller instead, and the panel grows with them."
-        },
-        {
-          "action": "Check the longest single word in the German copy against the card's width.",
-          "result": "It fits, or wraps without overflowing the card. Record the longest word that fits, so a translator has a real number to work to rather than a guess."
+          "result": "Every label is fully readable at both sizes. Longer words wrap or truncate as the design shows rather than clipping, overlapping a neighbour, or forcing the page sideways."
         }
-      ]
+      ],
+      "designRef": {
+        "name": "RTL Adaptation (Arabic)",
+        "url": "https://felipecastro92.github.io/ufs-design-system/handover/nav-header-spec.html#rtl"
+      }
     }
   ]
 }
