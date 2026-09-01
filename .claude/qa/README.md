@@ -84,12 +84,13 @@ a `*all` field expansion returns no step, test-type, or Test Set field of any ki
 detail is that Xray exposes `addTestStep` as a GraphQL mutation at all; if steps were a Jira
 field, that mutation would not need to exist.
 
-### 2. Jira API token — for the two jobs MCP cannot do
+### 2. Jira API token — for the jobs MCP cannot do well
 
-Most Jira work goes through the MCP server. Two things do not, because the server cannot do them:
-deleting an issue link (`jira-unlink.mjs`) and fetching a spec ticket to compare against a recorded
-digest (`spec-drift.mjs`). Both need a Jira API token. (`qa-comment.mjs` needs one too, if you ever
-reach for it — see the note in the file table.)
+Most Jira work goes through the MCP server. Three things do not: deleting an issue link
+(`jira-unlink.mjs` — the server cannot delete one at all), fetching a spec ticket to compare against
+a recorded digest (`spec-drift.mjs`), and applying a plan's field edits in bulk
+(`jira-apply.mjs` — the server can do these one at a time, which is the problem). All three need a
+Jira API token. (`qa-comment.mjs` needs one too, if you ever reach for it — see the file table.)
 
 Unlike the Xray key, you can create this one yourself — no admin needed. Go to
 [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens),
@@ -198,11 +199,35 @@ The push emits missing links on every run now, not only when a test changes, and
 backwards link separately: those have to be deleted in the Jira UI, since the MCP tools cannot
 remove a link and adding a second one does not help.
 
+### After each push — apply the Jira-side field edits
+
+`xray-push` writes test steps and suite membership itself. Summary, description and labels belong to
+Jira, which the Xray API cannot touch, so they land in `<plan>.jira-actions.json`. Apply them:
+
+```sh
+node .claude/scripts/jira-apply.mjs .claude/qa/plans/NAV.json                 # preview, writes nothing
+JIRA_APPLY_APPROVED=1 node .claude/scripts/jira-apply.mjs .claude/qa/plans/NAV.json --apply
+```
+
+It takes several plans at once, sends only the fields that actually changed, and reads every
+description back to confirm what Jira stored.
+
+That last part is the reason this is a script and not a handful of MCP calls. Jira stores a document
+tree rather than text, so a write can succeed and still store the wrong shape — a fixture list
+flattened onto one line, a label that lost its emphasis. And nothing downstream will tell you:
+`sameText` strips emphasis markers before comparing, so a mangled description reconciles as
+unchanged on the next push forever. The conversion lives in `lib/adf.mjs` with its own tests, and one
+of those tests exists because the first version italicised everything between `2*3` and a stray
+asterisk at the end of the line.
+
+`editJiraIssue` over MCP is still the right tool for one or two edits. The script is for the case
+where a change to `describeTest` touches all forty-eight tests at once.
+
 ### Nothing reaches Jira unapproved
 
-`.claude/settings.json` registers a `PreToolUse` hook that blocks `xray-push.mjs`, `da-fixture.mjs`
-and `qa-comment.mjs --post` unless the run is read-only (`--dry-run`, `--adopt`, or a comment
-preview) or carries an explicit approval. The comment script is no longer part of the workflow, but
+`.claude/settings.json` registers a `PreToolUse` hook that blocks `xray-push.mjs`, `da-fixture.mjs`,
+`jira-apply.mjs --apply` and `qa-comment.mjs --post` unless the run is read-only (`--dry-run`,
+`--adopt`, or a preview) or carries an explicit approval. The comment script is no longer part of the workflow, but
 the guard still covers it — a script that can write to a live ticket keeps its safety whether or not
 anything calls it:
 
@@ -496,6 +521,8 @@ is safe, and a key that is not a Test Plan is rejected before anything is writte
 | `.claude/scripts/xray-push.mjs` | Validates a plan, creates Tests and Test Sets, idempotently |
 | `.claude/scripts/qa-coverage.mjs` | Asks Xray what it actually counts as covered — run after every push |
 | `.claude/scripts/spec-drift.mjs` | Flags a repurposed ticket or rewritten criteria — run before each sprint |
+| `.claude/scripts/jira-apply.mjs` | Applies a plan's `jira-actions.json` field edits — summary, description, labels — and reads each description back to check what Jira stored |
+| `.claude/scripts/lib/adf.mjs` | Description text into Jira's document tree. Tested on its own, because a mangled tree renders badly rather than failing, and the push cannot see it |
 | `.claude/scripts/qa-comment.mjs` | Builds and posts a comment on a spec ticket, editable in place. **Not part of the workflow** — posting a comment after writing test cases is no longer a step. Retained for the occasions someone wants it deliberately |
 | `.claude/scripts/verify-environment.mjs` | Re-checks `environment.json` against the live instance |
 | `.claude/scripts/guard-xray-push.sh` | PreToolUse hook: blocks an unapproved push, fixture write or comment |

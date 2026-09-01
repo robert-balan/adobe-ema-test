@@ -48,6 +48,9 @@ elif invokes 'da-fixture\.mjs'; then
 elif invokes 'qa-comment\.mjs'; then
   tool=comment; approval=QA_COMMENT_APPROVED; target="a comment on a real Jira ticket"
   script=qa-comment.mjs; preview='<comment.json>'; args='<comment.json> --post'
+elif invokes 'jira-apply\.mjs'; then
+  tool=apply; approval=JIRA_APPLY_APPROVED; target="summaries, descriptions and labels on real Jira issues"
+  script=jira-apply.mjs; preview='<plan.json>'; args='<plan.json> --apply'
 else
   allow
 fi
@@ -60,6 +63,13 @@ esac
 if [ "$tool" = comment ]; then
   case "$command" in
     *--post*) ;;
+    *) allow ;;
+  esac
+fi
+# jira-apply previews unless asked to write, so an invocation without --apply needs no approval.
+if [ "$tool" = apply ]; then
+  case "$command" in
+    *--apply*) ;;
     *) allow ;;
   esac
 fi

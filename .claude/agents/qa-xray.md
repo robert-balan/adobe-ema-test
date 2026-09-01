@@ -462,8 +462,23 @@ The Xray API cannot write Jira fields or issue links, so the script emits
 - `relink` → a link that exists but points the wrong way. **Do not create a second link.** The MCP
   tools cannot delete one, so tell the user which links to remove in the Jira UI, then re-run the
   push to emit the correct ones.
-- `edits` → `editJiraIssue` with the given summary / labels / description.
-- `deprecate` → `editJiraIssue` adding the `deprecated` label.
+- `edits` and `deprecate` → **`jira-apply.mjs`, not one MCP call per test.**
+
+  ```bash
+  node .claude/scripts/jira-apply.mjs .claude/qa/plans/NAV.json                 # preview
+  JIRA_APPLY_APPROVED=1 node .claude/scripts/jira-apply.mjs .claude/qa/plans/NAV.json --apply
+  ```
+
+  `editJiraIssue` is still fine for one or two. It stops being reasonable in bulk, because a change
+  to how a description is built touches every test at once — forty-five in one go on 2026-09-01 —
+  and hand-made edits at that scale are how a typo reaches a live ticket. The script sends only the
+  fields that actually changed, and reads each description back to confirm what Jira stored.
+
+  Reading back matters more than it sounds. Jira stores a document tree rather than text, so a
+  write can succeed and still store the wrong shape — a fixture list flattened onto one line, a
+  label that lost its emphasis. The next push will not report it either: `sameText` strips emphasis
+  markers before comparing, so a mangled description still reconciles as unchanged. The conversion
+  lives in `lib/adf.mjs` with its own tests for that reason.
 - `unlink` → **the requirement link of a retired test must be removed.** Xray counts coverage from
   that link, so a deprecated test keeps counting against the story and, since it will never run
   again, that story's coverage can never come out green. This is the one place the "keep links for
