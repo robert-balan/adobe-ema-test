@@ -86,5 +86,8 @@ yours to assert.
 - Run `npm test` before proposing a change to anything under `.claude/scripts/`.
 - **This repository is public.** Test steps, plan files and commit messages are world-readable and
   permanent. Keep client-confidential detail out of them.
-- Never write to Jira or Xray without explicit approval. A `PreToolUse` hook enforces this; the
-  rule and the reasoning are in `.claude/agents/qa-xray.md`.
+- Never write to Jira or Xray without explicit approval. Two things enforce it: a `PreToolUse`
+  hook, and a check inside each write script — the hook only runs under Claude Code, and this
+  repository gets opened by other tools too. The rule and the reasoning are in
+  `.claude/agents/qa-xray.md`.
+- Using Copilot rather than Claude Code? `.github/copilot-instructions.md` points back here.

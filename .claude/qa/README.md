@@ -227,7 +227,13 @@ where a change to `describeTest` touches all forty-eight tests at once.
 
 `.claude/settings.json` registers a `PreToolUse` hook that blocks `xray-push.mjs`, `da-fixture.mjs`,
 `jira-apply.mjs --apply` and `qa-comment.mjs --post` unless the run is read-only (`--dry-run`,
-`--adopt`, or a preview) or carries an explicit approval. The comment script is no longer part of the workflow, but
+`--adopt`, or a preview) or carries an explicit approval.
+
+**And each script checks the same variable itself.** The hook is the better of the two — it fires
+before the command runs and can explain itself — but it is Claude Code's hook, and this repository
+will be opened by other tools, other people and CI. For those the hook simply does not exist, so
+until the check moved into the scripts a colleague using Copilot could have written to the client's
+Jira with nothing asking first. Same variable either way, so approving a run satisfies both. The comment script is no longer part of the workflow, but
 the guard still covers it — a script that can write to a live ticket keeps its safety whether or not
 anything calls it:
 

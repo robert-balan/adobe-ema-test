@@ -43,6 +43,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createClient } from './lib/gql.mjs';
 import { validate } from './lib/schema.mjs';
+import { approvalProblem } from './lib/approval.mjs';
 import {
   SUITES, LINK_TYPE, stepsOf, labelsFor, describeTest, folderFor,
   resolveIdentity, diffTest, linkState, driftFor, planProblems, parseUnclaim, requirementLinkId,
@@ -79,6 +80,21 @@ const fail = (msg) => { console.error(`xray-push: ${msg}`); process.exit(1); };
 if (!planPath) fail('usage: xray-push.mjs <plan.json> [--dry-run] [--only IDs] [--force] [--deprecate IDs] [--adopt] [--test-plan KEY] [--unclaim ID:suite]');
 if (testPlanKey && !/^[A-Z][A-Z0-9]*-\d+$/.test(testPlanKey)) fail(`--test-plan expects an issue key like EC-59, got "${testPlanKey}"`);
 if (!existsSync(planPath)) fail(`no such plan: ${planPath}`);
+
+// The PreToolUse hook denies an unapproved run before it starts, but only under Claude Code. This
+// is the same check in the script, so the rule survives a colleague using another tool, a plain
+// terminal, or CI. --adopt only rewrites the local ledger, which is why it counts as read-only here
+// exactly as it does in the hook.
+{
+  const problem = approvalProblem({
+    writes: !dryRun && !adopt,
+    variable: 'XRAY_PUSH_APPROVED',
+    script: 'xray-push.mjs',
+    args: '<plan.json>',
+    target: 'create or modify real Jira issues',
+  });
+  if (problem) fail(problem);
+}
 
 const plan = JSON.parse(readFileSync(planPath, 'utf8'));
 const resultPath = `${planPath.replace(/\.json$/, '')}.result.json`;

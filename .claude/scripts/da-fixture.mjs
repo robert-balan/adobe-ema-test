@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { validate } from './lib/schema.mjs';
 import { planProblems } from './lib/reconcile.mjs';
+import { approvalProblem } from './lib/approval.mjs';
 import { fixturePage, transformNav, transformFooter } from './lib/da-render.mjs';
 import { tokenExpiry } from './lib/da-token.mjs';
 
@@ -60,6 +61,19 @@ const only = listArg('--only');
 
 const fail = (m) => { console.error(`da-fixture: ${m}`); process.exit(1); };
 if (!planPath) fail('usage: da-fixture.mjs <plan.json> [--dry-run] [--only IDs] [--force]');
+
+// Same check the PreToolUse hook makes, in the script, so it holds under any tool. This one writes
+// into a client's authoring environment, which makes it the least forgiving of the three.
+{
+  const problem = approvalProblem({
+    writes: !dryRun,
+    variable: 'DA_FIXTURE_APPROVED',
+    script: 'da-fixture.mjs',
+    args: '<plan.json>',
+    target: "create or modify content in the client's authoring environment",
+  });
+  if (problem) fail(problem);
+}
 if (!existsSync(planPath)) fail(`no such plan: ${planPath}`);
 
 const plan = JSON.parse(readFileSync(planPath, 'utf8'));

@@ -20,6 +20,7 @@
  * approval is repeated in the command itself as QA_COMMENT_APPROVED=1. Show them the preview first.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
+import { approvalProblem } from './lib/approval.mjs';
 import { buildComment, renderPreview, roster, countMentions } from './lib/qa-comment.mjs';
 
 const SITE = 'https://unileverfoodsolutions.atlassian.net';
@@ -32,6 +33,19 @@ const isNew = args.includes('--new');
 
 const fail = (m) => { console.error(`qa-comment: ${m}`); process.exit(1); };
 if (!specPath) fail('usage: qa-comment.mjs <comment.json> [--post] [--new]');
+
+// Same check the PreToolUse hook makes, in the script, so it holds under any tool. Without --post
+// this only prints the comment, which is the preview and needs no approval.
+{
+  const problem = approvalProblem({
+    writes: post,
+    variable: 'QA_COMMENT_APPROVED',
+    script: 'qa-comment.mjs',
+    args: '<comment.json> --post',
+    target: 'write a comment on a real Jira ticket',
+  });
+  if (problem) fail(problem);
+}
 
 const spec = JSON.parse(readFileSync(specPath, 'utf8'));
 const people = roster(JSON.parse(readFileSync(ENVIRONMENT, 'utf8')));
