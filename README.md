@@ -53,7 +53,7 @@ counts for nothing when it is backwards.
 ## A note on this repository being public
 
 Plan files are tracked so they can be reviewed and shared, which means every word of a test step is
-world-readable and permanent once pushed. Keep client-confidential detail out of them — or move
+read by the client and permanent once pushed. Keep genuinely confidential detail out of them — or move
 `.claude/qa/plans/` into a private repository checked out at that path, which the tooling supports
 unchanged.
 
@@ -64,7 +64,7 @@ a full Edge Delivery site for a while. None of it was ever used, and all of it h
 along with the Apache licence, contribution guide and code of conduct that came with it, which
 described Adobe's project rather than this one.
 
-**Nothing here is licensed for reuse.** The repository is public so the work can be reviewed and
+**Nothing here is licensed for reuse.** The repository is readable by the client so the work can be reviewed and
 shared with the team, not so it can be copied. Without a licence file that is the default position
 in any case: all rights reserved. If this should carry an explicit notice, or an open-source
 licence, that needs a named copyright holder — decide it deliberately rather than inheriting one.

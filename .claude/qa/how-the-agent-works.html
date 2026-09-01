@@ -387,7 +387,11 @@
         <div class="stage-num">10</div>
         <div class="stage-body">
           <div class="stage-title"><h3>Wire up the Jira side</h3><span class="chip chip-live">writes to jira</span></div>
-          <p>Xray’s API can write steps but not Jira fields or links, so a second pass adds the traceability link to the spec ticket, the labels, and a short “QA scope” comment so a tester knows what to run without reading any of this.</p>
+          <p>Xray’s API can write steps but not Jira fields or links, so a second pass adds the
+          traceability link to the spec ticket, the summaries, the descriptions and the labels.
+          <code>jira-apply.mjs</code> does the fields — in bulk, because a change to how a
+          description is built touches every test at once — and reads each one back to check
+          what Jira actually stored.</p>
         </div>
       </div>
 
@@ -477,7 +481,11 @@ node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json --dry-run
 <span class="c"># apply it, for real</span>
 XRAY_PUSH_APPROVED=1 node .claude/scripts/xray-push.mjs .claude/qa/plans/BRANDS.json
 
-<span class="c"># did Xray actually count it? linked is not the same as covered</span>
+<span class="c"># apply the Jira-side fields the push could not write
+node .claude/scripts/jira-apply.mjs .claude/qa/plans/BRANDS.json
+JIRA_APPLY_APPROVED=1 node .claude/scripts/jira-apply.mjs .claude/qa/plans/BRANDS.json --apply
+
+# did Xray actually count it? linked is not the same as covered</span>
 node .claude/scripts/qa-coverage.mjs --plan .claude/qa/plans/BRANDS.json
 
 <span class="c"># retire a test without destroying its history</span>

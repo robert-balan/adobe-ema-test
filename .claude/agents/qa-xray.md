@@ -247,9 +247,15 @@ AC that is not objectively verifiable (e.g. "must feel smooth") as needing clari
 
 ### Granularity — one test per category
 
-**Six tests per block, each with 6–14 steps.** One per category, in this order. Agreed 2026-08-25,
-replacing an earlier target of 10–15 tests that itself replaced one-test-per-assertion (which
-produced 42 tickets for a single block and was rejected).
+**Six tests per block.** One per category, in this order. Agreed 2026-08-25, replacing an earlier
+target of 10–15 tests that itself replaced one-test-per-assertion (which produced 42 tickets for a
+single block and was rejected).
+
+Step counts vary by category and are not a target. Functionality and Visual run long — twelve or
+more is normal, because each step is a separate assertion. Compatibility and Internationalization
+run short: five and four, because each step covers a device class or defers to the design reference
+rather than enumerating what "correct" looks like. Restructured 2026-09-01 on QA's feedback that
+both were too detailed to run.
 
 | # | Category | Label | Owns |
 |---|---|---|---|
@@ -352,6 +358,25 @@ deliberate standing requirement, or a criterion nobody bothered to link. The not
 apart. This rule exists because the schema demanded every test cite an AC while this section
 demanded RTL coverage the ticket never mentions; the first test to need both was refused by the
 first rule and required by the second.
+
+### 3b. The breakpoint is set by QA, not by the ticket
+
+**1024px, project-wide: 1024 and above is desktop, below it is mobile.** Set 2026-09-01. Put it on
+every plan and the push publishes it into all of that plan's tests:
+
+```json
+"breakpoint": { "value": 1024, "setOn": "2026-09-01" }
+```
+
+This is the one value where QA overrides the ticket, and it exists because the tickets do not agree
+with each other: EC-18 says 900, EC-8 says 1024, an RE ruled 900 on EC-7 in a comment while that
+ticket's own criteria still say 1024, and the code does 1200. A tester needs one number. Everything
+else in the ticket remains the source of truth, and this reverts to normal the moment the tickets
+are updated to match — the `setOn` date is there so a stale override is visible as one.
+
+Note what this does NOT resolve: the shipped code switches at 1200 in the header family and 900 in
+the footer, newsletter and breadcrumb, so every block fails the boundary today, in two opposite
+directions. That is a finding, not a reason to write the tests to the code.
 
 ### 4. Classify into suites
 Every test belongs to at least one of:
@@ -508,8 +533,9 @@ counted toward the spec ticket. Run it after applying the links, every time. It 
 that can tell the difference between "linked" and "covered", and the gap between those two is
 what once left this project with 40 tests and no coverage at all.
 
-Then post or update the QA scope comment, and report the Test keys, the Test Set keys and the
-coverage figure this command printed. Never restate the push script's output as proof.
+Then report the Test keys, the Test Set keys and the coverage figure this command printed. Never
+restate the push script's output as proof — the script says what it intended to do, and this says
+what Xray actually counted.
 
 ## Linking policy
 

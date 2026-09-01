@@ -18,7 +18,7 @@ test step that asserts a colour, size, spacing or timing.
 
 Note this repo holds the QA tooling, **not the site under test**, and it is **public**. Plans
 under `plans/` are tracked so they can be reviewed and shared,
-which means every word of a test step is world-readable and permanent once pushed. Keep
+which means every word of a test step is read by the client and permanent once pushed. Keep
 client-confidential detail out of plan text — or move `plans/` into a private repo checked out
 at that path, which the tooling supports unchanged.
 
@@ -38,7 +38,7 @@ GraphQL API — the Atlassian MCP server cannot write them. So the agent needs a
    The key is bound to that Jira user and inherits their permissions, so tests get created as
    them. For shared CI use, generate the key against a dedicated automation account instead.
 3. Store them outside the repo. `robert-balan/adobe-ema-test` is a **public** GitHub repo, so a
-   committed secret is world-readable and picked up by credential scanners within minutes. Never
+   committed secret is burned the moment it lands — scanners find it, and the history keeps it. Never
    put them in `.mcp.json`, `.claude/settings.local.json`, any tracked file, or a chat transcript.
 
    **Preferred — macOS Keychain.** Encrypted at rest, and `-w` with no value prompts so the
@@ -360,6 +360,26 @@ node .claude/scripts/qa-coverage.mjs EC-8       # 9 test(s)
 Left in place the entries are not harmful, but they are not free: every push reports nine tests
 for review and three test sets in drift, so the one report that is supposed to tell you something
 is wrong tells you that every time. A clean run is what makes a dirty one worth reading.
+
+### A test never predicts its own result
+
+A tester meets each case cold: they run it, and they raise a bug when it does not do what the step
+says. So nothing in a test tells them what to expect — no "step 6 is expected to fail", no record of
+the spec disagreeing with the design or the code, no naming of a known defect.
+
+That is not tidiness. A step flagged as a known failure tends not to get raised at all, because the
+failure reads as somebody else's problem already. Worse, a step that later fails for a **new** reason
+gets waved through as the old one — so the note does not just suppress the known bug, it hides the
+next one.
+
+The analysis still matters, it just is not the test's to carry. It goes in the test's **`findings`**
+field, which stays in the plan file and in git and is **never published to Jira**. `xray-push`
+refuses a plan whose `notes` predict a result and points at `findings` instead, so this is enforced
+rather than remembered.
+
+`notes` survives for one job: explaining why a test exists when it traces to no acceptance criterion
+— a standing requirement like RTL or accessibility. That is a statement about coverage rather than
+about the outcome, so it primes nothing, and the push refuses a no-AC test without it.
 
 ### Revising tests when a spec changes
 

@@ -71,7 +71,9 @@ a later phase must not shift layout when it lands, and a block with nothing to r
 itself rather than leave an empty container behind.
 
 **Responsive breakpoints are 600px, 900px and 1200px**, mobile-first, plus whatever breakpoint a
-spec names for itself. Test at the boundaries — this is where the brand carousel's real defect was
+spec names for itself. **For testing, though, one number wins: 1024px** — 1024 and above is
+desktop, below is mobile, set by QA on 2026-09-01 because the tickets, the design and the code
+give four different answers. See "The breakpoint is set by QA" in `.claude/agents/qa-xray.md`. Test at the boundaries — this is where the brand carousel's real defect was
 found, `develop` switching at 1200px where the spec says 900px.
 
 **Author-uploaded images are optimised automatically** and served as a `picture` with generated
@@ -84,8 +86,10 @@ yours to assert.
 - The tooling is deliberately **dependency-free**. Adding a dependency to run a script is a trade
   that needs justifying in the PR, not a default.
 - Run `npm test` before proposing a change to anything under `.claude/scripts/`.
-- **This repository is public.** Test steps, plan files and commit messages are world-readable and
-  permanent. Keep client-confidential detail out of them.
+- **Write as if the client is reading, because they are.** Test steps, plan files and commit
+  messages go where the client's team can see them, and git makes them permanent. Keep anything
+  genuinely confidential out of them, and never commit a credential — check the repository's
+  visibility before assuming anything is private.
 - Never write to Jira or Xray without explicit approval. Two things enforce it: a `PreToolUse`
   hook, and a check inside each write script — the hook only runs under Claude Code, and this
   repository gets opened by other tools too. The rule and the reasoning are in
