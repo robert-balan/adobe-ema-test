@@ -703,11 +703,12 @@
     },
     {
       "id": "NAV-TC-04",
-      "summary": "Header: Navigation - Compatibility, desktop - Desktop widths and browsers",
+      "summary": "Header: Navigation - Compatibility - Devices and browsers",
       "ac": [
         "AC-1",
+        "AC-15",
         "AC-6",
-        "AC-15"
+        "AC-7"
       ],
       "suites": [
         "sanity",
@@ -718,11 +719,11 @@
         "compatibility",
         "desktop"
       ],
-      "scope": "The component on the desktop side of the 1024px breakpoint, in every browser we support, plus the breakpoint itself.",
+      "scope": "The component across the device classes and browsers we support, and at the 1024px breakpoint itself.",
       "fixtures": [
         "NAV-FX-01"
       ],
-      "findings": "The desktop/mobile switch is 900px. Gianluca Volpe answered this on EC-7 on 26 Aug 2026, against the three values that were in play; AC-7 and AC-15 still say 1024px and need correcting to match. header.css switches at 1200px, so steps 3 to 8 are expected to fail from 1199px down to 900px: the hamburger bar shows where the spec calls for the full desktop nav.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nThe desktop/mobile switch is 900px. Gianluca Volpe answered this on EC-7 on 26 Aug 2026, against the three values that were in play; AC-7 and AC-15 still say 1024px and need correcting to match. header.css switches at 1200px, so steps 3 to 8 are expected to fail from 1199px down to 900px: the hamburger bar shows where the spec calls for the full desktop nav.",
       "steps": [
         {
           "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
@@ -743,32 +744,8 @@
           "fixtures": [
             "NAV-FX-01"
           ],
-          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
-        }
-      ]
-    },
-    {
-      "id": "NAV-TC-05",
-      "summary": "Header: Navigation - Compatibility, mobile - Tablets and phones",
-      "ac": [
-        "AC-7",
-        "AC-15"
-      ],
-      "suites": [
-        "sanity",
-        "regression"
-      ],
-      "labels": [
-        "navigation",
-        "compatibility",
-        "mobile"
-      ],
-      "scope": "The component on tablets and phones, on the real devices we support rather than a resized desktop window.",
-      "fixtures": [
-        "NAV-FX-01"
-      ],
-      "findings": "Steps 6 and 7 are expected to fail: the switch happens at 1200px, not the 900px Gianluca Volpe confirmed on EC-7 on 26 Aug 2026 — so the mobile bar starts 300px too early. Steps 1 to 5 pass; the mobile bar itself is correct. AC-7 and AC-15 still say 1024px and need correcting to match.",
-      "steps": [
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing."
+        },
         {
           "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
           "fixtures": [
@@ -806,7 +783,7 @@
         "NAV-FX-07",
         "NAV-FX-01"
       ],
-      "findings": "Four steps are expected to fail, and all four are real barriers rather than pedantry. (a) Step 1 — tab order is logo, then the tools on the right, then the nav links, so focus jumps to the far right of the bar and back. (b) Step 2 — every dropdown item takes two Tab stops: the <li> carries tabindex=\"0\" and its <a> is focusable too, and the <li> has no role, so its accessible name is the entire flattened contents of its dropdown. (c) Steps 7 and 8 — there is no focus rule for the top-level links at all, so what you see is Chrome's default blue outline, not --color-accessible-orange. (d) Steps 9 and 10 — aria-expanded is set on the <li>, which is a listitem and does not support it, so it never reaches assistive technology; the focusable <a> has neither aria-expanded nor aria-haspopup. On top of that the whole bar sits inside .nav-drawer, which carries role=\"dialog\" aria-label=\"Main menu\" and display: contents — so at desktop widths a screen reader announces the entire primary navigation as a dialog that visually is not there. Confirmed from the browser's accessibility tree.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nFour steps are expected to fail, and all four are real barriers rather than pedantry. (a) Step 1 — tab order is logo, then the tools on the right, then the nav links, so focus jumps to the far right of the bar and back. (b) Step 2 — every dropdown item takes two Tab stops: the <li> carries tabindex=\"0\" and its <a> is focusable too, and the <li> has no role, so its accessible name is the entire flattened contents of its dropdown. (c) Steps 7 and 8 — there is no focus rule for the top-level links at all, so what you see is Chrome's default blue outline, not --color-accessible-orange. (d) Steps 9 and 10 — aria-expanded is set on the <li>, which is a listitem and does not support it, so it never reaches assistive technology; the focusable <a> has neither aria-expanded nor aria-haspopup. On top of that the whole bar sits inside .nav-drawer, which carries role=\"dialog\" aria-label=\"Main menu\" and display: contents — so at desktop widths a screen reader announces the entire primary navigation as a dialog that visually is not there. Confirmed from the browser's accessibility tree.",
       "steps": [
         {
           "action": "Open FX-07, click once in the address bar, then press Tab repeatedly through the header.",
@@ -881,7 +858,7 @@
         "NAV-FX-06",
         "NAV-FX-03"
       ],
-      "findings": "Step 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nStep 6 is expected to fail for the same reason as NAV-TC-03 step 8, not because of anything to do with German. The long label does render on one line without wrapping, but on FX-03 it runs under the search field and is cut off there. The underlying cause is that the bar has no overflow strategy at all. The links sit between the logo and the tools with nothing to stop them growing: when the authored labels need more room than is left, they do not wrap, scroll or truncate — they carry on underneath the tools cluster and off the edge of the window. There is no page-level sideways scroll, so the overflowing items are simply unreachable. Steps 1 to 5 and 8 pass: mirroring is correct, the logo moves to the right start edge, the links run right to left in the authored order, and the chevrons keep their unmirrored rotation exactly as AC-9 asks.",
       "steps": [
         {
           "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and look at the nav bar.",

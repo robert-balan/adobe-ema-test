@@ -533,12 +533,14 @@
     },
     {
       "id": "UTILITY-TC-04",
-      "summary": "Header: [Megamenu]: Utility Bar - Compatibility, desktop - Desktop widths and browsers",
-      "scope": "The component on the desktop side of the 1024px breakpoint, in every browser we support, plus the breakpoint itself.",
+      "summary": "Header: [Megamenu]: Utility Bar - Compatibility - Devices and browsers",
+      "scope": "The component across the device classes and browsers we support, and at the 1024px breakpoint itself.",
       "ac": [
         "AC-1",
         "AC-10",
-        "AC-18"
+        "AC-18",
+        "AC-2",
+        "AC-8"
       ],
       "suites": [
         "sanity",
@@ -572,32 +574,8 @@
           "fixtures": [
             "UTILITY-FX-01"
           ],
-          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
-        }
-      ]
-    },
-    {
-      "id": "UTILITY-TC-05",
-      "summary": "Header: [Megamenu]: Utility Bar - Compatibility, mobile - Tablets and phones",
-      "scope": "The component on tablets and phones, on the real devices we support rather than a resized desktop window.",
-      "ac": [
-        "AC-2",
-        "AC-8",
-        "AC-18"
-      ],
-      "suites": [
-        "sanity",
-        "regression"
-      ],
-      "labels": [
-        "utility-bar",
-        "mobile",
-        "responsive"
-      ],
-      "fixtures": [
-        "UTILITY-FX-01"
-      ],
-      "steps": [
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing."
+        },
         {
           "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
           "fixtures": [

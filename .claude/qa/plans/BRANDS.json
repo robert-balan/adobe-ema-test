@@ -548,12 +548,15 @@
     },
     {
       "id": "BRANDS-TC-04",
-      "summary": "Header: Products Brand Carousel - Compatibility, desktop - Desktop widths and browsers",
+      "summary": "Header: Products Brand Carousel - Compatibility - Devices and browsers",
       "ac": [
-        "AC-2",
-        "AC-8",
         "AC-19",
-        "AC-20"
+        "AC-2",
+        "AC-20",
+        "AC-3",
+        "AC-6",
+        "AC-7",
+        "AC-8"
       ],
       "suites": [
         "sanity",
@@ -564,11 +567,11 @@
         "desktop",
         "responsive"
       ],
-      "scope": "The component on the desktop side of the 1024px breakpoint, in every browser we support, plus the breakpoint itself.",
+      "scope": "The component across the device classes and browsers we support, and at the 1024px breakpoint itself.",
       "fixtures": [
         "BRANDS-FX-01"
       ],
-      "findings": "Steps 5 and 6 are expected to fail on develop. The header there switches layout at 1200px where the spec specifies 900px, so the desktop layout persists between 900px and 1199px. That is a defect in develop's header.css, not a fault in this test — raise it rather than re-running for a pass.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nSteps 5 and 6 are expected to fail on develop. The header there switches layout at 1200px where the spec specifies 900px, so the desktop layout persists between 900px and 1199px. That is a defect in develop's header.css, not a fault in this test — raise it rather than re-running for a pass.",
       "steps": [
         {
           "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
@@ -589,35 +592,8 @@
           "fixtures": [
             "BRANDS-FX-01"
           ],
-          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
-        }
-      ]
-    },
-    {
-      "id": "BRANDS-TC-05",
-      "summary": "Header: Products Brand Carousel - Compatibility, mobile - Tablets and phones",
-      "ac": [
-        "AC-3",
-        "AC-6",
-        "AC-7",
-        "AC-19",
-        "AC-20"
-      ],
-      "suites": [
-        "sanity",
-        "regression"
-      ],
-      "labels": [
-        "brand-carousel",
-        "mobile",
-        "responsive"
-      ],
-      "scope": "The component on tablets and phones, on the real devices we support rather than a resized desktop window.",
-      "fixtures": [
-        "BRANDS-FX-01"
-      ],
-      "findings": "Step 6 shares the breakpoint defect described on BRANDS-TC-04 — on develop the switch happens at 1200px rather than the specified 900px. Step 2 asserts the separator below the strip rather than above it as AC-3 says: Gianluca Volpe's answer of 26 Aug 2026 is to follow the designs, and the handover prototype draws it below. AC-3 needs correcting to match.",
-      "steps": [
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing."
+        },
         {
           "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
           "fixtures": [
@@ -655,7 +631,7 @@
       "fixtures": [
         "BRANDS-FX-07"
       ],
-      "findings": "Step 8 is expected to fail on current code. The label measures #d14900 on #f5f3f4 at 12px weight 600, which computes to 4.08:1 against the 4.5:1 required for normal text. Raise it as a defect rather than re-running. Step 4 is a known risk area: the focus indicator on a tile, and the behaviour of an arrow that hides while it holds focus.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nStep 8 is expected to fail on current code. The label measures #d14900 on #f5f3f4 at 12px weight 600, which computes to 4.08:1 against the 4.5:1 required for normal text. Raise it as a defect rather than re-running. Step 4 is a known risk area: the focus indicator on a tile, and the behaviour of an arrow that hides while it holds focus.",
       "steps": [
         {
           "action": "Open fixture FX-07 on a desktop viewport, open the Products megamenu, and Tab forward until focus enters the carousel.",
@@ -721,7 +697,7 @@
         "BRANDS-FX-06"
       ],
       "notes": "EC-14 states no acceptance criterion for RTL or localisation. This test exists under the agent's mandatory-coverage rule, not derived from the ticket — see Coverage gaps.",
-      "findings": "RTL is reached by page metadata: decorateLocale() in scripts.js reads a Language or Locale row and sets lang and dir on <html>, so FX-06 carries Language: ar-MA. header.css is written with logical properties throughout (inset-inline, margin-inline, padding-inline, border-inline) and no physical margin-left/right, so most mirroring should happen by construction. The residual risk is 4 left: and 3 right: declarations that remain physical — step 3 targets those.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nRTL is reached by page metadata: decorateLocale() in scripts.js reads a Language or Locale row and sets lang and dir on <html>, so FX-06 carries Language: ar-MA. header.css is written with logical properties throughout (inset-inline, margin-inline, padding-inline, border-inline) and no physical margin-left/right, so most mirroring should happen by construction. The residual risk is 4 left: and 3 right: declarations that remain physical — step 3 targets those.",
       "steps": [
         {
           "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and open the Products megamenu.",

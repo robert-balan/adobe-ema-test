@@ -942,7 +942,7 @@
           "fixtures": [
             "MEGAMENU-FX-01"
           ],
-          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing."
         },
         {
           "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",

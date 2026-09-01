@@ -354,7 +354,7 @@
       "fixtures": [
         "BREADCRUMB-FX-01"
       ],
-      "findings": "Steps 3 to 6 are expected to fail on current code, and this is the most significant finding on this ticket.\n\nThe mobile collapse the spec describes — Home, an ellipsis control, current page — does not exist in the implementation. Verified on develop, main and stage: blocks/breadcrumb/breadcrumb.js builds one flat ordered list containing every crumb, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep. There is no button, no aria-expanded and no ellipsis anywhere in the block or in the auto-block builder in scripts.js.\n\nWhat mobile does instead is make the trail horizontally scrollable at 600px and below, with the scrollbar hidden. That is a different design decision, not a partial implementation of this one.\n\nA second, smaller mismatch: the spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the scroll treatment starts at 600px — so between 601px and 899px the block behaves like neither.\n\nThese steps are written against the spec because the ticket is Ready for Testing. Raise them as product defects rather than re-running for a pass.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nSteps 3 to 6 are expected to fail on current code, and this is the most significant finding on this ticket.\n\nThe mobile collapse the spec describes — Home, an ellipsis control, current page — does not exist in the implementation. Verified on develop, main and stage: blocks/breadcrumb/breadcrumb.js builds one flat ordered list containing every crumb, and the only classes in breadcrumb.css are breadcrumb, -current, -item, -link, -list and -sep. There is no button, no aria-expanded and no ellipsis anywhere in the block or in the auto-block builder in scripts.js.\n\nWhat mobile does instead is make the trail horizontally scrollable at 600px and below, with the scrollbar hidden. That is a different design decision, not a partial implementation of this one.\n\nA second, smaller mismatch: the spec puts the desktop/mobile split at 900px and the CSS agrees for padding, but the scroll treatment starts at 600px — so between 601px and 899px the block behaves like neither.\n\nThese steps are written against the spec because the ticket is Ready for Testing. Raise them as product defects rather than re-running for a pass.",
       "steps": [
         {
           "action": "BrowserStack — small desktop, 1024 wide — Chrome, Edge, Firefox and Safari.",
@@ -375,7 +375,7 @@
           "fixtures": [
             "BREADCRUMB-FX-01"
           ],
-          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing. This step is what pins the breakpoint — none of the real devices we test falls between 900 and 1024, so nothing else would catch it."
+          "result": "1024 gets the desktop treatment and 1023 gets the mobile one. Crossing the line in either direction loses nothing and duplicates nothing."
         },
         {
           "action": "BrowserStack — tablets, both orientations — a mid-size iPad in Safari and in Chrome, and a mid-size Android tablet in Chrome.",
@@ -477,7 +477,7 @@
       "fixtures": [
         "BREADCRUMB-FX-07"
       ],
-      "findings": "Step 5 concerns the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04. Expected to fail, and part of that same defect.",
+      "findings": "[Step numbers below refer to this test's shape before 2026-09-01, when the compatibility and RTL tests were restructured around device classes. The findings themselves still stand.]\n\nStep 5 concerns the mobile collapse control, which is not implemented — see BREADCRUMB-TC-04. Expected to fail, and part of that same defect.",
       "steps": [
         {
           "action": "Open the Arabic fixture on small desktop at 1024, in Chrome, and look at the breadcrumb.",
